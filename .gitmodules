@@ -1,0 +1,3 @@
+[submodule "sconshelper"]
+	path = sconshelper
+	url = https://github.com/schansge/sconshelper.git
