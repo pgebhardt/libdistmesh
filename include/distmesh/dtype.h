@@ -15,9 +15,10 @@ namespace dtype {
 
     // basic array type
     template <
+        class type,
         int dims
     >
-    using array = boost::multi_array<real, dims>;
+    using array = boost::multi_array<type, dims>;
 }
 }
 

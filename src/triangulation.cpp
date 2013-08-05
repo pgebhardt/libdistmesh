@@ -6,8 +6,8 @@
 #include "distmesh/distmesh.h"
 #include <stdio.h>
 
-std::shared_ptr<distmesh::dtype::array<2>> distmesh::triangulation::delaunay(
-    std::shared_ptr<dtype::array<2>> points) {
+std::shared_ptr<distmesh::dtype::array<distmesh::dtype::index, 2>>
+    distmesh::triangulation::delaunay(std::shared_ptr<dtype::array<dtype::real, 2>> points) {
     // set flags for qhull
     std::string flags = "qhull d Qbb Qc Qz";
 
@@ -26,7 +26,7 @@ std::shared_ptr<distmesh::dtype::array<2>> distmesh::triangulation::delaunay(
     }
 
     // extract point ids from delaunay triangulation
-    auto triangulation = std::make_shared<dtype::array<2>>(
+    auto triangulation = std::make_shared<dtype::array<dtype::index, 2>>(
         boost::extents[facet_count][3]);
     dtype::index facet_id = 0;
     dtype::index vertex_id = 0;
