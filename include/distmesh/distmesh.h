@@ -8,5 +8,6 @@
 
 #include "common.h"
 #include "dtype.h"
+#include "triangulation.h"
 
 #endif

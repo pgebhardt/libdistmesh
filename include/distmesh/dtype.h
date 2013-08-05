@@ -7,7 +7,7 @@
 #define LIBDISTMESH_INCLUDE_DTYPE_H
 
 // namespace libdistmesh::dtype
-namespace mpFlow {
+namespace distmesh {
 namespace dtype {
     // basic scalar types
     typedef double real;

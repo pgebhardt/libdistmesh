@@ -16,5 +16,6 @@ sconshelper.Library(name='distmesh', env=env, arguments=ARGUMENTS,
         '-O4',
         ],
     LIBS=[
+        'qhull',
         ],
     )
