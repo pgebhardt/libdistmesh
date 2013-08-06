@@ -12,12 +12,6 @@
 #include <functional>
 
 // boost multi array library for array handling
-#include <boost/multi_array.hpp>
-
-// qhull library used to calculate delaunay triangulation
-extern "C" {
-#define qh_QHimport
-#include <qhull/qhull_a.h>
-}
+#include <Eigen/Dense>
 
 #endif

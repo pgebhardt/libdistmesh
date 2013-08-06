@@ -10,8 +10,8 @@
 namespace distmesh {
 namespace triangulation {
     // create delaunay triangulation from points array
-    std::shared_ptr<dtype::array<dtype::index, 2>> delaunay(
-        std::shared_ptr<dtype::array<dtype::real, 2>> points);
+    std::shared_ptr<dtype::matrix<dtype::index>> delaunay(
+        std::shared_ptr<dtype::matrix<dtype::real>> points);
 }
 }
 

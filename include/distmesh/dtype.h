@@ -11,14 +11,13 @@ namespace distmesh {
 namespace dtype {
     // basic scalar types
     typedef double real;
-    typedef boost::multi_array_types::index index;
+    typedef unsigned int index;
 
-    // basic array type
+    // basic linear algebra types
     template <
-        class type,
-        int dims
+        class type
     >
-    using array = boost::multi_array<type, dims>;
+    using matrix = Eigen::Matrix<type, Eigen::Dynamic, Eigen::Dynamic>;
 }
 }
 
