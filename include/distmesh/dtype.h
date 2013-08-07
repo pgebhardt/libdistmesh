@@ -17,7 +17,7 @@ namespace dtype {
     template <
         class type
     >
-    using matrix = Eigen::Matrix<type, Eigen::Dynamic, Eigen::Dynamic>;
+    using array = Eigen::Array<type, Eigen::Dynamic, Eigen::Dynamic>;
 }
 }
 

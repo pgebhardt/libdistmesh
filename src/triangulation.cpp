@@ -12,9 +12,9 @@ extern "C" {
 #include <qhull/qhull_a.h>
 }
 
-std::shared_ptr<distmesh::dtype::matrix<distmesh::dtype::index>>
+std::shared_ptr<distmesh::dtype::array<distmesh::dtype::index>>
     distmesh::triangulation::delaunay(
-    std::shared_ptr<dtype::matrix<dtype::real>> points) {
+    std::shared_ptr<dtype::array<dtype::real>> points) {
     // set flags for qhull
     std::string flags = "qhull d Qbb Qc Qz";
 
@@ -33,7 +33,7 @@ std::shared_ptr<distmesh::dtype::matrix<distmesh::dtype::index>>
     }
 
     // extract point ids from delaunay triangulation
-    auto triangulation = std::make_shared<dtype::matrix<dtype::index>>(
+    auto triangulation = std::make_shared<dtype::array<dtype::index>>(
         facet_count, points->cols() + 1);
     dtype::index facet_id = 0;
     dtype::index vertex_id = 0;
