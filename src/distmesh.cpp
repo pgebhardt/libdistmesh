@@ -13,26 +13,26 @@ std::tuple<std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>,
     std::function<dtype::real(dtype::array<dtype::real>)> edge_length_function,
     dtype::real initial_edge_length, dtype::array<dtype::real> bounding_box) {
     // create initial distribution in bounding_box
-    auto points = meshgen::create_point_list(distance_function,
+    auto points = utils::create_point_list(distance_function,
         edge_length_function, initial_edge_length, bounding_box);
 
     // create initial triangulation
     auto triangulation = triangulation::delaunay(points);
 
     // create points buffer for retriangulation and stop criterion
-    dtype::array<dtype::real> points_retriangulation_criterion(points->rows(), points->cols());
-    dtype::array<dtype::real> points_stop_criterion(points->rows(), points->cols());
-    points_retriangulation_criterion.fill(INFINITY);
+    dtype::array<dtype::real> buffer_retriangulation_criterion(points->rows(), points->cols());
+    dtype::array<dtype::real> buffer_stop_criterion(points->rows(), points->cols());
+    buffer_retriangulation_criterion.fill(INFINITY);
 
     // main distmesh loop
     std::shared_ptr<dtype::array<dtype::index>> bar_indices = nullptr;
     while (true) {
         // retriangulate if point movement is above tolerance
         auto retriangulation_criterion =
-            (((*points) - points_retriangulation_criterion).square().rowwise().sum().sqrt() /
+            (((*points) - buffer_retriangulation_criterion).square().rowwise().sum().sqrt() /
             initial_edge_length).maxCoeff();
         if (retriangulation_criterion > settings::retriangulation_tolerance) {
-            points_retriangulation_criterion = *points;
+            buffer_retriangulation_criterion = *points;
 
             // reject triangles with circumcenter outside of the region
             triangulation = triangulation::delaunay(points);
@@ -54,7 +54,7 @@ std::tuple<std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>,
             triangulation->conservativeResize(triangle_count, triangulation->cols());
 
             // find unique bar indices
-            bar_indices = meshgen::find_unique_bars(points, triangulation);
+            bar_indices = utils::find_unique_bars(points, triangulation);
         }
 
         // calculate bar vector
@@ -90,7 +90,7 @@ std::tuple<std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>,
         }
 
         // move points
-        points_stop_criterion = *points;
+        buffer_stop_criterion = *points;
         for (dtype::index bar = 0; bar < bar_indices->rows(); ++bar) {
             points->row((*bar_indices)(bar, 0)) += settings::deltaT *
                 force_vector.row(bar);
@@ -99,11 +99,11 @@ std::tuple<std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>,
         }
 
         // project points outside of domain to boundary
-        meshgen::project_points_to_function(distance_function,
+        utils::project_points_to_function(distance_function,
             initial_edge_length, points);
 
         // stop criterion
-        auto stop_criterion = ((*points - points_stop_criterion).square().rowwise().sum().sqrt() / initial_edge_length).maxCoeff();
+        auto stop_criterion = ((*points - buffer_stop_criterion).square().rowwise().sum().sqrt() / initial_edge_length).maxCoeff();
         if (stop_criterion < settings::point_movement_tolerance) {
             break;
         }

@@ -8,11 +8,10 @@
 #include <limits>
 #include <set>
 #include <array>
-#include <algorithm>
 
 // create point list
 std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>
-    distmesh::meshgen::create_point_list(
+    distmesh::utils::create_point_list(
     std::function<dtype::real(dtype::array<dtype::real>)> distance_function,
     std::function<dtype::real(dtype::array<dtype::real>)> edge_length_function,
     dtype::real initial_edge_length, dtype::array<dtype::real> bounding_box) {
@@ -83,7 +82,7 @@ std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>
 
 // find unique bars
 std::shared_ptr<distmesh::dtype::array<distmesh::dtype::index>>
-    distmesh::meshgen::find_unique_bars(
+    distmesh::utils::find_unique_bars(
     std::shared_ptr<dtype::array<dtype::real>> points,
     std::shared_ptr<dtype::array<dtype::index>> triangulation) {
     // fill set of sorted bar indices
@@ -115,7 +114,7 @@ std::shared_ptr<distmesh::dtype::array<distmesh::dtype::index>>
 }
 
 // project points outside of boundary back to it
-void distmesh::meshgen::project_points_to_function(
+void distmesh::utils::project_points_to_function(
     std::function<dtype::real(dtype::array<dtype::real>)> distance_function,
     dtype::real initial_edge_length, std::shared_ptr<dtype::array<dtype::real>> points) {
     // evaluate distance function at points

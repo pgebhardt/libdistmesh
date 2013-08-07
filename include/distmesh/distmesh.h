@@ -10,7 +10,7 @@
 #include "dtype.h"
 #include "settings.h"
 #include "triangulation.h"
-#include "meshgen.h"
+#include "utils.h"
 
 // namespace distmesh
 namespace distmesh {

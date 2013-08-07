@@ -17,6 +17,7 @@ sconshelper.Library(name='distmesh', env=env, arguments=ARGUMENTS,
         ],
     CPPPATH=[
         '/usr/include/eigen3/',
+        '/usr/local/include/eigen3/',
         ],
     LIBS=[
         'qhull',
