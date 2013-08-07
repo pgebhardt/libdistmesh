@@ -87,7 +87,7 @@ std::shared_ptr<distmesh::dtype::array<distmesh::dtype::index>>
     dtype::array<dtype::index> initial_bar_indices(
         (points->cols() + 1) * triangulation->rows(), 2);
     for (dtype::index triangle = 0; triangle < triangulation->rows(); ++triangle)
-    for (dtype::index bar = 0; bar < initial_bar_indices.cols(); ++bar) {
+    for (dtype::index bar = 0; bar < points->cols() + 1; ++bar) {
         initial_bar_indices(bar + triangle * (points->cols() + 1), 0) =
             (*triangulation)(triangle, bar);
         initial_bar_indices(bar + triangle * (points->cols() + 1), 1) =
@@ -97,7 +97,7 @@ std::shared_ptr<distmesh::dtype::array<distmesh::dtype::index>>
     // sort bar indices rowwise
     for (dtype::index bar = 0; bar < initial_bar_indices.rows(); ++bar) {
         if (initial_bar_indices(bar, 0) > initial_bar_indices(bar, 1)) {
-            auto temp = initial_bar_indices(bar, 0);
+            dtype::real temp = initial_bar_indices(bar, 0);
             initial_bar_indices(bar, 0) = initial_bar_indices(bar, 1);
             initial_bar_indices(bar, 1) = temp;
         }

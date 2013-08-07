@@ -27,7 +27,7 @@ std::tuple<std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>,
 
     // main distmesh loop
     std::shared_ptr<dtype::array<dtype::index>> bar_indices = nullptr;
-    for (int i = 0; i < 10; ++i) {
+    for (int i = 0; i < 100; ++i) {
 //    while (1) {
         // retriangulate if point movement is above tolerance
         auto retriangulation_criterium =
@@ -55,7 +55,7 @@ std::tuple<std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>,
             *triangulation = keep_triangulation;
             triangulation->conservativeResize(triangle_count, triangulation->cols());
 
-            // update bar indices
+            // find unique bar indices
             bar_indices = meshgen::find_unique_bars(points, triangulation);
         }
 
@@ -65,6 +65,38 @@ std::tuple<std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>,
         for (dtype::index bar = 0; bar < bar_indices->rows(); ++bar) {
             bar_vector.row(bar) += points->row((*bar_indices)(bar, 0)) -
                 points->row((*bar_indices)(bar, 1));
+        }
+
+        // calculate length of each bar
+        dtype::array<dtype::real> bar_length(bar_indices->rows(), 1);
+        bar_length = bar_vector.square().rowwise().sum().sqrt();
+
+        // evaluate edge_length_function
+        dtype::array<dtype::real> hbars(bar_indices->rows(), 1);
+        for (dtype::index bar = 0; bar < bar_indices->rows(); ++bar) {
+            hbars(bar, 0) = edge_length_function(0.5 * (points->row((*bar_indices)(bar, 0)) +
+                points->row((*bar_indices)(bar, 1))));
+        }
+
+        // calculate desired bar length
+        dtype::array<dtype::real> desired_bar_length(bar_length.rows(), bar_length.cols());
+        desired_bar_length = hbars * (1.0 + 0.4 / std::pow(2.0, points->cols() - 1)) *
+            std::pow((bar_length.pow(points->cols()).sum() / hbars.pow(points->cols()).sum()), 1.0 / points->cols());
+
+        // calculate force vector for each bar
+        dtype::array<dtype::real> force(bar_indices->rows(), 1);
+        dtype::array<dtype::real> force_vector(bar_indices->rows(), points->cols());
+        force = ((desired_bar_length - bar_length) / bar_length).max(0.0);
+        for (dtype::index dim = 0; dim < points->cols(); ++dim) {
+            force_vector.col(dim) = force * bar_vector.col(dim);
+        }
+
+        // move points
+        for (dtype::index bar = 0; bar < bar_indices->rows(); ++bar) {
+            points->row((*bar_indices)(bar, 0)) += settings::deltaT *
+                force_vector.row(bar);
+            points->row((*bar_indices)(bar, 1)) -= settings::deltaT *
+                force_vector.row(bar);
         }
     }
 
