@@ -11,6 +11,7 @@
 #include "settings.h"
 #include "triangulation.h"
 #include "utils.h"
+#include "distance_functions.h"
 
 // namespace distmesh
 namespace distmesh {
