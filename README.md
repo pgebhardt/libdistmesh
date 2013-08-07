@@ -1,5 +1,7 @@
-libdistmesh: A Simple Mesh Generator in C++
+libDistMesh: A Simple Mesh Generator in C++
 ==============================================
+
+.. _DistMesh: http://persson.berkeley.edu/distmesh/
 
 References
 ----------
