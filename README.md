@@ -1,12 +1,10 @@
 libDistMesh: A Simple Mesh Generator in C++
 ==============================================
 
-.. _DistMesh: http://persson.berkeley.edu/distmesh/
-
 References
 ----------
 
-The DistMesh_ algorithm is described in the following two references.
+The DistMesh algorithm is described in the following two references.
 If you use the algorithm in a program or publication, please
 acknowledge its authors by adding a reference to the first paper
 below.
