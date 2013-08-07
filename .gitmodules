@@ -1,3 +1,6 @@
 [submodule "sconshelper"]
 	path = sconshelper
 	url = https://github.com/schansge/sconshelper.git
+[submodule "test/gtest"]
+	path = test/gtest
+	url = http://git.chromium.org/external/googletest.git
