@@ -77,3 +77,51 @@ std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>
 
     return final_points;
 }
+
+// find unique bars
+std::shared_ptr<distmesh::dtype::array<distmesh::dtype::index>>
+    distmesh::meshgen::find_unique_bars(
+    std::shared_ptr<dtype::array<dtype::real>> points,
+    std::shared_ptr<dtype::array<dtype::index>> triangulation) {
+    // create initial list of bar indices
+    dtype::array<dtype::index> initial_bar_indices(
+        (points->cols() + 1) * triangulation->rows(), 2);
+    for (dtype::index triangle = 0; triangle < triangulation->rows(); ++triangle)
+    for (dtype::index bar = 0; bar < initial_bar_indices.cols(); ++bar) {
+        initial_bar_indices(bar + triangle * (points->cols() + 1), 0) =
+            (*triangulation)(triangle, bar);
+        initial_bar_indices(bar + triangle * (points->cols() + 1), 1) =
+            (*triangulation)(triangle, (bar + 1) % (points->cols() + 1));
+    }
+
+    // sort bar indices rowwise
+    for (dtype::index bar = 0; bar < initial_bar_indices.rows(); ++bar) {
+        if (initial_bar_indices(bar, 0) > initial_bar_indices(bar, 1)) {
+            auto temp = initial_bar_indices(bar, 0);
+            initial_bar_indices(bar, 0) = initial_bar_indices(bar, 1);
+            initial_bar_indices(bar, 1) = temp;
+        }
+    }
+
+    // reject duplicated bars
+    auto bar_indices = std::make_shared<dtype::array<dtype::index>>(
+        initial_bar_indices.rows(), initial_bar_indices.cols());
+    bar_indices->fill(0);
+    dtype::index bar_count = 0;
+    for (dtype::index bar = 0; bar < initial_bar_indices.rows(); ++bar) {
+        bool unique = true;
+        for (dtype::index unique_bar = 0; unique_bar < bar_count; ++unique_bar) {
+            if ((initial_bar_indices.row(bar) == bar_indices->row(unique_bar)).all()) {
+                unique = false;
+                break;
+            }
+        }
+        if (unique == true) {
+            bar_indices->row(bar_count) = initial_bar_indices.row(bar);
+            bar_count++;
+        }
+    }
+    bar_indices->conservativeResize(bar_count, bar_indices->cols());
+
+    return bar_indices;
+}

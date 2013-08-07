@@ -15,6 +15,19 @@ namespace meshgen {
         std::function<
             dtype::real(dtype::array<dtype::real>)> edge_length_function,
         dtype::real initial_edge_length, dtype::array<dtype::real> bounding_box);
+
+    // find unique bars
+    std::shared_ptr<dtype::array<dtype::index>> find_unique_bars(
+        std::shared_ptr<dtype::array<dtype::real>> points,
+        std::shared_ptr<dtype::array<dtype::index>> triangulation);
+
+    // calculate forces on each point based on lengths of each bar
+    std::shared_ptr<dtype::array<dtype::real>> calculate_forced(
+        std::shared_ptr<dtype::array<dtype::real>> points,
+        std::shared_ptr<dtype::array<dtype::index>> bars_vector,
+        std::function<
+            dtype::real(dtype::array<dtype::real>)
+            > edge_length_function);
 }
 }
 
