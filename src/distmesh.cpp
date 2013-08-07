@@ -4,6 +4,9 @@
 // Contact: patrik.gebhardt@rub.de
 
 #include "distmesh/distmesh.h"
+#include <vector>
+#include <set>
+#include <algorithm>
 
 // apply the distmesh algorithm
 std::tuple<std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>,
@@ -110,4 +113,12 @@ std::tuple<std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>,
     }
 
     return std::make_tuple(points, triangulation);
+}
+
+// determine boundary edges of given triangulation
+std::shared_ptr<distmesh::dtype::array<distmesh::dtype::index>>
+    distmesh::boundedges(
+    std::shared_ptr<dtype::array<dtype::index>> triangulation) {
+
+    return triangulation;
 }

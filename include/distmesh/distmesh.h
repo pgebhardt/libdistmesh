@@ -21,6 +21,10 @@ namespace distmesh {
         std::function<dtype::real(dtype::array<dtype::real>)> distance_function,
         std::function<dtype::real(dtype::array<dtype::real>)> edge_length_function,
         dtype::real initial_edge_length, dtype::array<dtype::real> bounding_box);
+
+    // determine boundary edges of given triangulation
+    std::shared_ptr<dtype::array<dtype::index>> boundedges(
+        std::shared_ptr<dtype::array<dtype::index>> triangulation);
 }
 
 #endif
