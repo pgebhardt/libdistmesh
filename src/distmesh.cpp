@@ -26,8 +26,7 @@ std::tuple<std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>,
 
     // main distmesh loop
     std::shared_ptr<dtype::array<dtype::index>> bar_indices = nullptr;
-    int count = 0;
-    while (1) {
+    while (true) {
         // retriangulate if point movement is above tolerance
         auto retriangulation_criterion =
             (((*points) - points_retriangulation_criterion).square().rowwise().sum().sqrt() /
@@ -56,7 +55,6 @@ std::tuple<std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>,
 
             // find unique bar indices
             bar_indices = meshgen::find_unique_bars(points, triangulation);
-            std::cout << "count: " << ++count << std::endl;
         }
 
         // calculate bar vector

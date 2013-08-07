@@ -86,9 +86,8 @@ std::shared_ptr<distmesh::dtype::array<distmesh::dtype::index>>
     distmesh::meshgen::find_unique_bars(
     std::shared_ptr<dtype::array<dtype::real>> points,
     std::shared_ptr<dtype::array<dtype::index>> triangulation) {
-    // create initial list of bar indices
+    // fill set of sorted bar indices
     std::set<std::array<dtype::index, 2>> bar_indices_set;
-
     std::array<dtype::index, 2> bar = {{0, 0}};
     for (dtype::index triangle = 0; triangle < triangulation->rows(); ++triangle)
     for (dtype::index i = 0; i < points->cols() + 1; ++i) {
