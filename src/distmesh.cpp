@@ -19,22 +19,21 @@ std::tuple<std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>,
     // create initial triangulation
     auto triangulation = triangulation::delaunay(points);
 
-    // create array of points of last iteration, but initialize with inf for
-    // first iteration
-    auto old_points = std::make_shared<dtype::array<dtype::real>>(
-        points->rows(), points->cols());
-    old_points->fill(INFINITY);
+    // create points buffer for retriangulation and stop criterion
+    dtype::array<dtype::real> points_retriangulation_criterion(points->rows(), points->cols());
+    dtype::array<dtype::real> points_stop_criterion(points->rows(), points->cols());
+    points_retriangulation_criterion.fill(INFINITY);
 
     // main distmesh loop
     std::shared_ptr<dtype::array<dtype::index>> bar_indices = nullptr;
-    for (int i = 0; i < 100; ++i) {
-//    while (1) {
+    int count = 0;
+    while (1) {
         // retriangulate if point movement is above tolerance
-        auto retriangulation_criterium =
-            (((*points) - (*old_points)).square().rowwise().sum() /
+        auto retriangulation_criterion =
+            (((*points) - points_retriangulation_criterion).square().rowwise().sum() /
             initial_edge_length).maxCoeff();
-        if (retriangulation_criterium > settings::retriangulation_tolerance) {
-            *old_points = *points;
+        if (retriangulation_criterion > settings::retriangulation_tolerance) {
+            points_retriangulation_criterion = *points;
 
             // reject triangles with circumcenter outside of the region
             triangulation = triangulation::delaunay(points);
@@ -92,12 +91,24 @@ std::tuple<std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>,
         }
 
         // move points
+        points_stop_criterion = *points;
         for (dtype::index bar = 0; bar < bar_indices->rows(); ++bar) {
             points->row((*bar_indices)(bar, 0)) += settings::deltaT *
                 force_vector.row(bar);
             points->row((*bar_indices)(bar, 1)) -= settings::deltaT *
                 force_vector.row(bar);
         }
+
+        // project points outside of domain to boundary
+        meshgen::project_points_to_function(distance_function,
+            initial_edge_length, points);
+
+        // stop criterion
+        auto stop_criterion = ((*points - points_stop_criterion).square().rowwise().sum().sqrt() / initial_edge_length).maxCoeff();
+        if (stop_criterion < 1e-3) {
+            break;
+        }
+        std::cout << "count: " << ++count << std::endl;
     }
 
     return std::make_tuple(points, triangulation);

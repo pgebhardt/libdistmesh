@@ -5,6 +5,7 @@
 
 #include "distmesh/distmesh.h"
 #include <random>
+#include <limits>
 
 // create point list
 std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>
@@ -46,7 +47,6 @@ std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>
             inside_point_count++;
         }
     }
-    inside_points->conservativeResize(inside_point_count, bounding_box.rows());
 
     // initialize random number generator
     std::default_random_engine random_generator;
@@ -55,7 +55,7 @@ std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>
     // calculate propability to keep point in point list based on
     // edge_length_function
     auto propability = std::make_shared<dtype::array<dtype::real>>(
-        inside_points->rows(), 1);
+        inside_point_count, 1);
     for (dtype::index point = 0; point < propability->rows(); ++point) {
         (*propability)(point, 0) = edge_length_function(inside_points->row(point));
     }
@@ -102,13 +102,12 @@ std::shared_ptr<distmesh::dtype::array<distmesh::dtype::index>>
             initial_bar_indices(bar, 1) = temp;
         }
     }
-
     // reject duplicated bars
     auto bar_indices = std::make_shared<dtype::array<dtype::index>>(
         initial_bar_indices.rows(), initial_bar_indices.cols());
     bar_indices->fill(0);
     dtype::index bar_count = 0;
-    for (dtype::index bar = 0; bar < initial_bar_indices.rows(); ++bar) {
+        for (dtype::index bar = 0; bar < initial_bar_indices.rows(); ++bar) {
         bool unique = true;
         for (dtype::index unique_bar = 0; unique_bar < bar_count; ++unique_bar) {
             if ((initial_bar_indices.row(bar) == bar_indices->row(unique_bar)).all()) {
@@ -124,4 +123,38 @@ std::shared_ptr<distmesh::dtype::array<distmesh::dtype::index>>
     bar_indices->conservativeResize(bar_count, bar_indices->cols());
 
     return bar_indices;
+}
+
+// project points outside of boundary back to it
+void distmesh::meshgen::project_points_to_function(
+    std::function<dtype::real(dtype::array<dtype::real>)> distance_function,
+    dtype::real initial_edge_length, std::shared_ptr<dtype::array<dtype::real>> points) {
+    // evaluate distance function at points
+    dtype::array<dtype::real> distance(points->rows(), 1);
+    for (dtype::index point = 0; point < points->rows(); ++point) {
+        distance(point, 0) = distance_function(points->row(point));
+    }
+
+    // check for points outside of boundary
+    dtype::array<bool> outside(points->rows(), 1);
+    outside = distance > 0.0;
+    if (outside.any()) {
+        for (dtype::index point = 0; point < points->rows(); ++point) {
+            if (outside(point, 0)) {
+                // calculate gradient
+                dtype::array<dtype::real> gradient(points->rows(), points->cols());
+                dtype::array<dtype::real> deltaX(1, points->cols());
+                deltaX.fill(0.0);
+                for (dtype::index dim = 0; dim < points->cols(); ++dim) {
+                    deltaX(0, dim) = std::sqrt(std::numeric_limits<dtype::real>::epsilon()) * initial_edge_length;
+                    gradient(point, dim) = (distance_function(points->row(point) + deltaX) - distance(point, 0)) /
+                        (std::sqrt(std::numeric_limits<dtype::real>::epsilon()) * initial_edge_length);
+                    deltaX(0, dim) = 0.0;
+                }
+
+                // project points back
+                points->row(point) -= distance(point, 0) * gradient.row(point) / gradient.row(point).square().sum();
+            }
+        }
+    }
 }
