@@ -16,5 +16,26 @@ std::tuple<std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>,
     auto points = meshgen::create_point_list(distance_function,
         edge_length_function, initial_edge_length, bounding_box);
 
-    return std::make_tuple(points, nullptr);
+    // create initial triangulation
+    auto triangulation = triangulation::delaunay(points);
+
+    // create array of points of last iteration, but initialize with inf for
+    // first iteration
+    auto old_points = std::make_shared<dtype::array<dtype::real>>(
+        points->rows(), points->cols());
+    // old_points->fill(INFINITY);
+
+    // main distmesh loop
+    while (1) {
+        // retriangulate if point movement is above tolerance
+        auto retriangulation_criterium =
+            (((*points) - (*old_points)).square().rowwise().sum() /
+            initial_edge_length).maxCoeff();
+        if (retriangulation_criterium > settings::retriangulation_tolerance) {
+
+        }
+        break;
+    }
+
+    return std::make_tuple(points, triangulation);
 }

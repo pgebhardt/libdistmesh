@@ -8,6 +8,7 @@
 
 #include "common.h"
 #include "dtype.h"
+#include "settings.h"
 #include "triangulation.h"
 #include "meshgen.h"
 
