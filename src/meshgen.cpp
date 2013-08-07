@@ -6,6 +6,9 @@
 #include "distmesh/distmesh.h"
 #include <random>
 #include <limits>
+#include <set>
+#include <array>
+#include <algorithm>
 
 // create point list
 std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>
@@ -84,43 +87,30 @@ std::shared_ptr<distmesh::dtype::array<distmesh::dtype::index>>
     std::shared_ptr<dtype::array<dtype::real>> points,
     std::shared_ptr<dtype::array<dtype::index>> triangulation) {
     // create initial list of bar indices
-    dtype::array<dtype::index> initial_bar_indices(
-        (points->cols() + 1) * triangulation->rows(), 2);
+    std::set<std::array<dtype::index, 2>> bar_indices_set;
+
+    std::array<dtype::index, 2> bar = {{0, 0}};
     for (dtype::index triangle = 0; triangle < triangulation->rows(); ++triangle)
-    for (dtype::index bar = 0; bar < points->cols() + 1; ++bar) {
-        initial_bar_indices(bar + triangle * (points->cols() + 1), 0) =
-            (*triangulation)(triangle, bar);
-        initial_bar_indices(bar + triangle * (points->cols() + 1), 1) =
-            (*triangulation)(triangle, (bar + 1) % (points->cols() + 1));
+    for (dtype::index i = 0; i < points->cols() + 1; ++i) {
+        if ((*triangulation)(triangle, i) > (*triangulation)(triangle, (i + 1) % (points->cols() + 1))) {
+            bar[0] = (*triangulation)(triangle, i);
+            bar[1] = (*triangulation)(triangle, (i + 1) % (points->cols() + 1));
+        } else {
+            bar[0] = (*triangulation)(triangle, (i + 1) % (points->cols() + 1));
+            bar[1] = (*triangulation)(triangle, i);
+        }
+        bar_indices_set.insert(bar);
     }
 
-    // sort bar indices rowwise
-    for (dtype::index bar = 0; bar < initial_bar_indices.rows(); ++bar) {
-        if (initial_bar_indices(bar, 0) > initial_bar_indices(bar, 1)) {
-            dtype::real temp = initial_bar_indices(bar, 0);
-            initial_bar_indices(bar, 0) = initial_bar_indices(bar, 1);
-            initial_bar_indices(bar, 1) = temp;
-        }
-    }
-    // reject duplicated bars
+    // copy set to eigen array
     auto bar_indices = std::make_shared<dtype::array<dtype::index>>(
-        initial_bar_indices.rows(), initial_bar_indices.cols());
-    bar_indices->fill(0);
-    dtype::index bar_count = 0;
-        for (dtype::index bar = 0; bar < initial_bar_indices.rows(); ++bar) {
-        bool unique = true;
-        for (dtype::index unique_bar = 0; unique_bar < bar_count; ++unique_bar) {
-            if ((initial_bar_indices.row(bar) == bar_indices->row(unique_bar)).all()) {
-                unique = false;
-                break;
-            }
-        }
-        if (unique == true) {
-            bar_indices->row(bar_count) = initial_bar_indices.row(bar);
-            bar_count++;
-        }
+        bar_indices_set.size(), 2);
+    dtype::index bar_index = 0;
+    for (auto & bar : bar_indices_set) {
+        (*bar_indices)(bar_index, 0) = bar[0];
+        (*bar_indices)(bar_index, 1) = bar[1];
+        bar_index++;
     }
-    bar_indices->conservativeResize(bar_count, bar_indices->cols());
 
     return bar_indices;
 }
