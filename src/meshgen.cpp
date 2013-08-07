@@ -40,7 +40,8 @@ std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>
         max_point_count, bounding_box.rows());
     dtype::index inside_point_count = 0;
     for (dtype::index point = 0; point < initial_points->rows(); ++point) {
-        if (distance_function(initial_points->row(point)) < 0.0) {
+        if (distance_function(initial_points->row(point)) <
+            settings::general_precision * initial_edge_length) {
             inside_points->row(inside_point_count) = initial_points->row(point);
             inside_point_count++;
         }

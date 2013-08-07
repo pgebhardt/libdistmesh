@@ -10,6 +10,7 @@
 namespace distmesh {
 namespace settings {
     static const dtype::real retriangulation_tolerance = 1e-3;
+    static const dtype::real general_precision = 1e-3;
 }
 }
 
