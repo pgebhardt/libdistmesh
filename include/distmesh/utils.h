@@ -11,7 +11,7 @@ namespace distmesh {
 namespace utils {
     // create point list
     std::shared_ptr<dtype::array<dtype::real>> create_point_list(
-        std::function<dtype::real(dtype::array<dtype::real>)> distance_function,
+        std::function<dtype::array<dtype::real>(dtype::array<dtype::real>&)> distance_function,
         std::function<dtype::array<dtype::real>(dtype::array<dtype::real>&)> edge_length_function,
         dtype::real initial_edge_length, dtype::array<dtype::real> bounding_box);
 
@@ -22,7 +22,7 @@ namespace utils {
 
     // project points outside of boundary back to it
     void project_points_to_function(
-        std::function<dtype::real(dtype::array<dtype::real>)> distance_function,
+        std::function<dtype::array<dtype::real>(dtype::array<dtype::real>&)> distance_function,
         dtype::real initial_edge_length, std::shared_ptr<dtype::array<dtype::real>> points);
 }
 }

@@ -10,6 +10,8 @@ std::function<distmesh::dtype::array<distmesh::dtype::real>(
     distmesh::dtype::array<distmesh::dtype::real>&)>
     distmesh::edge_length_functions::uniform() {
     return [=](dtype::array<dtype::real>& points) {
-        return Eigen::MatrixXd::Ones(points.rows(), 1).array();
+        dtype::array<dtype::real> result(points.rows(), 1);
+        result.fill(1.0);
+        return result;
     };
 }

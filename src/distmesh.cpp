@@ -9,34 +9,13 @@
 #include <algorithm>
 #include <sys/time.h>
 
-class Time {
-public:
-    Time() {
-        this->restart();
-    }
-    double elapsed() {
-        struct timeval tv;
-        gettimeofday(&tv, NULL);
-        return ((double)tv.tv_sec + (double)tv.tv_usec * 1e-6) - this->time;
-    }
-    void restart() {
-        struct timeval tv;
-        gettimeofday(&tv, NULL);
-        this->time = (double)tv.tv_sec + (double)tv.tv_usec * 1e-6;
-    }
-
-private:
-    double time;
-};
-
 // apply the distmesh algorithm
 std::tuple<std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>,
     std::shared_ptr<distmesh::dtype::array<distmesh::dtype::index>>>
     distmesh::distmesh(
-    std::function<dtype::real(dtype::array<dtype::real>)> distance_function,
+    std::function<dtype::array<dtype::real>(dtype::array<dtype::real>&)> distance_function,
     std::function<dtype::array<dtype::real>(dtype::array<dtype::real>&)> edge_length_function,
     dtype::real initial_edge_length, dtype::array<dtype::real> bounding_box) {
-    Time time;
     // create initial distribution in bounding_box
     auto points = utils::create_point_list(distance_function,
         edge_length_function, initial_edge_length, bounding_box);
@@ -51,28 +30,31 @@ std::tuple<std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>,
 
     // main distmesh loop
     std::shared_ptr<dtype::array<dtype::index>> bar_indices = nullptr;
-//    for (dtype::index i = 0; i < 1; ++i) {
     while (true) {
-        time.restart();
         // retriangulate if point movement is above tolerance
         auto retriangulation_criterion =
             (((*points) - buffer_retriangulation_criterion).square().rowwise().sum().sqrt() /
             initial_edge_length).maxCoeff();
         if (retriangulation_criterion > settings::retriangulation_tolerance) {
-            buffer_retriangulation_criterion = *points;
+            // update triangulation
+            triangulation = triangulation::delaunay(points);
+
+            // calculate circumcenter
+            dtype::array<dtype::real> circumcenter(triangulation->rows(), points->cols());
+            circumcenter.fill(0.0);
+            for (dtype::index triangle = 0; triangle < triangulation->rows(); ++triangle)
+            for (dtype::index point = 0; point < triangulation->cols(); ++point) {
+                circumcenter.row(triangle) += points->row((*triangulation)(triangle, point)) / triangulation->cols();
+            }
 
             // reject triangles with circumcenter outside of the region
-            triangulation = triangulation::delaunay(points);
-            dtype::array<dtype::index> keep_triangulation(triangulation->rows(), triangulation->cols());
             dtype::index triangle_count = 0;
+            dtype::array<dtype::index> keep_triangulation(triangulation->rows(), triangulation->cols());
+            dtype::array<dtype::real> circumcenter_distance(triangulation->rows(), points->cols());
+            circumcenter_distance = distance_function(circumcenter);
+
             for (dtype::index triangle = 0; triangle < triangulation->rows(); ++triangle) {
-                // calculate circumcenter
-                dtype::array<dtype::real> circumcenter(1, points->cols());
-                circumcenter.fill(0.0);
-                for (dtype::index point = 0; point < triangulation->cols(); ++point) {
-                    circumcenter += points->row((*triangulation)(triangle, point)) / triangulation->cols();
-                }
-                if (distance_function(circumcenter) < -settings::general_precision * initial_edge_length) {
+                if (circumcenter_distance(triangle, 0) < -settings::general_precision * initial_edge_length) {
                     keep_triangulation.row(triangle_count) = triangulation->row(triangle);
                     triangle_count++;
                 }
@@ -83,8 +65,7 @@ std::tuple<std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>,
             // find unique bar indices
             bar_indices = utils::find_unique_bars(points, triangulation);
 
-            std::cout << "retriangulation: " << time.elapsed() * 1e3 << " ms" << std::endl;
-            time.restart();
+            buffer_retriangulation_criterion = *points;
         }
 
         // calculate bar vector
@@ -95,15 +76,9 @@ std::tuple<std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>,
                 points->row((*bar_indices)(bar, 1));
         }
 
-        std::cout << "calculate bar vector: " << time.elapsed() * 1e3 << " ms" << std::endl;
-        time.restart();
-
         // calculate length of each bar
         dtype::array<dtype::real> bar_length(bar_indices->rows(), 1);
         bar_length = bar_vector.square().rowwise().sum().sqrt();
-
-        std::cout << "calculate length of each bar: " << time.elapsed() * 1e3 << " ms" << std::endl;
-        time.restart();
 
         // evaluate edge_length_function
         dtype::array<dtype::real> hbars(bar_indices->rows(), 1);
@@ -114,16 +89,10 @@ std::tuple<std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>,
         }
         hbars = edge_length_function(bar_midpoints);
 
-        std::cout << "evaluate edge_length_function: " << time.elapsed() * 1e3 << " ms" << std::endl;
-        time.restart();
-
         // calculate desired bar length
         dtype::array<dtype::real> desired_bar_length(bar_length.rows(), bar_length.cols());
         desired_bar_length = hbars * (1.0 + 0.4 / std::pow(2.0, points->cols() - 1)) *
             std::pow((bar_length.pow(points->cols()).sum() / hbars.pow(points->cols()).sum()), 1.0 / points->cols());
-
-        std::cout << "calculate desired bar length: " << time.elapsed() * 1e3 << " ms" << std::endl;
-        time.restart();
 
         // calculate force vector for each bar
         dtype::array<dtype::real> force(bar_indices->rows(), 1);
@@ -132,9 +101,6 @@ std::tuple<std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>,
         for (dtype::index dim = 0; dim < points->cols(); ++dim) {
             force_vector.col(dim) = force * bar_vector.col(dim);
         }
-
-        std::cout << "calculate force vector for each bar: " << time.elapsed() * 1e3 << " ms" << std::endl;
-        time.restart();
 
         // move points
         buffer_stop_criterion = *points;
@@ -145,23 +111,15 @@ std::tuple<std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>,
                 force_vector.row(bar);
         }
 
-        std::cout << "move points: " << time.elapsed() * 1e3 << " ms" << std::endl;
-        time.restart();
-
         // project points outside of domain to boundary
         utils::project_points_to_function(distance_function,
             initial_edge_length, points);
-
-        std::cout << "project points outside of domain to boundary: " << time.elapsed() * 1e3 << " ms" << std::endl;
-        time.restart();
 
         // stop criterion
         auto stop_criterion = ((*points - buffer_stop_criterion).square().rowwise().sum().sqrt() / initial_edge_length).maxCoeff();
         if (stop_criterion < settings::point_movement_tolerance) {
             break;
         }
-        std::cout << "stop criterion: " << time.elapsed() * 1e3 << " ms" << std::endl;
-        time.restart();
     }
 
     return std::make_tuple(points, triangulation);

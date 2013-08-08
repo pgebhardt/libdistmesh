@@ -11,9 +11,11 @@ sconshelper.Library(name='distmesh', env=env, arguments=ARGUMENTS,
     CXXFLAGS=[
         '-std=c++11',
         '-O4',
+        '-g',
         ],
     LINKFLAGS=[
         '-O4',
+        '-g',
         ],
     CPPPATH=[
         '/usr/include/eigen3/',

@@ -13,7 +13,7 @@
 // create point list
 std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>
     distmesh::utils::create_point_list(
-    std::function<dtype::real(dtype::array<dtype::real>)> distance_function,
+    std::function<dtype::array<dtype::real>(dtype::array<dtype::real>&)> distance_function,
     std::function<dtype::array<dtype::real>(dtype::array<dtype::real>&)> edge_length_function,
     dtype::real initial_edge_length, dtype::array<dtype::real> bounding_box) {
     // calculate max number of points per dimension and max total point count
@@ -39,11 +39,12 @@ std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>
     }
 
     // reject points outside of region defined by distance_function
-    dtype::array<dtype::real> inside_points(max_point_count, bounding_box.rows());
     dtype::index inside_point_count = 0;
+    dtype::array<dtype::real> inside_points(max_point_count, bounding_box.rows());
+    dtype::array<dtype::real> distance(max_point_count, 1);
+    distance = distance_function(initial_points);
     for (dtype::index point = 0; point < initial_points.rows(); ++point) {
-        if (distance_function(initial_points.row(point)) <
-            settings::general_precision * initial_edge_length) {
+        if (distance(point, 0) < settings::general_precision * initial_edge_length) {
             inside_points.row(inside_point_count) = initial_points.row(point);
             inside_point_count++;
         }
@@ -113,31 +114,31 @@ std::shared_ptr<distmesh::dtype::array<distmesh::dtype::index>>
 
 // project points outside of boundary back to it
 void distmesh::utils::project_points_to_function(
-    std::function<dtype::real(dtype::array<dtype::real>)> distance_function,
+    std::function<dtype::array<dtype::real>(dtype::array<dtype::real>&)> distance_function,
     dtype::real initial_edge_length, std::shared_ptr<dtype::array<dtype::real>> points) {
     // evaluate distance function at points
     dtype::array<dtype::real> distance(points->rows(), 1);
-    for (dtype::index point = 0; point < points->rows(); ++point) {
-        distance(point, 0) = distance_function(points->row(point));
-    }
+    distance = distance_function(*points);
 
     // check for points outside of boundary
     dtype::array<bool> outside(points->rows(), 1);
     outside = distance > 0.0;
     if (outside.any()) {
+        // calculate gradient
+        dtype::array<dtype::real> gradient(points->rows(), points->cols());
+        dtype::array<dtype::real> deltaX(points->rows(), points->cols());
+        dtype::array<dtype::real> h(points->rows(), points->cols());
+        deltaX.fill(0.0);
+        for (dtype::index dim = 0; dim < points->cols(); ++dim) {
+            deltaX.col(dim).fill(std::sqrt(std::numeric_limits<dtype::real>::epsilon()) * initial_edge_length);
+            h = *points + deltaX;
+            gradient.col(dim) = (distance_function(h) - distance) /
+                (std::sqrt(std::numeric_limits<dtype::real>::epsilon()) * initial_edge_length);
+            deltaX.col(dim).fill(0.0);
+        }
+
         for (dtype::index point = 0; point < points->rows(); ++point) {
             if (outside(point, 0)) {
-                // calculate gradient
-                dtype::array<dtype::real> gradient(points->rows(), points->cols());
-                dtype::array<dtype::real> deltaX(1, points->cols());
-                deltaX.fill(0.0);
-                for (dtype::index dim = 0; dim < points->cols(); ++dim) {
-                    deltaX(0, dim) = std::sqrt(std::numeric_limits<dtype::real>::epsilon()) * initial_edge_length;
-                    gradient(point, dim) = (distance_function(points->row(point) + deltaX) - distance(point, 0)) /
-                        (std::sqrt(std::numeric_limits<dtype::real>::epsilon()) * initial_edge_length);
-                    deltaX(0, dim) = 0.0;
-                }
-
                 // project points back
                 points->row(point) -= distance(point, 0) * gradient.row(point) / gradient.row(point).square().sum();
             }
