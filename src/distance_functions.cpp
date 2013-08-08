@@ -25,10 +25,14 @@ std::function<distmesh::dtype::array<distmesh::dtype::real>(
     dtype::array<dtype::real> rectangle) {
     return [=](dtype::array<dtype::real>& points) {
         dtype::array<dtype::real> result(points.rows(), 1);
-        result = -(points.col(0) - rectangle(0, 0))
-            .min(rectangle(0, 1) - points.col(0))
-            .min(points.col(1) - rectangle(1, 0))
-            .min(rectangle(1, 1) - points.col(1));
+        result = (points.col(0) - rectangle(0, 0))
+            .min(rectangle(0, 1) - points.col(0));
+        for (dtype::index dim = 1; dim < points.cols(); ++dim) {
+            result = result
+                .min((points.col(dim) - rectangle(dim, 0)))
+                .min(rectangle(dim, 1) - points.col(dim));
+        }
+        result = -result;
         return result;
     };
 }
