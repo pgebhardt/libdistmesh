@@ -68,7 +68,7 @@ int main() {
 Dependencies
 ------------
 
-libDistMesh uses some C++11 features and compiles proper with both clang
+libDistMesh uses some C++11 features and compiles properly with both clang
 and gcc. For linear algebra operations and the delaunay triangulation two
 libraries are needed for building and using libDistMesh:
 
