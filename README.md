@@ -20,15 +20,50 @@ Example
 * Uniform Mesh on Unit Circle::
 
 ```
-// bounding box in which the algorithm tries to create points
-distmesh::dtype::array<distmesh::dtype::real> bounding_box(2, 2);
-bounding_box << -1.0, 1.0, -1.0, 1.0;
+#include <distmesh/distmesh.h>
 
-// create mesh
-auto mesh = distmesh::distmesh(
-    distmesh::distance_functions::circular(1.0),
-    distmesh::edge_length_functions::uniform(),
-    0.02, bounding_box);
+int main() {
+    // bounding box in which the algorithm tries to create points
+    distmesh::dtype::array<distmesh::dtype::real> bounding_box(2, 2);
+    bounding_box << -1.0, 1.0, -1.0, 1.0;
+
+    // create mesh
+    auto mesh = distmesh::distmesh(
+        distmesh::distance_functions::circular(1.0),
+        distmesh::edge_length_functions::uniform(),
+        0.02, bounding_box);
+
+    return 0;
+}
+```
+* Rectangle with circular hole, refined at circle boundary:
+
+```
+#include <distmesh/distmesh.h>
+
+int main() {
+    // bounding box in which the algorithm tries to create points
+    distmesh::dtype::array<distmesh::dtype::real> bounding_box(2, 2);
+    bounding_box << -1.0, 1.0, -1.0, 1.0;
+
+    // fixed points at the corners of domain to guaranty convergence
+    distmesh::dtype::array<distmesh::dtype::real> fixed_points(4, 2);
+    fixed_points << -1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0;
+
+    // create mesh
+    auto mesh = distmesh::distmesh(
+        distmesh::distance_functions::diff(
+            distmesh::distance_functions::rectangular(bounding_box),
+            distmesh::distance_functions::circular(0.5)),
+        [](distmesh::dtype::array<distmesh::dtype::real>& points) {
+            distmesh::dtype::array<distmesh::dtype::real> result(points.rows(), 1);
+            result = 0.05 + 0.3 * distmesh::distance_functions::circular(0.5)(points);
+            return result;
+        }, 0.05, bounding_box, fixed_points);
+
+    return 0;
+}
+
 ```
 
 Dependencies
