@@ -15,7 +15,8 @@ std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>
     distmesh::utils::create_point_list(
     std::function<dtype::array<dtype::real>(dtype::array<dtype::real>&)> distance_function,
     std::function<dtype::array<dtype::real>(dtype::array<dtype::real>&)> edge_length_function,
-    dtype::real initial_edge_length, dtype::array<dtype::real> bounding_box) {
+    dtype::real initial_edge_length, dtype::array<dtype::real> bounding_box,
+    dtype::array<dtype::real> fixed_points) {
     // calculate max number of points per dimension and max total point count
     // and create initial array
     dtype::array<dtype::index> max_points_per_dimension(bounding_box.rows(), 1);
@@ -61,20 +62,26 @@ std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>
     dtype::array<dtype::real> propability(inside_point_count, 1);
     propability = edge_length_function(inside_points);
 
-    // reject points with wrong propability
+    // add fixed points to final list first
     auto final_points = std::make_shared<dtype::array<dtype::real>>(
-        inside_point_count, bounding_box.rows());
+        inside_point_count + fixed_points.rows(), bounding_box.rows());
+    for (dtype::index fixed_point = 0; fixed_point < fixed_points.rows(); ++fixed_point) {
+        final_points->row(fixed_point) = fixed_points.row(fixed_point);
+    }
+
+    // reject points with wrong propability
     auto propability_norm = propability.minCoeff();
-    dtype::index final_point_count = 0;
+    dtype::index final_point_count = fixed_points.rows();
     for (dtype::index point = 0; point < propability.rows(); ++point) {
         if (random_distribution(random_generator) <
             std::pow(propability_norm / propability(point, 0),
                 bounding_box.rows())) {
-            final_points->row(final_point_count) = inside_points.row(point);
+            final_points->row(final_point_count + fixed_points.rows()) = inside_points.row(point);
             final_point_count++;
         }
     }
-    final_points->conservativeResize(final_point_count, bounding_box.rows());
+    final_points->conservativeResize(final_point_count + fixed_points.rows(),
+        bounding_box.rows());
 
     return final_points;
 }

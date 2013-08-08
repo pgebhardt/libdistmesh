@@ -15,10 +15,11 @@ std::tuple<std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>,
     distmesh::distmesh(
     std::function<dtype::array<dtype::real>(dtype::array<dtype::real>&)> distance_function,
     std::function<dtype::array<dtype::real>(dtype::array<dtype::real>&)> edge_length_function,
-    dtype::real initial_edge_length, dtype::array<dtype::real> bounding_box) {
+    dtype::real initial_edge_length, dtype::array<dtype::real> bounding_box,
+    dtype::array<dtype::real> fixed_points) {
     // create initial distribution in bounding_box
-    auto points = utils::create_point_list(distance_function,
-        edge_length_function, initial_edge_length, bounding_box);
+    auto points = utils::create_point_list(distance_function, edge_length_function,
+        initial_edge_length, bounding_box, fixed_points);
 
     // create initial triangulation
     auto triangulation = triangulation::delaunay(points);
@@ -105,10 +106,14 @@ std::tuple<std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>,
         // move points
         buffer_stop_criterion = *points;
         for (dtype::index bar = 0; bar < bar_indices->rows(); ++bar) {
-            points->row((*bar_indices)(bar, 0)) += settings::deltaT *
-                force_vector.row(bar);
-            points->row((*bar_indices)(bar, 1)) -= settings::deltaT *
-                force_vector.row(bar);
+            if ((*bar_indices)(bar, 0) >= fixed_points.rows()) {
+                points->row((*bar_indices)(bar, 0)) += settings::deltaT *
+                    force_vector.row(bar);
+            }
+            if ((*bar_indices)(bar, 1) >= fixed_points.rows()) {
+                points->row((*bar_indices)(bar, 1)) -= settings::deltaT *
+                    force_vector.row(bar);
+            }
         }
 
         // project points outside of domain to boundary

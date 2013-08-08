@@ -13,7 +13,8 @@ namespace utils {
     std::shared_ptr<dtype::array<dtype::real>> create_point_list(
         std::function<dtype::array<dtype::real>(dtype::array<dtype::real>&)> distance_function,
         std::function<dtype::array<dtype::real>(dtype::array<dtype::real>&)> edge_length_function,
-        dtype::real initial_edge_length, dtype::array<dtype::real> bounding_box);
+        dtype::real initial_edge_length, dtype::array<dtype::real> bounding_box,
+        dtype::array<dtype::real> fixed_points);
 
     // find unique bars
     std::shared_ptr<dtype::array<dtype::index>> find_unique_bars(
