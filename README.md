@@ -7,7 +7,7 @@ algorithm for generating unstructured triangular and tetrahedral meshes using *s
 Getting Started
 ---------------
 
-Simply clone the repository, update submodules and make shure all dependencies are installed.
+Simply clone the repository, update submodules and make sure all dependencies are installed.
 For building the project the [SCons](http://www.scons.org/) build system is used:
 
     git submodule update --init
