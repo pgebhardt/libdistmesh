@@ -46,7 +46,7 @@ int main() {
     distmesh::dtype::array<distmesh::dtype::real> bounding_box(2, 2);
     bounding_box << -1.0, 1.0, -1.0, 1.0;
 
-    // fixed points at the corners of domain to guaranty convergence
+    // fixed points at the corners of domain to guarantee convergence
     distmesh::dtype::array<distmesh::dtype::real> fixed_points(4, 2);
     fixed_points << -1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0;
 
