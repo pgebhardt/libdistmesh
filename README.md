@@ -24,13 +24,9 @@ Example
 distmesh::dtype::array<distmesh::dtype::real> bounding_box(2, 2);
 bounding_box << -1.0, 1.0, -1.0, 1.0;
 
-// midpoint of unit circle
-distmesh::dtype::array<distmesh::dtype::real> midpoint(1, 2);
-midpoint.fill(0.0);
-
 // create mesh
 auto mesh = distmesh::distmesh(
-    distmesh::distance_functions::circular(midpoint, 1.0),
+    distmesh::distance_functions::circular(1.0),
     distmesh::edge_length_functions::uniform(),
     0.02, bounding_box);
 ```
