@@ -13,6 +13,7 @@ namespace settings {
     static const dtype::real point_movement_tolerance = 1e-3;
     static const dtype::real general_precision = 1e-1;
     static const dtype::real deltaT = 1e-1;
+    static const dtype::index max_steps = 10000;
 }
 }
 

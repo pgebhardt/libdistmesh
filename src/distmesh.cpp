@@ -30,7 +30,7 @@ std::tuple<std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>,
 
     // main distmesh loop
     std::shared_ptr<dtype::array<dtype::index>> bar_indices = nullptr;
-    while (true) {
+    for (dtype::index step = 0; step < settings::max_steps; ++step) {
         // retriangulate if point movement is above tolerance
         auto retriangulation_criterion =
             (((*points) - buffer_retriangulation_criterion).square().rowwise().sum().sqrt() /

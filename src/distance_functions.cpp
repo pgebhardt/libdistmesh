@@ -22,13 +22,13 @@ std::function<distmesh::dtype::array<distmesh::dtype::real>(
 std::function<distmesh::dtype::array<distmesh::dtype::real>(
     distmesh::dtype::array<distmesh::dtype::real>&)>
     distmesh::distance_functions::rectangular(
-    dtype::array<dtype::real> corners) {
+    dtype::array<dtype::real> rectangle) {
     return [=](dtype::array<dtype::real>& points) {
         dtype::array<dtype::real> result(points.rows(), 1);
-        result = (-corners(0, 1) + points.col(1));
-        result = result.max(corners(1, 1) - points.col(1));
-        result = result.max(-corners(0, 0) + points.col(0));
-        result = result.max(corners(1, 0) - points.col(0));
+        result = -(points.col(0) - rectangle(0, 0))
+            .min(rectangle(0, 1) - points.col(0))
+            .min(points.col(1) - rectangle(1, 0))
+            .min(rectangle(1, 1) - points.col(1));
         return result;
     };
 }

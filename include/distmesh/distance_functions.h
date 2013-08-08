@@ -16,7 +16,7 @@ namespace distance_functions {
 
     // creates distance function of rectangular domain
     std::function<dtype::array<dtype::real>(dtype::array<dtype::real>&)> rectangular(
-        dtype::array<dtype::real> corners);
+        dtype::array<dtype::real> rectangle);
 
     // creates distance function for circular domains
     std::function<dtype::array<dtype::real>(dtype::array<dtype::real>&)> circular(
