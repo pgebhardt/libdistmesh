@@ -119,6 +119,52 @@ std::tuple<std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>,
 std::shared_ptr<distmesh::dtype::array<distmesh::dtype::index>>
     distmesh::boundedges(
     std::shared_ptr<dtype::array<dtype::index>> triangulation) {
+    std::set<std::vector<dtype::index>> edge_set;
+    std::vector<std::vector<dtype::index>> boundary_edges;
+    std::vector<dtype::index> facet(triangulation->cols());
+    std::vector<dtype::index> edge(triangulation->cols() - 1);
 
-    return triangulation;
+    // find edges, which only appear once in triangulation
+    for (dtype::index triangle = 0; triangle < triangulation->rows(); ++triangle) {
+        // get current facet
+        for (dtype::index vertex = 0; vertex < triangulation->cols(); ++vertex) {
+            facet[vertex] = (*triangulation)(triangle, vertex);
+        }
+        std::sort(facet.begin(), facet.end());
+
+        // check appearance for all permutation and take care of same permutation
+        std::set<std::vector<dtype::index>> permutation_set;
+        do {
+            // use the first vertices of facet as edge
+            for (dtype::index vertex = 0; vertex < triangulation->cols() - 1; ++vertex) {
+                edge[vertex] = facet[vertex];
+            }
+            std::sort(edge.begin(), edge.end());
+            if (!std::get<1>(permutation_set.insert(edge))) {
+                continue;
+            }
+
+            // insert edge in set to get info about multiple appearance
+            bool appearance = std::get<1>(edge_set.insert(edge));
+            if (!appearance) {
+                // find edge in vector and delete it
+                auto it = std::find(boundary_edges.begin(), boundary_edges.end(), edge);
+                if (it != boundary_edges.end()) {
+                    boundary_edges.erase(it);
+                }
+            } else {
+                boundary_edges.push_back(edge);
+            }
+        } while (std::next_permutation(facet.begin(), facet.end()));
+    }
+
+    // convert stl vector to eigen array
+    auto boundary_array = std::make_shared<dtype::array<dtype::index>>(
+        boundary_edges.size(), edge.size());
+    for (dtype::index edge = 0; edge < boundary_array->rows(); ++edge)
+    for (dtype::index vertex = 0; vertex < boundary_array->cols(); ++vertex) {
+        (*boundary_array)(edge, vertex) = boundary_edges[edge][vertex];
+    }
+
+    return boundary_array;
 }
