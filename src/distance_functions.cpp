@@ -41,13 +41,20 @@ std::function<distmesh::dtype::array<distmesh::dtype::real>(
 std::function<distmesh::dtype::array<distmesh::dtype::real>(
     distmesh::dtype::array<distmesh::dtype::real>&)>
     distmesh::distance_functions::circular(
-    dtype::array<dtype::real> midpoint, dtype::real radius) {
+    dtype::real radius, dtype::array<dtype::real> midpoint) {
     return [=](dtype::array<dtype::real>& points) {
+        // move points towards midpoint
         dtype::array<dtype::real> norm_points(points.rows(), points.cols());
-        dtype::array<dtype::real> result(points.rows(), 1);
-        for (dtype::index dim = 0; dim < points.cols(); ++dim) {
-            norm_points.col(dim) = points.col(dim) - midpoint(0, dim);
+        if (midpoint.cols() == points.cols()) {
+            for (dtype::index dim = 0; dim < points.cols(); ++dim) {
+                norm_points.col(dim) = points.col(dim) - midpoint(0, dim);
+            }
+        } else {
+            norm_points = points;
         }
+
+        // apply circle equation
+        dtype::array<dtype::real> result(points.rows(), 1);
         result = norm_points.square().rowwise().sum().sqrt() - radius;
         return result;
     };

@@ -20,7 +20,8 @@ namespace distance_functions {
 
     // creates distance function for circular domains
     std::function<dtype::array<dtype::real>(dtype::array<dtype::real>&)> circular(
-        dtype::array<dtype::real> midpoint, dtype::real radius);
+        dtype::real radius=1.0,
+        dtype::array<dtype::real> midpoint=dtype::array<dtype::real>());
 }
 }
 
