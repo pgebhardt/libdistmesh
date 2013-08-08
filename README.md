@@ -17,7 +17,7 @@ For building the project the [SCons](http://www.scons.org/) build system is used
 Example
 -------
 
-* Uniform Mesh on Unit Circle::
+* Uniform Mesh on Unit Circle:
 
 ```
 #include <distmesh/distmesh.h>
@@ -31,7 +31,7 @@ int main() {
     auto mesh = distmesh::distmesh(
         distmesh::distance_functions::circular(1.0),
         distmesh::edge_length_functions::uniform(),
-        0.02, bounding_box);
+        0.2, bounding_box);
 
     return 0;
 }
