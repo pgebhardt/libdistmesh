@@ -145,7 +145,8 @@ std::shared_ptr<distmesh::dtype::array<distmesh::dtype::index>>
         // check appearance for all permutation and take care of same permutation
         std::set<std::vector<dtype::index>> permutation_set;
         do {
-            // use the first vertices of facet as edge
+            // use the first vertices of facet as edge and skip permutation,
+            // which was already handled
             for (dtype::index vertex = 0; vertex < triangulation->cols() - 1; ++vertex) {
                 edge[vertex] = facet[vertex];
             }
@@ -155,8 +156,8 @@ std::shared_ptr<distmesh::dtype::array<distmesh::dtype::index>>
             }
 
             // insert edge in set to get info about multiple appearance
-            bool appearance = std::get<1>(edge_set.insert(edge));
-            if (!appearance) {
+            bool appearance = !std::get<1>(edge_set.insert(edge));
+            if (appearance) {
                 // find edge in vector and delete it
                 auto it = std::find(boundary_edges.begin(), boundary_edges.end(), edge);
                 if (it != boundary_edges.end()) {
