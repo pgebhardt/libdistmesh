@@ -12,6 +12,7 @@
 #include "triangulation.h"
 #include "utils.h"
 #include "distance_functions.h"
+#include "edge_length_functions.h"
 
 // namespace distmesh
 namespace distmesh {
@@ -19,7 +20,7 @@ namespace distmesh {
     std::tuple<std::shared_ptr<dtype::array<dtype::real>>,
         std::shared_ptr<dtype::array<dtype::index>>> distmesh(
         std::function<dtype::real(dtype::array<dtype::real>)> distance_function,
-        std::function<dtype::real(dtype::array<dtype::real>)> edge_length_function,
+        std::function<dtype::array<dtype::real>(dtype::array<dtype::real>&)> edge_length_function,
         dtype::real initial_edge_length, dtype::array<dtype::real> bounding_box);
 
     // determine boundary edges of given triangulation

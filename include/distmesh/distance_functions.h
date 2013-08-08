@@ -9,6 +9,15 @@
 // namespace distmesh::distance_functions
 namespace distmesh {
 namespace distance_functions {
+    // generate new distance function with difference of two ones
+    std::function<dtype::real(dtype::array<dtype::real>)> diff(
+        std::function<dtype::real(dtype::array<dtype::real>)> function1,
+        std::function<dtype::real(dtype::array<dtype::real>)> function2);
+
+    // creates distance function of rectangular domain
+    std::function<dtype::real(dtype::array<dtype::real>)> rectangular(
+        dtype::array<dtype::real> corners);
+
     // creates distance function for circular domains
     std::function<dtype::real(dtype::array<dtype::real>)> circular(
         dtype::array<dtype::real> midpoint, dtype::real radius);
