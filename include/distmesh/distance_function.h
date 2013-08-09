@@ -22,8 +22,10 @@
 #define LIBDISTMESH_INCLUDE_DISTANCE_FUNCTION_H
 
 // macro for easies creation of edge length functions
-#define DISTMESH_DISTANCE_FUNCTION(x) \
-    ([=](const Eigen::Ref<distmesh::dtype::array<distmesh::dtype::real>> points) x)
+#define DISTMESH_DISTANCE_FUNCTION(function_body) \
+    ([=](const Eigen::Ref<distmesh::dtype::array<distmesh::dtype::real>> points) -> \
+    distmesh::dtype::array<distmesh::dtype::real> \
+    function_body)
 
 // namespace distmesh::distance_function
 namespace distmesh {

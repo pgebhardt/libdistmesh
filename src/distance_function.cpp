@@ -25,7 +25,7 @@ distmesh::distance_function::function_t
     distmesh::distance_function::diff(function_t function1,
     function_t function2) {
     return DISTMESH_DISTANCE_FUNCTION({
-        return function1(points).max(-function2(points)).eval();
+        return function1(points).max(-function2(points));
     });
 }
 
@@ -42,7 +42,7 @@ distmesh::distance_function::function_t
                 .min((points.col(dim) - rectangle(dim, 0)))
                 .min(rectangle(dim, 1) - points.col(dim));
         }
-        return (-result).eval();
+        return -result;
     });
 }
 
@@ -60,7 +60,6 @@ distmesh::distance_function::function_t
         }
 
         // apply circle equation
-        return (norm_points.square().rowwise().sum().sqrt() - radius)
-            .eval();
+        return norm_points.square().rowwise().sum().sqrt() - radius;
     });
 }

@@ -24,7 +24,6 @@
 distmesh::edge_length_function::function_t
     distmesh::edge_length_function::uniform() {
     return DISTMESH_DISTANCE_FUNCTION({
-        return dtype::array<dtype::real>::Ones(
-            points.rows(), 1).eval();
+        return dtype::array<dtype::real>::Ones(points.rows(), 1);
     });
 }
