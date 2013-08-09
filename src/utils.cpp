@@ -144,11 +144,10 @@ void distmesh::utils::project_points_to_function(
             deltaX.col(dim).fill(0.0);
         }
 
-        for (dtype::index point = 0; point < points->rows(); ++point) {
-            if (outside(point, 0)) {
-                // project points back
-                points->row(point) -= distance(point, 0) * gradient.row(point) / gradient.row(point).square().sum();
-            }
+        for (dtype::index dim = 0; dim < points->cols(); ++dim) {
+            points->col(dim) -= outside.select(
+                gradient.col(dim) * distance.col(0) / gradient.square().rowwise().sum(),
+                0.0);
         }
     }
 }

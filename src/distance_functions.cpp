@@ -43,9 +43,7 @@ std::function<distmesh::dtype::array<distmesh::dtype::real>(
         // move points towards midpoint
         dtype::array<dtype::real> norm_points(points.rows(), points.cols());
         if (midpoint.cols() == points.cols()) {
-            for (dtype::index dim = 0; dim < points.cols(); ++dim) {
-                norm_points.col(dim) = points.col(dim) - midpoint(0, dim);
-            }
+            norm_points = points.rowwise() - midpoint.row(0);
         } else {
             norm_points = points;
         }
