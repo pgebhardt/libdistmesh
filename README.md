@@ -56,9 +56,7 @@ int main() {
             distmesh::distance_functions::rectangular(bounding_box),
             distmesh::distance_functions::circular(0.5)),
         [](distmesh::dtype::array<distmesh::dtype::real>& points) {
-            distmesh::dtype::array<distmesh::dtype::real> result(points.rows(), 1);
-            result = 0.05 + 0.3 * distmesh::distance_functions::circular(0.5)(points);
-            return result;
+            return (0.05 + 0.3 * distmesh::distance_functions::circular(0.5)(points)).eval();
         }, 0.05, bounding_box, fixed_points);
 
     return 0;
