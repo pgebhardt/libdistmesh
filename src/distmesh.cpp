@@ -7,7 +7,6 @@
 #include <vector>
 #include <set>
 #include <algorithm>
-#include <sys/time.h>
 
 // apply the distmesh algorithm
 std::tuple<std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>,
