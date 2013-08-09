@@ -22,7 +22,7 @@
 #define LIBDISTMESH_INCLUDE_EDGE_LENGTH_FUNCTION_H
 
 // macro for easies creation of edge length functions
-#define LIBDISTMESH_EDGE_LENGTH_FUNCTION(x) \
+#define DISTMESH_EDGE_LENGTH_FUNCTION(x) \
     ([=](const Eigen::Ref<distmesh::dtype::array<distmesh::dtype::real>> points) x)
 
 // namespace distmesh::edge_length_function

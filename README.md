@@ -56,7 +56,7 @@ int main() {
         distmesh::distance_functions::diff(
             distmesh::distance_function::rectangular(bounding_box),
             distmesh::distance_function::circular(0.5)),
-        LIBDISTMESH_EDGE_LENGTH_FUNCTION({
+        DISTMESH_EDGE_LENGTH_FUNCTION({
             return (0.05 + 0.3 * distmesh::distance_functions::circular(0.5)(points)).eval();
         }), 0.05, bounding_box, fixed_points);
 
