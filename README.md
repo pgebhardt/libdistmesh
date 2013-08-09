@@ -10,6 +10,7 @@ Getting Started
 Simply clone the repository, update submodules and make sure all dependencies are installed.
 For building the project the [SCons](http://www.scons.org/) build system is used:
 
+    git clone https://github.com/schansge/libdistmesh.git
     git submodule update --init
     scons
     scons install
