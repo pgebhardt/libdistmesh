@@ -12,9 +12,7 @@ std::function<distmesh::dtype::array<distmesh::dtype::real>(
     std::function<dtype::array<dtype::real>(dtype::array<dtype::real>&)> function1,
     std::function<dtype::array<dtype::real>(dtype::array<dtype::real>&)> function2) {
     return [=](dtype::array<dtype::real>& points) {
-        dtype::array<dtype::real> result(points.rows(), 1);
-        result = function1(points).max(-function2(points));
-        return result;
+        return function1(points).max(-function2(points)).eval();
     };
 }
 
@@ -32,8 +30,7 @@ std::function<distmesh::dtype::array<distmesh::dtype::real>(
                 .min((points.col(dim) - rectangle(dim, 0)))
                 .min(rectangle(dim, 1) - points.col(dim));
         }
-        result = -result;
-        return result;
+        return (-result).eval();
     };
 }
 
@@ -54,8 +51,6 @@ std::function<distmesh::dtype::array<distmesh::dtype::real>(
         }
 
         // apply circle equation
-        dtype::array<dtype::real> result(points.rows(), 1);
-        result = norm_points.square().rowwise().sum().sqrt() - radius;
-        return result;
+        return (norm_points.square().rowwise().sum().sqrt() - radius).eval();
     };
 }
