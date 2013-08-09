@@ -32,8 +32,7 @@
 // namespace distmesh
 namespace distmesh {
     // apply the distmesh algorithm
-    std::tuple<std::shared_ptr<dtype::array<dtype::real>>,
-        std::shared_ptr<dtype::array<dtype::index>>> distmesh(
+    std::tuple<dtype::array<dtype::real>, dtype::array<dtype::index>> distmesh(
         distance_function::function_t distance_function,
         edge_length_function::function_t edge_length_function,
         dtype::real initial_edge_length,
@@ -41,8 +40,8 @@ namespace distmesh {
         dtype::array<dtype::real> fixed_points=dtype::array<dtype::real>());
 
     // determine boundary edges of given triangulation
-    std::shared_ptr<dtype::array<dtype::index>> boundedges(
-        std::shared_ptr<dtype::array<dtype::index>> triangulation);
+    dtype::array<dtype::index> boundedges(
+        const Eigen::Ref<dtype::array<dtype::index>>& triangulation);
 }
 
 #endif

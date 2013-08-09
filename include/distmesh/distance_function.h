@@ -23,7 +23,7 @@
 
 // macro for easies creation of edge length functions
 #define DISTMESH_DISTANCE_FUNCTION(function_body) \
-    ([=](const Eigen::Ref<distmesh::dtype::array<distmesh::dtype::real>> points) -> \
+    ([=](const Eigen::Ref<distmesh::dtype::array<distmesh::dtype::real>>& points) -> \
     distmesh::dtype::array<distmesh::dtype::real> \
     function_body)
 
@@ -32,7 +32,7 @@ namespace distmesh {
 namespace distance_function {
     // function type for edge length functions
     typedef std::function<dtype::array<dtype::real>(
-        const Eigen::Ref<dtype::array<dtype::real>>)> function_t;
+        const Eigen::Ref<dtype::array<dtype::real>>&)> function_t;
 
     // generate new distance function with difference of two ones
     function_t diff(function_t function1, function_t function2);

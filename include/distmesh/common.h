@@ -23,7 +23,6 @@
 
 // standard c++ includes
 #include <iostream>
-#include <memory>
 #include <functional>
 #include <tuple>
 

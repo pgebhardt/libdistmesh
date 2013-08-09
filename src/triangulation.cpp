@@ -27,19 +27,18 @@ extern "C" {
 #include <qhull/qhull_a.h>
 }
 
-std::shared_ptr<distmesh::dtype::array<distmesh::dtype::index>>
+distmesh::dtype::array<distmesh::dtype::index>
     distmesh::triangulation::delaunay(
-    std::shared_ptr<dtype::array<dtype::real>> points) {
+    const Eigen::Ref<dtype::array<dtype::real>>& points) {
     // convert points array to row major format
     Eigen::Array<dtype::real, Eigen::Dynamic, Eigen::Dynamic,
-        Eigen::RowMajor> points_rowmajor(points->rows(), points->cols());
-    points_rowmajor = *points;
+        Eigen::RowMajor> points_rowmajor = points;
 
     // set flags for qhull
     std::string flags = "qhull d Qt Qbb Qc Qz";
 
     // calculate delaunay triangulation
-    qh_new_qhull(points->cols(), points->rows(), points_rowmajor.data(), False,
+    qh_new_qhull(points.cols(), points.rows(), points_rowmajor.data(), False,
         (char*)flags.c_str(), nullptr, stderr);
     qh_triangulate();
 
@@ -53,8 +52,7 @@ std::shared_ptr<distmesh::dtype::array<distmesh::dtype::index>>
     }
 
     // extract point ids from delaunay triangulation
-    auto triangulation = std::make_shared<dtype::array<dtype::index>>(
-        facet_count, points->cols() + 1);
+    dtype::array<dtype::index> triangulation(facet_count, points.cols() + 1);
     dtype::index facet_id = 0;
     dtype::index vertex_id = 0;
     vertexT* vertex, **vertexp;
@@ -64,7 +62,7 @@ std::shared_ptr<distmesh::dtype::array<distmesh::dtype::index>>
         if (!facet->upperdelaunay) {
             qh_setsize(facet->vertices);
             FOREACHvertex_(facet->vertices) {
-                (*triangulation)(facet_id, vertex_id) = qh_pointid(vertex->point);
+                triangulation(facet_id, vertex_id) = qh_pointid(vertex->point);
                 vertex_id++;
             }
             facet_id++;

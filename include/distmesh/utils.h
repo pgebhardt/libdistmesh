@@ -29,8 +29,8 @@ namespace utils {
         class type
     >
     dtype::array<type> select_masked_array_elements(
-        const Eigen::Ref<dtype::array<type>> array,
-        const Eigen::Ref<dtype::array<bool>> mask) {
+        const Eigen::Ref<dtype::array<type>>& array,
+        const Eigen::Ref<dtype::array<bool>>& mask) {
         dtype::array<type> result(array.rows(), array.cols());
         dtype::index result_count = 0;
         for (dtype::index row = 0; row < array.rows(); ++row) {
@@ -49,8 +49,8 @@ namespace utils {
         class type
     >
     dtype::array<type> select_indiced_array_elements(
-        const Eigen::Ref<dtype::array<type>> array,
-        const Eigen::Ref<dtype::array<dtype::index>> indices) {
+        const Eigen::Ref<dtype::array<type>>& array,
+        const Eigen::Ref<dtype::array<dtype::index>>& indices) {
         dtype::array<type> result(indices.rows(), array.cols());
         for (dtype::index row = 0; row < indices.rows(); ++row) {
             result.row(row) = array.row(indices(row, 0));
@@ -61,7 +61,7 @@ namespace utils {
 
 
     // create point list
-    std::shared_ptr<dtype::array<dtype::real>> create_point_list(
+    dtype::array<dtype::real> create_point_list(
         distance_function::function_t distance_function,
         edge_length_function::function_t edge_length_function,
         dtype::real initial_edge_length,
@@ -69,15 +69,15 @@ namespace utils {
         dtype::array<dtype::real> fixed_points);
 
     // find unique bars
-    std::shared_ptr<dtype::array<dtype::index>> find_unique_bars(
-        std::shared_ptr<dtype::array<dtype::real>> points,
-        std::shared_ptr<dtype::array<dtype::index>> triangulation);
+    dtype::array<dtype::index> find_unique_bars(
+        const Eigen::Ref<dtype::array<dtype::real>>& points,
+        const Eigen::Ref<dtype::array<dtype::index>>& triangulation);
 
     // project points outside of boundary back to it
     void project_points_to_function(
         distance_function::function_t distance_function,
         dtype::real initial_edge_length,
-        std::shared_ptr<dtype::array<dtype::real>> points);
+        Eigen::Ref<dtype::array<dtype::real>> points);
 }
 }
 

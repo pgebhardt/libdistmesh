@@ -24,97 +24,90 @@
 #include <algorithm>
 
 // apply the distmesh algorithm
-std::tuple<std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>,
-    std::shared_ptr<distmesh::dtype::array<distmesh::dtype::index>>>
-    distmesh::distmesh(
+std::tuple<distmesh::dtype::array<distmesh::dtype::real>,
+    distmesh::dtype::array<distmesh::dtype::index>> distmesh::distmesh(
     distance_function::function_t distance_function,
     edge_length_function::function_t edge_length_function,
     dtype::real initial_edge_length,
     dtype::array<dtype::real> bounding_box,
     dtype::array<dtype::real> fixed_points) {
     // create initial distribution in bounding_box
-    auto points = utils::create_point_list(distance_function,
-        edge_length_function, initial_edge_length, bounding_box,
-        fixed_points);
+    dtype::array<dtype::real> points = utils::create_point_list(distance_function,
+        edge_length_function, initial_edge_length, bounding_box, fixed_points);
 
     // create initial triangulation
-    auto triangulation = triangulation::delaunay(points);
+    dtype::array<dtype::index> triangulation = triangulation::delaunay(points);
 
     // create points buffer for retriangulation and stop criterion
     dtype::array<dtype::real> buffer_retriangulation_criterion(
-        points->rows(), points->cols());
+        points.rows(), points.cols());
     dtype::array<dtype::real> buffer_stop_criterion;
     buffer_retriangulation_criterion.fill(INFINITY);
 
     // main distmesh loop
-    std::shared_ptr<dtype::array<dtype::index>> bar_indices = nullptr;
+    dtype::array<dtype::index> bar_indices;
     for (dtype::index step = 0; step < settings::max_steps; ++step) {
         // retriangulate if point movement is above tolerance
-        auto retriangulation_criterion =
-            (((*points) - buffer_retriangulation_criterion).square().rowwise().sum().sqrt() /
+        dtype::real retriangulation_criterion =
+            ((points - buffer_retriangulation_criterion).square().rowwise().sum().sqrt() /
             initial_edge_length).maxCoeff();
         if (retriangulation_criterion > settings::retriangulation_tolerance) {
             // update triangulation
             triangulation = triangulation::delaunay(points);
 
             // calculate circumcenter
-            dtype::array<dtype::real> circumcenter(triangulation->rows(), points->cols());
+            dtype::array<dtype::real> circumcenter(triangulation.rows(), points.cols());
             circumcenter.fill(0.0);
-            for (dtype::index point = 0; point < triangulation->cols(); ++point) {
+            for (dtype::index point = 0; point < triangulation.cols(); ++point) {
                 circumcenter += utils::select_indiced_array_elements<dtype::real>(
-                    *points, triangulation->col(point)) / triangulation->cols();
+                    points, triangulation.col(point)) / triangulation.cols();
             }
 
             // reject triangles with circumcenter outside of the region
             dtype::array<bool> circumcenter_criterion =
                 distance_function(circumcenter) < -settings::general_precision * initial_edge_length;
-            *triangulation = utils::select_masked_array_elements<dtype::index>(*triangulation,
+            triangulation = utils::select_masked_array_elements<dtype::index>(triangulation,
                 circumcenter_criterion);
 
             // find unique bar indices
             bar_indices = utils::find_unique_bars(points, triangulation);
 
-            buffer_retriangulation_criterion = *points;
+            buffer_retriangulation_criterion = points;
         }
 
-        // calculate bar vector
+        // calculate bar vectors and their length
         dtype::array<dtype::real> bar_vector =
-            utils::select_indiced_array_elements<dtype::real>(*points, bar_indices->col(0)) -
-            utils::select_indiced_array_elements<dtype::real>(*points, bar_indices->col(1));
-
-        // calculate length of each bar
-        dtype::array<dtype::real> bar_length(bar_indices->rows(), 1);
-        bar_length = bar_vector.square().rowwise().sum().sqrt();
+            utils::select_indiced_array_elements<dtype::real>(points, bar_indices.col(0)) -
+            utils::select_indiced_array_elements<dtype::real>(points, bar_indices.col(1));
+        dtype::array<dtype::real> bar_length = bar_vector.square().rowwise().sum().sqrt();
 
         // evaluate edge_length_function
         dtype::array<dtype::real> bar_midpoints = 0.5 *
-            (utils::select_indiced_array_elements<dtype::real>(*points, bar_indices->col(0)) +
-            utils::select_indiced_array_elements<dtype::real>(*points, bar_indices->col(1)));
+            (utils::select_indiced_array_elements<dtype::real>(points, bar_indices.col(0)) +
+            utils::select_indiced_array_elements<dtype::real>(points, bar_indices.col(1)));
         dtype::array<dtype::real> hbars = edge_length_function(bar_midpoints);
 
         // calculate desired bar length
         dtype::array<dtype::real> desired_bar_length(bar_length.rows(), bar_length.cols());
-        desired_bar_length = hbars * (1.0 + 0.4 / std::pow(2.0, points->cols() - 1)) *
-            std::pow((bar_length.pow(points->cols()).sum() / hbars.pow(points->cols()).sum()), 1.0 / points->cols());
+        desired_bar_length = hbars * (1.0 + 0.4 / std::pow(2.0, points.cols() - 1)) *
+            std::pow((bar_length.pow(points.cols()).sum() / hbars.pow(points.cols()).sum()), 1.0 / points.cols());
 
         // calculate force vector for each bar
         dtype::array<dtype::real> force =
             ((desired_bar_length - bar_length) / bar_length).max(0.0);
-        dtype::array<dtype::real> force_vector(bar_indices->rows(), points->cols());
-        for (dtype::index dim = 0; dim < points->cols(); ++dim) {
+        dtype::array<dtype::real> force_vector(bar_indices.rows(), points.cols());
+        for (dtype::index dim = 0; dim < points.cols(); ++dim) {
             force_vector.col(dim) = force * bar_vector.col(dim);
         }
 
         // move points
-        buffer_stop_criterion = *points;
-        for (dtype::index bar = 0; bar < bar_indices->rows(); ++bar) {
-            if ((*bar_indices)(bar, 0) >= fixed_points.rows()) {
-                points->row((*bar_indices)(bar, 0)) += settings::deltaT *
-                    force_vector.row(bar);
+        buffer_stop_criterion = points;
+        for (dtype::index bar = 0; bar < bar_indices.rows(); ++bar) {
+            if (bar_indices(bar, 0) >= fixed_points.rows()) {
+                points.row(bar_indices(bar, 0)) += settings::deltaT * force_vector.row(bar);
             }
-            if ((*bar_indices)(bar, 1) >= fixed_points.rows()) {
-                points->row((*bar_indices)(bar, 1)) -= settings::deltaT *
-                    force_vector.row(bar);
+            if (bar_indices(bar, 1) >= fixed_points.rows()) {
+                points.row(bar_indices(bar, 1)) -= settings::deltaT * force_vector.row(bar);
             }
         }
 
@@ -123,7 +116,7 @@ std::tuple<std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>,
             initial_edge_length, points);
 
         // stop criterion
-        auto stop_criterion = ((*points - buffer_stop_criterion).square().rowwise().sum().sqrt() / initial_edge_length).maxCoeff();
+        auto stop_criterion = ((points - buffer_stop_criterion).square().rowwise().sum().sqrt() / initial_edge_length).maxCoeff();
         if (stop_criterion < settings::point_movement_tolerance) {
             break;
         }
@@ -133,19 +126,18 @@ std::tuple<std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>,
 }
 
 // determine boundary edges of given triangulation
-std::shared_ptr<distmesh::dtype::array<distmesh::dtype::index>>
-    distmesh::boundedges(
-    std::shared_ptr<dtype::array<dtype::index>> triangulation) {
+distmesh::dtype::array<distmesh::dtype::index> distmesh::boundedges(
+    const Eigen::Ref<dtype::array<dtype::index>>& triangulation) {
     std::set<std::vector<dtype::index>> edge_set;
     std::vector<std::vector<dtype::index>> boundary_edges;
-    std::vector<dtype::index> facet(triangulation->cols());
-    std::vector<dtype::index> edge(triangulation->cols() - 1);
+    std::vector<dtype::index> facet(triangulation.cols());
+    std::vector<dtype::index> edge(triangulation.cols() - 1);
 
     // find edges, which only appear once in triangulation
-    for (dtype::index triangle = 0; triangle < triangulation->rows(); ++triangle) {
+    for (dtype::index triangle = 0; triangle < triangulation.rows(); ++triangle) {
         // get current facet
-        for (dtype::index vertex = 0; vertex < triangulation->cols(); ++vertex) {
-            facet[vertex] = (*triangulation)(triangle, vertex);
+        for (dtype::index vertex = 0; vertex < triangulation.cols(); ++vertex) {
+            facet[vertex] = triangulation(triangle, vertex);
         }
         std::sort(facet.begin(), facet.end());
 
@@ -154,7 +146,7 @@ std::shared_ptr<distmesh::dtype::array<distmesh::dtype::index>>
         do {
             // use the first vertices of facet as edge and skip permutation,
             // which was already handled
-            for (dtype::index vertex = 0; vertex < triangulation->cols() - 1; ++vertex) {
+            for (dtype::index vertex = 0; vertex < triangulation.cols() - 1; ++vertex) {
                 edge[vertex] = facet[vertex];
             }
             std::sort(edge.begin(), edge.end());
@@ -177,11 +169,10 @@ std::shared_ptr<distmesh::dtype::array<distmesh::dtype::index>>
     }
 
     // convert stl vector to eigen array
-    auto boundary_array = std::make_shared<dtype::array<dtype::index>>(
-        boundary_edges.size(), edge.size());
-    for (dtype::index edge = 0; edge < boundary_array->rows(); ++edge)
-    for (dtype::index vertex = 0; vertex < boundary_array->cols(); ++vertex) {
-        (*boundary_array)(edge, vertex) = boundary_edges[edge][vertex];
+    dtype::array<dtype::index> boundary_array(boundary_edges.size(), edge.size());
+    for (dtype::index edge = 0; edge < boundary_array.rows(); ++edge)
+    for (dtype::index vertex = 0; vertex < boundary_array.cols(); ++vertex) {
+        boundary_array(edge, vertex) = boundary_edges[edge][vertex];
     }
 
     return boundary_array;
