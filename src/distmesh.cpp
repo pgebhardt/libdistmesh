@@ -27,20 +27,23 @@
 std::tuple<std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>,
     std::shared_ptr<distmesh::dtype::array<distmesh::dtype::index>>>
     distmesh::distmesh(
-    std::function<dtype::array<dtype::real>(dtype::array<dtype::real>&)> distance_function,
-    std::function<dtype::array<dtype::real>(dtype::array<dtype::real>&)> edge_length_function,
-    dtype::real initial_edge_length, dtype::array<dtype::real> bounding_box,
+    distance_function::function_t distance_function,
+    edge_length_function::function_t edge_length_function,
+    dtype::real initial_edge_length,
+    dtype::array<dtype::real> bounding_box,
     dtype::array<dtype::real> fixed_points) {
     // create initial distribution in bounding_box
-    auto points = utils::create_point_list(distance_function, edge_length_function,
-        initial_edge_length, bounding_box, fixed_points);
+    auto points = utils::create_point_list(distance_function,
+        edge_length_function, initial_edge_length, bounding_box,
+        fixed_points);
 
     // create initial triangulation
     auto triangulation = triangulation::delaunay(points);
 
     // create points buffer for retriangulation and stop criterion
-    dtype::array<dtype::real> buffer_retriangulation_criterion(points->rows(), points->cols());
-    dtype::array<dtype::real> buffer_stop_criterion(points->rows(), points->cols());
+    dtype::array<dtype::real> buffer_retriangulation_criterion(
+        points->rows(), points->cols());
+    dtype::array<dtype::real> buffer_stop_criterion;
     buffer_retriangulation_criterion.fill(INFINITY);
 
     // main distmesh loop

@@ -18,24 +18,28 @@
 // Contact: patrik.gebhardt@rub.de
 // --------------------------------------------------------------------
 
-#ifndef LIBDISTMESH_INCLUDE_DISTANCE_FUNCTIONS_H
-#define LIBDISTMESH_INCLUDE_DISTANCE_FUNCTIONS_H
+#ifndef LIBDISTMESH_INCLUDE_DISTANCE_FUNCTION_H
+#define LIBDISTMESH_INCLUDE_DISTANCE_FUNCTION_H
 
-// namespace distmesh::distance_functions
+// macro for easies creation of edge length functions
+#define LIBDISTMESH_DISTANCE_FUNCTION(x) \
+    ([=](const Eigen::Ref<distmesh::dtype::array<distmesh::dtype::real>> points) x)
+
+// namespace distmesh::distance_function
 namespace distmesh {
-namespace distance_functions {
+namespace distance_function {
+    // function type for edge length functions
+    typedef std::function<dtype::array<dtype::real>(
+        const Eigen::Ref<dtype::array<dtype::real>>)> function_t;
+
     // generate new distance function with difference of two ones
-    std::function<dtype::array<dtype::real>(dtype::array<dtype::real>&)> diff(
-        std::function<dtype::array<dtype::real>(dtype::array<dtype::real>&)> function1,
-        std::function<dtype::array<dtype::real>(dtype::array<dtype::real>&)> function2);
+    function_t diff(function_t function1, function_t function2);
 
     // creates distance function of rectangular domain
-    std::function<dtype::array<dtype::real>(dtype::array<dtype::real>&)> rectangular(
-        dtype::array<dtype::real> rectangle);
+    function_t rectangular(dtype::array<dtype::real> rectangle);
 
     // creates distance function for circular domains
-    std::function<dtype::array<dtype::real>(dtype::array<dtype::real>&)> circular(
-        dtype::real radius=1.0,
+    function_t circular(dtype::real radius=1.0,
         dtype::array<dtype::real> midpoint=dtype::array<dtype::real>());
 }
 }

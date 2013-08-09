@@ -30,8 +30,8 @@ int main() {
 
     // create mesh
     auto mesh = distmesh::distmesh(
-        distmesh::distance_functions::circular(1.0),
-        distmesh::edge_length_functions::uniform(),
+        distmesh::distance_function::circular(1.0),
+        distmesh::edge_length_function::uniform(),
         0.2, bounding_box);
 
     return 0;
@@ -54,11 +54,11 @@ int main() {
     // create mesh
     auto mesh = distmesh::distmesh(
         distmesh::distance_functions::diff(
-            distmesh::distance_functions::rectangular(bounding_box),
-            distmesh::distance_functions::circular(0.5)),
-        [](distmesh::dtype::array<distmesh::dtype::real>& points) {
+            distmesh::distance_function::rectangular(bounding_box),
+            distmesh::distance_function::circular(0.5)),
+        LIBDISTMESH_EDGE_LENGTH_FUNCTION({
             return (0.05 + 0.3 * distmesh::distance_functions::circular(0.5)(points)).eval();
-        }, 0.05, bounding_box, fixed_points);
+        }), 0.05, bounding_box, fixed_points);
 
     return 0;
 }

@@ -28,20 +28,24 @@
 // create point list
 std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>
     distmesh::utils::create_point_list(
-    std::function<dtype::array<dtype::real>(dtype::array<dtype::real>&)> distance_function,
-    std::function<dtype::array<dtype::real>(dtype::array<dtype::real>&)> edge_length_function,
-    dtype::real initial_edge_length, dtype::array<dtype::real> bounding_box,
+    distance_function::function_t distance_function,
+    edge_length_function::function_t edge_length_function,
+    dtype::real initial_edge_length,
+    dtype::array<dtype::real> bounding_box,
     dtype::array<dtype::real> fixed_points) {
-    // calculate max number of points per dimension and max total point count
-    // and create initial array
-    dtype::array<dtype::index> max_points_per_dimension(bounding_box.rows(), 1);
+    // calculate max number of points per dimension and
+    // max total point coun and create initial array
+    dtype::array<dtype::index> max_points_per_dimension(
+        bounding_box.rows(), 1);
     dtype::index max_point_count = 1;
     for (dtype::index dim = 0; dim < bounding_box.rows(); ++dim) {
         max_points_per_dimension(dim, 0) = 1 +
-            (bounding_box(dim, 1) - bounding_box(dim, 0)) / initial_edge_length;
+            (bounding_box(dim, 1) - bounding_box(dim, 0)) /
+            initial_edge_length;
         max_point_count *= max_points_per_dimension(dim, 0);
     }
-    dtype::array<dtype::real> initial_points(max_point_count, bounding_box.rows());
+    dtype::array<dtype::real> initial_points(
+        max_point_count, bounding_box.rows());
 
     // fill point list with evenly distributed points
     dtype::index same_value_count = 1;
@@ -136,8 +140,9 @@ std::shared_ptr<distmesh::dtype::array<distmesh::dtype::index>>
 
 // project points outside of boundary back to it
 void distmesh::utils::project_points_to_function(
-    std::function<dtype::array<dtype::real>(dtype::array<dtype::real>&)> distance_function,
-    dtype::real initial_edge_length, std::shared_ptr<dtype::array<dtype::real>> points) {
+    distance_function::function_t distance_function,
+    dtype::real initial_edge_length,
+    std::shared_ptr<dtype::array<dtype::real>> points) {
     // evaluate distance function at points
     dtype::array<dtype::real> distance(points->rows(), 1);
     distance = distance_function(*points);

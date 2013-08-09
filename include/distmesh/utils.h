@@ -26,9 +26,10 @@ namespace distmesh {
 namespace utils {
     // create point list
     std::shared_ptr<dtype::array<dtype::real>> create_point_list(
-        std::function<dtype::array<dtype::real>(dtype::array<dtype::real>&)> distance_function,
-        std::function<dtype::array<dtype::real>(dtype::array<dtype::real>&)> edge_length_function,
-        dtype::real initial_edge_length, dtype::array<dtype::real> bounding_box,
+        distance_function::function_t distance_function,
+        edge_length_function::function_t edge_length_function,
+        dtype::real initial_edge_length,
+        dtype::array<dtype::real> bounding_box,
         dtype::array<dtype::real> fixed_points);
 
     // find unique bars
@@ -38,8 +39,9 @@ namespace utils {
 
     // project points outside of boundary back to it
     void project_points_to_function(
-        std::function<dtype::array<dtype::real>(dtype::array<dtype::real>&)> distance_function,
-        dtype::real initial_edge_length, std::shared_ptr<dtype::array<dtype::real>> points);
+        distance_function::function_t distance_function,
+        dtype::real initial_edge_length,
+        std::shared_ptr<dtype::array<dtype::real>> points);
 }
 }
 

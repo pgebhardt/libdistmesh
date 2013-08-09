@@ -21,22 +21,19 @@
 #include "distmesh/distmesh.h"
 
 // generate new distance function with difference of two ones
-std::function<distmesh::dtype::array<distmesh::dtype::real>(
-    distmesh::dtype::array<distmesh::dtype::real>&)>
-    distmesh::distance_functions::diff(
-    std::function<dtype::array<dtype::real>(dtype::array<dtype::real>&)> function1,
-    std::function<dtype::array<dtype::real>(dtype::array<dtype::real>&)> function2) {
-    return [=](dtype::array<dtype::real>& points) {
+distmesh::distance_function::function_t
+    distmesh::distance_function::diff(function_t function1,
+    function_t function2) {
+    return LIBDISTMESH_DISTANCE_FUNCTION({
         return function1(points).max(-function2(points)).eval();
-    };
+    });
 }
 
 // creates distance function of rectangular domain
-std::function<distmesh::dtype::array<distmesh::dtype::real>(
-    distmesh::dtype::array<distmesh::dtype::real>&)>
-    distmesh::distance_functions::rectangular(
+distmesh::distance_function::function_t
+    distmesh::distance_function::rectangular(
     dtype::array<dtype::real> rectangle) {
-    return [=](dtype::array<dtype::real>& points) {
+    return LIBDISTMESH_DISTANCE_FUNCTION({
         dtype::array<dtype::real> result(points.rows(), 1);
         result = (points.col(0) - rectangle(0, 0))
             .min(rectangle(0, 1) - points.col(0));
@@ -46,17 +43,16 @@ std::function<distmesh::dtype::array<distmesh::dtype::real>(
                 .min(rectangle(dim, 1) - points.col(dim));
         }
         return (-result).eval();
-    };
+    });
 }
 
 // creates distance function for circular domains
-std::function<distmesh::dtype::array<distmesh::dtype::real>(
-    distmesh::dtype::array<distmesh::dtype::real>&)>
-    distmesh::distance_functions::circular(
+distmesh::distance_function::function_t
+    distmesh::distance_function::circular(
     dtype::real radius, dtype::array<dtype::real> midpoint) {
-    return [=](dtype::array<dtype::real>& points) {
+    return LIBDISTMESH_DISTANCE_FUNCTION({
         // move points towards midpoint
-        dtype::array<dtype::real> norm_points(points.rows(), points.cols());
+        dtype::array<dtype::real> norm_points;
         if (midpoint.cols() == points.cols()) {
             norm_points = points.rowwise() - midpoint.row(0);
         } else {
@@ -64,6 +60,7 @@ std::function<distmesh::dtype::array<distmesh::dtype::real>(
         }
 
         // apply circle equation
-        return (norm_points.square().rowwise().sum().sqrt() - radius).eval();
-    };
+        return (norm_points.square().rowwise().sum().sqrt() - radius)
+            .eval();
+    });
 }

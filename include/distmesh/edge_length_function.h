@@ -18,13 +18,23 @@
 // Contact: patrik.gebhardt@rub.de
 // --------------------------------------------------------------------
 
-#include "distmesh/distmesh.h"
+#ifndef LIBDISTMESH_INCLUDE_EDGE_LENGTH_FUNCTION_H
+#define LIBDISTMESH_INCLUDE_EDGE_LENGTH_FUNCTION_H
 
-// uniform edge length
-std::function<distmesh::dtype::array<distmesh::dtype::real>(
-    distmesh::dtype::array<distmesh::dtype::real>&)>
-    distmesh::edge_length_functions::uniform() {
-    return [=](dtype::array<dtype::real>& points) {
-        return dtype::array<dtype::real>::Ones(points.rows(), 1).eval();
-    };
+// macro for easies creation of edge length functions
+#define LIBDISTMESH_EDGE_LENGTH_FUNCTION(x) \
+    ([=](const Eigen::Ref<distmesh::dtype::array<distmesh::dtype::real>> points) x)
+
+// namespace distmesh::edge_length_function
+namespace distmesh {
+namespace edge_length_function {
+    // function type for edge length functions
+    typedef std::function<dtype::array<dtype::real>(
+        const Eigen::Ref<dtype::array<dtype::real>>)> function_t;
+
+    // uniform edge length
+    function_t uniform();
 }
+}
+
+#endif
