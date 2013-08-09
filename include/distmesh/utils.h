@@ -24,6 +24,42 @@
 // namespace distmesh::utils
 namespace distmesh {
 namespace utils {
+    // select array elements based on mask
+    template <
+        class type
+    >
+    dtype::array<type> select_masked_array_elements(
+        const Eigen::Ref<dtype::array<type>> array,
+        const Eigen::Ref<dtype::array<bool>> mask) {
+        dtype::array<type> result(array.rows(), array.cols());
+        dtype::index result_count = 0;
+        for (dtype::index row = 0; row < array.rows(); ++row) {
+            if (mask(row, 0)) {
+                result.row(result_count) = array.row(row);
+                result_count++;
+            }
+        }
+        result.conservativeResize(result_count, array.cols());
+
+        return result;
+    }
+
+    // select array elements based on indices
+    template <
+        class type
+    >
+    dtype::array<type> select_indiced_array_elements(
+        const Eigen::Ref<dtype::array<type>> array,
+        const Eigen::Ref<dtype::array<dtype::index>> indices) {
+        dtype::array<type> result(indices.rows(), array.cols());
+        for (dtype::index row = 0; row < indices.rows(); ++row) {
+            result.row(row) = array.row(indices(row, 0));
+        }
+
+        return result;
+    }
+
+
     // create point list
     std::shared_ptr<dtype::array<dtype::real>> create_point_list(
         distance_function::function_t distance_function,

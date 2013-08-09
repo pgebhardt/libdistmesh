@@ -59,17 +59,9 @@ std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>
     }
 
     // reject points outside of region defined by distance_function
-    dtype::index inside_point_count = 0;
-    dtype::array<dtype::real> inside_points(max_point_count, bounding_box.rows());
-    dtype::array<dtype::real> distance(max_point_count, 1);
-    distance = distance_function(initial_points);
-    for (dtype::index point = 0; point < initial_points.rows(); ++point) {
-        if (distance(point, 0) < settings::general_precision * initial_edge_length) {
-            inside_points.row(inside_point_count) = initial_points.row(point);
-            inside_point_count++;
-        }
-    }
-    inside_points.conservativeResize(inside_point_count, inside_points.cols());
+    dtype::array<bool> inside = distance_function(initial_points) < settings::general_precision * initial_edge_length;
+    dtype::array<dtype::real> inside_points = select_masked_array_elements<dtype::real>(
+        initial_points, inside);
 
     // initialize random number generator
     auto seed = std::chrono::system_clock::now().time_since_epoch().count();
@@ -78,12 +70,11 @@ std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>
 
     // calculate propability to keep point in point list based on
     // edge_length_function
-    dtype::array<dtype::real> propability(inside_point_count, 1);
-    propability = edge_length_function(inside_points);
+    dtype::array<dtype::real> propability = edge_length_function(inside_points);
 
     // add fixed points to final list first
     auto final_points = std::make_shared<dtype::array<dtype::real>>(
-        inside_point_count + fixed_points.rows(), bounding_box.rows());
+        inside_points.rows() + fixed_points.rows(), bounding_box.rows());
     for (dtype::index fixed_point = 0; fixed_point < fixed_points.rows(); ++fixed_point) {
         final_points->row(fixed_point) = fixed_points.row(fixed_point);
     }

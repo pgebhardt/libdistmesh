@@ -60,25 +60,16 @@ std::tuple<std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>,
             // calculate circumcenter
             dtype::array<dtype::real> circumcenter(triangulation->rows(), points->cols());
             circumcenter.fill(0.0);
-            for (dtype::index triangle = 0; triangle < triangulation->rows(); ++triangle)
             for (dtype::index point = 0; point < triangulation->cols(); ++point) {
-                circumcenter.row(triangle) += points->row((*triangulation)(triangle, point)) / triangulation->cols();
+                circumcenter += utils::select_indiced_array_elements<dtype::real>(
+                    *points, triangulation->col(point)) / triangulation->cols();
             }
 
             // reject triangles with circumcenter outside of the region
-            dtype::index triangle_count = 0;
-            dtype::array<dtype::index> keep_triangulation(triangulation->rows(), triangulation->cols());
-            dtype::array<dtype::real> circumcenter_distance(triangulation->rows(), points->cols());
-            circumcenter_distance = distance_function(circumcenter);
-
-            for (dtype::index triangle = 0; triangle < triangulation->rows(); ++triangle) {
-                if (circumcenter_distance(triangle, 0) < -settings::general_precision * initial_edge_length) {
-                    keep_triangulation.row(triangle_count) = triangulation->row(triangle);
-                    triangle_count++;
-                }
-            }
-            *triangulation = keep_triangulation;
-            triangulation->conservativeResize(triangle_count, triangulation->cols());
+            dtype::array<bool> circumcenter_criterion =
+                distance_function(circumcenter) < -settings::general_precision * initial_edge_length;
+            *triangulation = utils::select_masked_array_elements<dtype::index>(*triangulation,
+                circumcenter_criterion);
 
             // find unique bar indices
             bar_indices = utils::find_unique_bars(points, triangulation);
@@ -87,25 +78,19 @@ std::tuple<std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>,
         }
 
         // calculate bar vector
-        dtype::array<dtype::real> bar_vector(bar_indices->rows(), points->cols());
-        bar_vector.fill(0.0);
-        for (dtype::index bar = 0; bar < bar_indices->rows(); ++bar) {
-            bar_vector.row(bar) += points->row((*bar_indices)(bar, 0)) -
-                points->row((*bar_indices)(bar, 1));
-        }
+        dtype::array<dtype::real> bar_vector =
+            utils::select_indiced_array_elements<dtype::real>(*points, bar_indices->col(0)) -
+            utils::select_indiced_array_elements<dtype::real>(*points, bar_indices->col(1));
 
         // calculate length of each bar
         dtype::array<dtype::real> bar_length(bar_indices->rows(), 1);
         bar_length = bar_vector.square().rowwise().sum().sqrt();
 
         // evaluate edge_length_function
-        dtype::array<dtype::real> hbars(bar_indices->rows(), 1);
-        dtype::array<dtype::real> bar_midpoints(bar_indices->rows(), points->cols());
-        for (dtype::index bar = 0; bar < bar_indices->rows(); ++bar) {
-            bar_midpoints.row(bar) = 0.5 * (points->row((*bar_indices)(bar, 0)) +
-                points->row((*bar_indices)(bar, 1)));
-        }
-        hbars = edge_length_function(bar_midpoints);
+        dtype::array<dtype::real> bar_midpoints = 0.5 *
+            (utils::select_indiced_array_elements<dtype::real>(*points, bar_indices->col(0)) +
+            utils::select_indiced_array_elements<dtype::real>(*points, bar_indices->col(1)));
+        dtype::array<dtype::real> hbars = edge_length_function(bar_midpoints);
 
         // calculate desired bar length
         dtype::array<dtype::real> desired_bar_length(bar_length.rows(), bar_length.cols());
@@ -113,9 +98,9 @@ std::tuple<std::shared_ptr<distmesh::dtype::array<distmesh::dtype::real>>,
             std::pow((bar_length.pow(points->cols()).sum() / hbars.pow(points->cols()).sum()), 1.0 / points->cols());
 
         // calculate force vector for each bar
-        dtype::array<dtype::real> force(bar_indices->rows(), 1);
+        dtype::array<dtype::real> force =
+            ((desired_bar_length - bar_length) / bar_length).max(0.0);
         dtype::array<dtype::real> force_vector(bar_indices->rows(), points->cols());
-        force = ((desired_bar_length - bar_length) / bar_length).max(0.0);
         for (dtype::index dim = 0; dim < points->cols(); ++dim) {
             force_vector.col(dim) = force * bar_vector.col(dim);
         }
