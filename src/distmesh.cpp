@@ -59,7 +59,7 @@ std::tuple<distmesh::dtype::array<distmesh::dtype::real>,
             dtype::array<dtype::real> circumcenter(triangulation.rows(), points.cols());
             circumcenter.fill(0.0);
             for (dtype::index point = 0; point < triangulation.cols(); ++point) {
-                circumcenter += utils::select_indiced_array_elements<dtype::real>(
+                circumcenter += utils::select_indexed_array_elements<dtype::real>(
                     points, triangulation.col(point)) / triangulation.cols();
             }
 
@@ -77,14 +77,14 @@ std::tuple<distmesh::dtype::array<distmesh::dtype::real>,
 
         // calculate bar vectors and their length
         dtype::array<dtype::real> bar_vector =
-            utils::select_indiced_array_elements<dtype::real>(points, bar_indices.col(0)) -
-            utils::select_indiced_array_elements<dtype::real>(points, bar_indices.col(1));
+            utils::select_indexed_array_elements<dtype::real>(points, bar_indices.col(0)) -
+            utils::select_indexed_array_elements<dtype::real>(points, bar_indices.col(1));
         dtype::array<dtype::real> bar_length = bar_vector.square().rowwise().sum().sqrt();
 
         // evaluate edge_length_function
         dtype::array<dtype::real> bar_midpoints = 0.5 *
-            (utils::select_indiced_array_elements<dtype::real>(points, bar_indices.col(0)) +
-            utils::select_indiced_array_elements<dtype::real>(points, bar_indices.col(1)));
+            (utils::select_indexed_array_elements<dtype::real>(points, bar_indices.col(0)) +
+            utils::select_indexed_array_elements<dtype::real>(points, bar_indices.col(1)));
         dtype::array<dtype::real> hbars = edge_length_function(bar_midpoints);
 
         // calculate desired bar length

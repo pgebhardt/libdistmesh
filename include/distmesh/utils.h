@@ -48,7 +48,7 @@ namespace utils {
     template <
         class type
     >
-    dtype::array<type> select_indiced_array_elements(
+    dtype::array<type> select_indexed_array_elements(
         const Eigen::Ref<dtype::array<type>>& array,
         const Eigen::Ref<dtype::array<dtype::index>>& indices) {
         dtype::array<type> result(indices.rows(), array.cols());
