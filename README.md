@@ -71,8 +71,8 @@ libDistMesh uses some C++11 features and compiles properly with both clang
 and gcc. For linear algebra operations and the delaunay triangulation two
 libraries are needed for building and using libDistMesh:
 
-* [Eigen](http://eigen.tuxfamily.org/)
-* [QHull](http://www.qhull.org/) (building only)
+* [Eigen](http://eigen.tuxfamily.org/) 3.2.0
+* [QHull](http://www.qhull.org/) 2012.1 (building only)
 
 References
 ----------
