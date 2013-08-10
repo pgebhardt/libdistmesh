@@ -56,16 +56,16 @@ std::tuple<distmesh::dtype::array<distmesh::dtype::real>,
             triangulation = triangulation::delaunay(points);
 
             // calculate circumcenter
-            dtype::array<dtype::real> circumcenter(triangulation.rows(), points.cols());
-            circumcenter.fill(0.0);
+            dtype::array<dtype::real> circumcenter = dtype::array<dtype::real>::Zero(
+                triangulation.rows(), points.cols());
             for (dtype::index point = 0; point < triangulation.cols(); ++point) {
                 circumcenter += utils::select_indexed_array_elements<dtype::real>(
                     points, triangulation.col(point)) / triangulation.cols();
             }
 
             // reject triangles with circumcenter outside of the region
-            dtype::array<bool> circumcenter_criterion =
-                distance_function(circumcenter) < -settings::general_precision * initial_edge_length;
+            dtype::array<bool> circumcenter_criterion = distance_function(circumcenter) <
+                -settings::general_precision * initial_edge_length;
             triangulation = utils::select_masked_array_elements<dtype::index>(triangulation,
                 circumcenter_criterion);
 
@@ -81,20 +81,21 @@ std::tuple<distmesh::dtype::array<distmesh::dtype::real>,
             utils::select_indexed_array_elements<dtype::real>(points, bar_indices.col(1));
         dtype::array<dtype::real> bar_length = bar_vector.square().rowwise().sum().sqrt();
 
-        // evaluate edge_length_function
+        // evaluate edge_length_function at midpoints of bars
         dtype::array<dtype::real> bar_midpoints = 0.5 *
             (utils::select_indexed_array_elements<dtype::real>(points, bar_indices.col(0)) +
             utils::select_indexed_array_elements<dtype::real>(points, bar_indices.col(1)));
         dtype::array<dtype::real> hbars = edge_length_function(bar_midpoints);
 
         // calculate desired bar length
-        dtype::array<dtype::real> desired_bar_length(bar_length.rows(), bar_length.cols());
-        desired_bar_length = hbars * (1.0 + 0.4 / std::pow(2.0, points.cols() - 1)) *
-            std::pow((bar_length.pow(points.cols()).sum() / hbars.pow(points.cols()).sum()), 1.0 / points.cols());
+        dtype::array<dtype::real> desired_bar_length = hbars *
+            (1.0 + 0.4 / std::pow(2.0, points.cols() - 1)) *
+            std::pow((bar_length.pow(points.cols()).sum() /
+            hbars.pow(points.cols()).sum()), 1.0 / points.cols());
 
         // calculate force vector for each bar
-        dtype::array<dtype::real> force =
-            ((desired_bar_length - bar_length) / bar_length).max(0.0);
+        dtype::array<dtype::real> force = ((desired_bar_length - bar_length)
+            / bar_length).max(0.0);
         dtype::array<dtype::real> force_vector(bar_indices.rows(), points.cols());
         for (dtype::index dim = 0; dim < points.cols(); ++dim) {
             force_vector.col(dim) = force * bar_vector.col(dim);
@@ -116,7 +117,9 @@ std::tuple<distmesh::dtype::array<distmesh::dtype::real>,
             initial_edge_length, points);
 
         // stop criterion
-        auto stop_criterion = ((points - buffer_stop_criterion).square().rowwise().sum().sqrt() / initial_edge_length).maxCoeff();
+        dtype::real stop_criterion = ((points - buffer_stop_criterion)
+            .square().rowwise().sum().sqrt() / initial_edge_length)
+            .maxCoeff();
         if (stop_criterion < settings::point_movement_tolerance) {
             break;
         }
