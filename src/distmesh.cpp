@@ -28,12 +28,12 @@ std::tuple<distmesh::dtype::array<distmesh::dtype::real>,
     distmesh::dtype::array<distmesh::dtype::index>> distmesh::distmesh(
     distance_function::function_t distance_function,
     edge_length_function::function_t edge_length_function,
-    dtype::real initial_edge_length,
+    dtype::real edge_length_base,
     dtype::array<dtype::real> bounding_box,
     dtype::array<dtype::real> fixed_points) {
     // create initial distribution in bounding_box
     dtype::array<dtype::real> points = utils::create_point_list(distance_function,
-        edge_length_function, initial_edge_length, bounding_box, fixed_points);
+        edge_length_function, edge_length_base, bounding_box, fixed_points);
 
     // create initial triangulation
     dtype::array<dtype::index> triangulation = triangulation::delaunay(points);
@@ -50,7 +50,7 @@ std::tuple<distmesh::dtype::array<distmesh::dtype::real>,
         // retriangulate if point movement is above tolerance
         dtype::real retriangulation_criterion =
             ((points - buffer_retriangulation_criterion).square().rowwise().sum().sqrt() /
-            initial_edge_length).maxCoeff();
+            edge_length_base).maxCoeff();
         if (retriangulation_criterion > settings::retriangulation_tolerance) {
             // update triangulation
             triangulation = triangulation::delaunay(points);
@@ -65,7 +65,7 @@ std::tuple<distmesh::dtype::array<distmesh::dtype::real>,
 
             // reject triangles with circumcenter outside of the region
             dtype::array<bool> circumcenter_criterion = distance_function(circumcenter) <
-                -settings::general_precision * initial_edge_length;
+                -settings::general_precision * edge_length_base;
             triangulation = utils::select_masked_array_elements<dtype::index>(triangulation,
                 circumcenter_criterion);
 
@@ -114,11 +114,11 @@ std::tuple<distmesh::dtype::array<distmesh::dtype::real>,
 
         // project points outside of domain to boundary
         utils::project_points_to_function(distance_function,
-            initial_edge_length, points);
+            edge_length_base, points);
 
         // stop criterion
         dtype::real stop_criterion = ((points - buffer_stop_criterion)
-            .square().rowwise().sum().sqrt() / initial_edge_length)
+            .square().rowwise().sum().sqrt() / edge_length_base)
             .maxCoeff();
         if (stop_criterion < settings::point_movement_tolerance) {
             break;

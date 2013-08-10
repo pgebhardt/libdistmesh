@@ -29,7 +29,7 @@
 distmesh::dtype::array<distmesh::dtype::real> distmesh::utils::create_point_list(
     distance_function::function_t distance_function,
     edge_length_function::function_t edge_length_function,
-    dtype::real initial_edge_length,
+    dtype::real edge_length_base,
     dtype::array<dtype::real> bounding_box,
     dtype::array<dtype::real> fixed_points) {
     // calculate max number of points per dimension and
@@ -40,7 +40,7 @@ distmesh::dtype::array<distmesh::dtype::real> distmesh::utils::create_point_list
     for (dtype::index dim = 0; dim < bounding_box.rows(); ++dim) {
         max_points_per_dimension(dim, 0) = 1 +
             (bounding_box(dim, 1) - bounding_box(dim, 0)) /
-            initial_edge_length;
+            edge_length_base;
         max_point_count *= max_points_per_dimension(dim, 0);
     }
     dtype::array<dtype::real> initial_points(
@@ -51,14 +51,14 @@ distmesh::dtype::array<distmesh::dtype::real> distmesh::utils::create_point_list
     for (dtype::index dim = 0; dim < bounding_box.rows(); ++dim) {
         for (dtype::index point = 0; point < max_point_count; ++point) {
             initial_points(point, dim) = bounding_box(dim, 0) +
-                initial_edge_length * ((point / same_value_count) %
+                edge_length_base * ((point / same_value_count) %
                 max_points_per_dimension(dim, 0));
         }
         same_value_count *= max_points_per_dimension(dim, 0);
     }
 
     // reject points outside of region defined by distance_function
-    dtype::array<bool> inside = distance_function(initial_points) < settings::general_precision * initial_edge_length;
+    dtype::array<bool> inside = distance_function(initial_points) < settings::general_precision * edge_length_base;
     dtype::array<dtype::real> inside_points = select_masked_array_elements<dtype::real>(
         initial_points, inside);
 
@@ -129,7 +129,7 @@ distmesh::dtype::array<distmesh::dtype::index> distmesh::utils::find_unique_bars
 // project points outside of boundary back to it
 void distmesh::utils::project_points_to_function(
     distance_function::function_t distance_function,
-    dtype::real initial_edge_length,
+    dtype::real edge_length_base,
     Eigen::Ref<dtype::array<dtype::real>> points) {
     // evaluate distance function at points
     dtype::array<dtype::real> distance = distance_function(points);
@@ -143,10 +143,10 @@ void distmesh::utils::project_points_to_function(
         dtype::array<dtype::real> h;
         deltaX.fill(0.0);
         for (dtype::index dim = 0; dim < points.cols(); ++dim) {
-            deltaX.col(dim).fill(std::sqrt(std::numeric_limits<dtype::real>::epsilon()) * initial_edge_length);
+            deltaX.col(dim).fill(std::sqrt(std::numeric_limits<dtype::real>::epsilon()) * edge_length_base);
             h = points + deltaX;
             gradient.col(dim) = (distance_function(h) - distance) /
-                (std::sqrt(std::numeric_limits<dtype::real>::epsilon()) * initial_edge_length);
+                (std::sqrt(std::numeric_limits<dtype::real>::epsilon()) * edge_length_base);
             deltaX.col(dim).fill(0.0);
         }
 

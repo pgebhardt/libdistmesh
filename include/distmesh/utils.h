@@ -64,7 +64,7 @@ namespace utils {
     dtype::array<dtype::real> create_point_list(
         distance_function::function_t distance_function,
         edge_length_function::function_t edge_length_function,
-        dtype::real initial_edge_length,
+        dtype::real edge_length_base,
         dtype::array<dtype::real> bounding_box,
         dtype::array<dtype::real> fixed_points);
 
@@ -76,7 +76,7 @@ namespace utils {
     // project points outside of boundary back to it
     void project_points_to_function(
         distance_function::function_t distance_function,
-        dtype::real initial_edge_length,
+        dtype::real edge_length_base,
         Eigen::Ref<dtype::array<dtype::real>> points);
 }
 }

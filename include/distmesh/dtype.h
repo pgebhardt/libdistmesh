@@ -21,7 +21,7 @@
 #ifndef LIBDISTMESH_INCLUDE_DTYPE_H
 #define LIBDISTMESH_INCLUDE_DTYPE_H
 
-// namespace libdistmesh::dtype
+// namespace distmesh::dtype
 namespace distmesh {
 namespace dtype {
     // basic scalar types

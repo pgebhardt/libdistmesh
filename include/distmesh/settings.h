@@ -21,7 +21,7 @@
 #ifndef LIBDISTMESH_INCLUDE_SETTINGS_H
 #define LIBDISTMESH_INCLUDE_SETTINGS_H
 
-// namespace libdistmesh::settings
+// namespace distmesh::settings
 namespace distmesh {
 namespace settings {
     static const dtype::real retriangulation_tolerance = 1e-1;

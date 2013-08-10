@@ -35,7 +35,7 @@ namespace distmesh {
     std::tuple<dtype::array<dtype::real>, dtype::array<dtype::index>> distmesh(
         distance_function::function_t distance_function,
         edge_length_function::function_t edge_length_function,
-        dtype::real initial_edge_length,
+        dtype::real edge_length_base,
         dtype::array<dtype::real> bounding_box,
         dtype::array<dtype::real> fixed_points=dtype::array<dtype::real>());
 
