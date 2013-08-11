@@ -27,16 +27,13 @@ env = Environment()
 # add paths and library
 env.Append(
     CPPPATH=[
-        '../include',
         '/usr/include/eigen3',
         '/usr/local/include/eigen3',
         ],
     LIBPATH=[
-        '../build',
         '/usr/local/lib',
         ],
     RPATH=[
-        '../build',
         '/usr/local/lib',
         ],
     LIBS=[
@@ -52,7 +49,7 @@ env.Append(
         ],
     )
 
-# use libc++ on mac os
+# use libc++ on mac os and update rpath
 if env['PLATFORM'] == 'darwin':
     env.Append(
         CXXFLAGS=['-stdlib=libc++'],
