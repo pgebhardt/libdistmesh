@@ -1,0 +1,65 @@
+# --------------------------------------------------------------------
+# This file is part of libDistMesh.
+#
+# libDistMesh is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# (at your option) any later version.
+#
+# libDistMesh is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with libDistMesh.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Copyright (C) 2013 Patrik Gebhardt
+# Contact: patrik.gebhardt@rub.de
+# --------------------------------------------------------------------
+
+import os
+import glob
+
+# create environment
+env = Environment()
+
+# add paths and library
+env.Append(
+    CPPPATH=[
+        '../include',
+        '/usr/include/eigen3',
+        '/usr/local/include/eigen3',
+        ],
+    LIBPATH=[
+        '../build',
+        '/usr/local/lib',
+        ],
+    RPATH=[
+        '../build',
+        '/usr/local/lib',
+        ],
+    LIBS=[
+        'distmesh',
+        ],
+    )
+
+# set compiler flags
+env.Append(
+    CXXFLAGS=[
+        '-std=c++11',
+        '-O3',
+        ],
+    )
+
+# use libc++ on mac os
+if env['PLATFORM'] == 'darwin':
+    env.Append(
+        CXXFLAGS=['-stdlib=libc++'],
+        LIBS=['c++'])
+
+# use clang++
+env.Replace(CXX='clang++')
+
+for file in glob.glob('*.cpp'):
+    env.Program(os.path.splitext(file)[0], file)
