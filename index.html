@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="libDistMesh : libDistMesh: A Simple Mesh Generator in C++" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>libDistMesh</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/schansge/libdistmesh">View on GitHub</a>
+
+          <h1 id="project_title">libDistMesh</h1>
+          <h2 id="project_tagline">libDistMesh: A Simple Mesh Generator in C++</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/schansge/libdistmesh/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/schansge/libdistmesh/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a name="libdistmesh-a-simple-mesh-generator-in-c" class="anchor" href="#libdistmesh-a-simple-mesh-generator-in-c"><span class="octicon octicon-link"></span></a>libDistMesh: A Simple Mesh Generator in C++</h1>
+
+<p>libDistMesh is a C++ implementation of the original <a href="http://persson.berkeley.edu/distmesh/">DistMesh</a>
+algorithm for generating unstructured triangular and tetrahedral meshes using <em>signed distance functions</em>.</p>
+
+<h2>
+<a name="getting-started" class="anchor" href="#getting-started"><span class="octicon octicon-link"></span></a>Getting Started</h2>
+
+<p>Simply clone the repository, update submodules and make sure all dependencies are installed.
+For building the project the <a href="http://www.scons.org/">SCons</a> build system is used:</p>
+
+<pre><code>git clone https://github.com/schansge/libdistmesh.git
+git submodule update --init
+scons
+scons install
+</code></pre>
+
+<h2>
+<a name="example" class="anchor" href="#example"><span class="octicon octicon-link"></span></a>Example</h2>
+
+<ul>
+<li>Uniform Mesh on Unit Circle:</li>
+</ul><pre><code>#include &lt;distmesh/distmesh.h&gt;
+
+int main() {
+    // bounding box in which the algorithm tries to create points
+    distmesh::dtype::array&lt;distmesh::dtype::real&gt; bounding_box(2, 2);
+    bounding_box &lt;&lt; -1.0, 1.0, -1.0, 1.0;
+
+    // create mesh
+    auto mesh = distmesh::distmesh(
+        distmesh::distance_function::circular(1.0),
+        distmesh::edge_length_function::uniform(),
+        0.2, bounding_box);
+
+    return 0;
+}
+</code></pre>
+
+<ul>
+<li>Rectangle with circular hole, refined at circle boundary:</li>
+</ul><pre><code>#include &lt;distmesh/distmesh.h&gt;
+
+int main() {
+    // bounding box in which the algorithm tries to create points
+    distmesh::dtype::array&lt;distmesh::dtype::real&gt; bounding_box(2, 2);
+    bounding_box &lt;&lt; -1.0, 1.0, -1.0, 1.0;
+
+    // fixed points at the corners of domain to guarantee convergence
+    distmesh::dtype::array&lt;distmesh::dtype::real&gt; fixed_points(4, 2);
+    fixed_points &lt;&lt; -1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0;
+
+    // create mesh
+    auto mesh = distmesh::distmesh(
+        distmesh::distance_function::diff(
+            distmesh::distance_function::rectangular(bounding_box),
+            distmesh::distance_function::circular(0.5)),
+        DISTMESH_EDGE_LENGTH_FUNCTION({
+            return 0.05 + 0.3 * distmesh::distance_function::circular(0.5)(points);
+        }), 0.05, bounding_box, fixed_points);
+
+    return 0;
+}
+</code></pre>
+
+<h2>
+<a name="dependencies" class="anchor" href="#dependencies"><span class="octicon octicon-link"></span></a>Dependencies</h2>
+
+<p>libDistMesh uses some C++11 features and compiles properly with both clang
+and gcc. For linear algebra operations and the delaunay triangulation two
+libraries are needed for building and using libDistMesh:</p>
+
+<ul>
+<li>
+<a href="http://eigen.tuxfamily.org/">Eigen</a> 3.2.0</li>
+<li>
+<a href="http://www.qhull.org/">QHull</a> 2012.1 (building only)</li>
+</ul><h2>
+<a name="references" class="anchor" href="#references"><span class="octicon octicon-link"></span></a>References</h2>
+
+<p>The DistMesh algorithm is described in the following two references.
+If you use the algorithm in a program or publication, please
+acknowledge its authors by adding a reference to the first paper
+below.</p>
+
+<ul>
+<li><p>P.-O. Persson, G. Strang, <strong>A Simple Mesh Generator in MATLAB</strong>.
+<em>SIAM Review</em>, Volume 46 (2), pp. 329-345, June 2004 (<a href="http://persson.berkeley.edu/distmesh/persson04mesh.pdf">PDF</a>)</p></li>
+<li><p>P.-O. Persson, <strong>Mesh Generation for Implicit Geometries</strong>.
+Ph.D. thesis, <em>Department of Mathematics, MIT</em>, Dec 2004 (<a href="http://persson.berkeley.edu/thesis/persson-thesis-color.pdf">PDF</a>)</p></li>
+</ul>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">libDistMesh maintained by <a href="https://github.com/schansge">schansge</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
