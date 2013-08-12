@@ -96,10 +96,7 @@ std::tuple<distmesh::dtype::array<distmesh::dtype::real>,
         // calculate force vector for each bar
         dtype::array<dtype::real> force = ((desired_bar_length - bar_length)
             / bar_length).max(0.0);
-        dtype::array<dtype::real> force_vector(bar_indices.rows(), points.cols());
-        for (dtype::index dim = 0; dim < points.cols(); ++dim) {
-            force_vector.col(dim) = force * bar_vector.col(dim);
-        }
+        dtype::array<dtype::real> force_vector = force.col(0) * bar_vector.colwise();
 
         // move points
         buffer_stop_criterion = points;
