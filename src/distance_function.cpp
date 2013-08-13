@@ -20,20 +20,11 @@
 
 #include "distmesh/distmesh.h"
 
-// generate new distance function with difference of two ones
-distmesh::distance_function::function_t
-    distmesh::distance_function::diff(function_t function1,
-    function_t function2) {
-    return DISTMESH_DISTANCE_FUNCTION({
-        return function1(points).max(-function2(points));
-    });
-}
-
 // creates distance function of rectangular domain
-distmesh::distance_function::function_t
+distmesh::functional::function_t
     distmesh::distance_function::rectangular(
     dtype::array<dtype::real> rectangle) {
-    return DISTMESH_DISTANCE_FUNCTION({
+    return DISTMESH_FUNCTIONAL({
         dtype::array<dtype::real> result(points.rows(), 1);
         result = (points.col(0) - rectangle(0, 0))
             .min(rectangle(0, 1) - points.col(0));
@@ -47,10 +38,10 @@ distmesh::distance_function::function_t
 }
 
 // creates distance function for circular domains
-distmesh::distance_function::function_t
+distmesh::functional::function_t
     distmesh::distance_function::circular(
     dtype::real radius, dtype::array<dtype::real> midpoint) {
-    return DISTMESH_DISTANCE_FUNCTION({
+    return DISTMESH_FUNCTIONAL({
         // move points towards midpoint
         dtype::array<dtype::real> norm_points;
         if (midpoint.cols() == points.cols()) {

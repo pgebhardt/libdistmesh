@@ -21,21 +21,11 @@
 #ifndef LIBDISTMESH_INCLUDE_EDGE_LENGTH_FUNCTION_H
 #define LIBDISTMESH_INCLUDE_EDGE_LENGTH_FUNCTION_H
 
-// macro for easies creation of edge length functions
-#define DISTMESH_EDGE_LENGTH_FUNCTION(function_body) \
-    ([=](const Eigen::Ref<distmesh::dtype::array<distmesh::dtype::real>>& points) -> \
-    distmesh::dtype::array<distmesh::dtype::real> \
-    function_body)
-
 // namespace distmesh::edge_length_function
 namespace distmesh {
 namespace edge_length_function {
-    // function type for edge length functions
-    typedef std::function<dtype::array<dtype::real>(
-        const Eigen::Ref<dtype::array<dtype::real>>&)> function_t;
-
     // uniform edge length
-    function_t uniform();
+    functional::function_t uniform();
 }
 }
 

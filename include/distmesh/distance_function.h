@@ -21,27 +21,14 @@
 #ifndef LIBDISTMESH_INCLUDE_DISTANCE_FUNCTION_H
 #define LIBDISTMESH_INCLUDE_DISTANCE_FUNCTION_H
 
-// macro for easies creation of edge length functions
-#define DISTMESH_DISTANCE_FUNCTION(function_body) \
-    ([=](const Eigen::Ref<distmesh::dtype::array<distmesh::dtype::real>>& points) -> \
-    distmesh::dtype::array<distmesh::dtype::real> \
-    function_body)
-
 // namespace distmesh::distance_function
 namespace distmesh {
 namespace distance_function {
-    // function type for edge length functions
-    typedef std::function<dtype::array<dtype::real>(
-        const Eigen::Ref<dtype::array<dtype::real>>&)> function_t;
-
-    // generate new distance function with difference of two ones
-    function_t diff(function_t function1, function_t function2);
-
     // creates distance function of rectangular domain
-    function_t rectangular(dtype::array<dtype::real> rectangle);
+    functional::function_t rectangular(dtype::array<dtype::real> rectangle);
 
     // creates distance function for circular domains
-    function_t circular(dtype::real radius=1.0,
+    functional::function_t circular(dtype::real radius=1.0,
         dtype::array<dtype::real> midpoint=dtype::array<dtype::real>());
 }
 }

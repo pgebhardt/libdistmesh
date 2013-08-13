@@ -18,31 +18,31 @@
 // Contact: patrik.gebhardt@rub.de
 // --------------------------------------------------------------------
 
-#ifndef LIBDISTMESH_INCLUDE_DISTMESH_H
-#define LIBDISTMESH_INCLUDE_DISTMESH_H
+#ifndef LIBDISTMESH_INCLUDE_FUNCTIONAL_H
+#define LIBDISTMESH_INCLUDE_FUNCTIONAL_H
 
-#include "common.h"
-#include "dtype.h"
-#include "settings.h"
-#include "functional.h"
-#include "distance_function.h"
-#include "edge_length_function.h"
-#include "triangulation.h"
-#include "utils.h"
+// macro for easies creation of distmesh lambda functions
+#define DISTMESH_FUNCTIONAL(function_body) \
+    ([=](const Eigen::Ref<distmesh::dtype::array<distmesh::dtype::real>>& points) -> \
+    distmesh::dtype::array<distmesh::dtype::real> \
+    function_body)
 
-// namespace distmesh
+// namespace distmesh::functional
 namespace distmesh {
-    // apply the distmesh algorithm
-    std::tuple<dtype::array<dtype::real>, dtype::array<dtype::index>> distmesh(
-        functional::function_t distance_function,
-        functional::function_t edge_length_function,
-        dtype::real edge_length_base,
-        dtype::array<dtype::real> bounding_box,
-        dtype::array<dtype::real> fixed_points=dtype::array<dtype::real>());
+namespace functional {
+    // function type for edge length functions
+    typedef std::function<dtype::array<dtype::real>(
+        const Eigen::Ref<dtype::array<dtype::real>>&)> function_t;
 
-    // determine boundary edges of given triangulation
-    dtype::array<dtype::index> boundedges(
-        const Eigen::Ref<dtype::array<dtype::index>>& triangulation);
+    // generate new functional with difference of two
+    function_t diff(function_t function1, function_t function2);
+
+    // generates new functional with intersect of two
+    function_t intersect(function_t function1, function_t function2);
+
+    // generates new functional with union of two
+    function_t union_(function_t function1, function_t function2);
+}
 }
 
 #endif
