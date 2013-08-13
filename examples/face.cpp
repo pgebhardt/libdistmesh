@@ -24,8 +24,7 @@ int main() {
     });
 
     // create mesh
-    auto mesh = distmesh::distmesh(
-        distance_function,
+    auto mesh = distmesh::distmesh(distance_function,
         DISTMESH_FUNCTIONAL({
             return 0.2 - distance_function(points);
         }), 0.02, bounding_box, fixed_points);
