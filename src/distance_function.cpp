@@ -64,6 +64,16 @@ distmesh::functional::function_t distmesh::distance_function::elliptical(
 distmesh::functional::function_t
     distmesh::distance_function::circular(
     dtype::real radius, dtype::array<dtype::real> midpoint) {
-    return elliptical(dtype::array<dtype::real>::Constant(1, midpoint.cols(), radius),
-        midpoint);
+    return DISTMESH_FUNCTIONAL({
+        // move points towards midpoint
+        dtype::array<dtype::real> norm_points;
+        if (midpoint.cols() == 0) {
+            norm_points = points;
+        } else {
+            norm_points = points.rowwise() - midpoint.row(0);
+        }
+
+        // apply circle equation
+        return norm_points.square().rowwise().sum().sqrt() - radius;
+    });
 }
