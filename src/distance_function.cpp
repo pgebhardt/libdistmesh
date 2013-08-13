@@ -37,20 +37,33 @@ distmesh::functional::function_t
     });
 }
 
+// creates distance function for elliptical domains
+// Note: not a real distance function but a level function,
+// which is sufficient
+distmesh::functional::function_t distmesh::distance_function::elliptical(
+    dtype::array<dtype::real> radii, dtype::array<dtype::real> midpoint) {
+    return DISTMESH_FUNCTIONAL({
+        // move points towards midpoint
+        dtype::array<dtype::real> norm_points;
+        if (midpoint.cols() == 0) {
+            norm_points = points;
+        } else {
+            norm_points = points.rowwise() - midpoint.row(0);
+        }
+
+        // apply ellipse equation
+        if (radii.cols() == 0) {
+            return norm_points.square().rowwise().sum().sqrt() - 1.0;
+        } else {
+            return (norm_points.rowwise() / radii.row(0)).square().rowwise().sum().sqrt() - 1.0;
+        }
+    });
+}
+
 // creates distance function for circular domains
 distmesh::functional::function_t
     distmesh::distance_function::circular(
     dtype::real radius, dtype::array<dtype::real> midpoint) {
-    return DISTMESH_FUNCTIONAL({
-        // move points towards midpoint
-        dtype::array<dtype::real> norm_points;
-        if (midpoint.cols() == points.cols()) {
-            norm_points = points.rowwise() - midpoint.row(0);
-        } else {
-            norm_points = points;
-        }
-
-        // apply circle equation
-        return norm_points.square().rowwise().sum().sqrt() - radius;
-    });
+    return elliptical(dtype::array<dtype::real>::Constant(1, midpoint.cols(), radius),
+        midpoint);
 }
