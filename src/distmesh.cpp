@@ -94,9 +94,8 @@ std::tuple<distmesh::dtype::array<distmesh::dtype::real>,
             hbars.pow(points.cols()).sum()), 1.0 / points.cols());
 
         // calculate force vector for each bar
-        dtype::array<dtype::real> force = ((desired_bar_length - bar_length)
-            / bar_length).max(0.0);
-        dtype::array<dtype::real> force_vector = bar_vector.colwise() * force.col(0);
+        dtype::array<dtype::real> force_vector = bar_vector.colwise() *
+            ((desired_bar_length - bar_length) / bar_length).max(0.0).col(0);
 
         // move points
         buffer_stop_criterion = points;
