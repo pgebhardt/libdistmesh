@@ -25,6 +25,8 @@ def main():
     points = loadtxt('points.txt')
     triangulation = loadtxt('triangulation.txt', dtype=int64)
 
+    # plot mesh
+    gca().set_aspect('equal')
     triplot(points[:, 0], points[:, 1], triangulation)
     show()
 
