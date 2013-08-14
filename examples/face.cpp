@@ -1,6 +1,14 @@
 #include <distmesh/distmesh.h>
 #include <fstream>
 
+distmesh::functional::Function elliptical(
+    distmesh::dtype::real f1, distmesh::dtype::real f2, distmesh::dtype::real r,
+    distmesh::dtype::real x0, distmesh::dtype::real y0) {
+    return DISTMESH_FUNCTIONAL({
+        return (f1 * (points.col(0) - x0).square() + f2 * (points.col(1) - y0).square()).sqrt() - r;
+    });
+}
+
 int main() {
     // bounding box in which the algorithm tries to create points
     distmesh::dtype::array<distmesh::dtype::real> bounding_box(2, 2);
@@ -10,18 +18,14 @@ int main() {
     distmesh::dtype::array<distmesh::dtype::real> fixed_points(4, 2);
     fixed_points << -1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0;
 
-    auto distance_function = DISTMESH_FUNCTIONAL({
-        auto out1 = points.col(0) + 1.0;
-        auto out2 = -(points.col(0) - 1.0);
-        auto out3 =  (points.col(1) + 1.0);
-        auto out4 = -(points.col(1) - 1.0);
-        auto eye1 = ((points.col(0) + 0.5).square() + (points.col(1) - 0.5).square()).sqrt() - 0.25;
-        auto eye2 = ((points.col(0) - 0.5).square() + (points.col(1) - 0.5).square()).sqrt() - 0.25;
-        auto mouth = (points.col(0).square() + 10.0 * (points.col(1) + 0.5).square()).sqrt() - 0.75;
-        auto nose = (3.0 * points.col(0).square() + (points.col(1) - 0.1).square()).sqrt() - 0.15;
+    distmesh::dtype::array<distmesh::dtype::real> midpoints(2, 2);
+    midpoints << -0.5, 0.5, 0.5, 0.5;
 
-        return -out1.min(out2).min(out3).min(out4).min(eye1).min(eye2).min(mouth).min(nose);
-    });
+    auto distance_function = distmesh::distance_function::rectangular(bounding_box) -
+            distmesh::distance_function::circular(0.25, midpoints.row(0)) -
+            distmesh::distance_function::circular(0.25, midpoints.row(1)) -
+            elliptical(1.0, 10.0, 0.75, 0.0, -0.5) -
+            elliptical(3.0, 1.0, 0.15, 0.0, 0.1);
 
     // create mesh
     auto mesh = distmesh::distmesh(distance_function,

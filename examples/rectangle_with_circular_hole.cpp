@@ -32,9 +32,8 @@ int main() {
 
     // create mesh
     auto mesh = distmesh::distmesh(
-        distmesh::functional::diff(
-            distmesh::distance_function::rectangular(bounding_box),
-            distmesh::distance_function::circular(0.5)),
+            distmesh::distance_function::rectangular(bounding_box) -
+            distmesh::distance_function::circular(0.5),
         DISTMESH_FUNCTIONAL({
             return 0.05 + 0.3 * distmesh::distance_function::circular(0.5)(points);
         }), 0.05, bounding_box, fixed_points);
