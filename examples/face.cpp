@@ -21,11 +21,12 @@ int main() {
     distmesh::dtype::array<distmesh::dtype::real> midpoints(2, 2);
     midpoints << -0.5, 0.5, 0.5, 0.5;
 
-    auto distance_function = distmesh::distance_function::rectangular(bounding_box) -
-            distmesh::distance_function::circular(0.25, midpoints.row(0)) -
-            distmesh::distance_function::circular(0.25, midpoints.row(1)) -
-            elliptical(1.0, 10.0, 0.75, 0.0, -0.5) -
-            elliptical(3.0, 1.0, 0.15, 0.0, 0.1);
+    auto distance_function =
+        distmesh::distance_function::rectangular(bounding_box) -
+        distmesh::distance_function::circular(0.25, midpoints.row(0)) -
+        distmesh::distance_function::circular(0.25, midpoints.row(1)) -
+        elliptical(1.0, 10.0, 0.75, 0.0, -0.5) -
+        elliptical(3.0, 1.0, 0.15, 0.0, 0.1);
 
     // create mesh
     auto mesh = distmesh::distmesh(distance_function,
