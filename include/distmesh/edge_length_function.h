@@ -25,7 +25,7 @@
 namespace distmesh {
 namespace edge_length_function {
     // uniform edge length
-    functional::Function uniform();
+    Functional uniform();
 }
 }
 

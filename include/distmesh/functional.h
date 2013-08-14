@@ -23,58 +23,57 @@
 
 // macro for easies creation of distmesh lambda functions
 #define DISTMESH_FUNCTIONAL(function_body) \
-    (distmesh::functional::Function( \
+    (distmesh::Functional( \
         [=](const Eigen::Ref<distmesh::dtype::array<distmesh::dtype::real>>& points) -> \
         distmesh::dtype::array<distmesh::dtype::real> \
         function_body))
 
-// namespace distmesh::functional
+// namespace distmesh
 namespace distmesh {
-namespace functional {
-    // function type for edge length functions
-    typedef std::function<dtype::array<dtype::real>(
-        const Eigen::Ref<dtype::array<dtype::real>>&)> function_t;
-
     // base class of all function expression for allowing easy function arithmetic
-    class Function {
+    class Functional {
     public:
+        // function type of Functional callable
+        typedef std::function<dtype::array<dtype::real>(
+            const Eigen::Ref<dtype::array<dtype::real>>&)> function_t;
+
         // create class from function type
-        Function(const function_t& func);
+        Functional(const function_t& func);
 
         // copy constructor
-        Function(const Function& rhs);
+        Functional(const Functional& rhs);
 
         // evaluate function by call
         dtype::array<dtype::real> operator()(
             const Eigen::Ref<dtype::array<dtype::real>>& points) const;
 
         // basic arithmetic operations
-        Function& operator+() { return *this; }
-        Function operator-();
-        Function& operator+=(const Function& rhs);
-        Function& operator+=(const dtype::real& rhs);
-        Function& operator-=(const Function& rhs);
-        Function& operator-=(const dtype::real& rhs);
-        Function& operator*=(const Function& rhs);
-        Function& operator*=(const dtype::real& rhs);
-        Function& operator/=(const Function& rhs);
-        Function& operator/=(const dtype::real& rhs);
-        friend Function operator+(const Function& lhs, const Function& rhs);
-        friend Function operator+(const Function& lhs, const dtype::real& rhs);
-        friend Function operator+(const dtype::real& lhs, const Function& rhs);
-        friend Function operator-(const Function& lhs, const Function& rhs);
-        friend Function operator-(const Function& lhs, const dtype::real& rhs);
-        friend Function operator-(const dtype::real& lhs, const Function& rhs);
-        friend Function operator*(const Function& lhs, const Function& rhs);
-        friend Function operator*(const Function& lhs, const dtype::real& rhs);
-        friend Function operator*(const dtype::real& lhs, const Function& rhs);
-        friend Function operator/(const Function& lhs, const Function& rhs);
-        friend Function operator/(const Function& lhs, const dtype::real& rhs);
-        friend Function operator/(const dtype::real& lhs, const Function& rhs);
+        Functional& operator+() { return *this; }
+        Functional operator-();
+        Functional& operator+=(const Functional& rhs);
+        Functional& operator+=(const dtype::real& rhs);
+        Functional& operator-=(const Functional& rhs);
+        Functional& operator-=(const dtype::real& rhs);
+        Functional& operator*=(const Functional& rhs);
+        Functional& operator*=(const dtype::real& rhs);
+        Functional& operator/=(const Functional& rhs);
+        Functional& operator/=(const dtype::real& rhs);
+        friend Functional operator+(const Functional& lhs, const Functional& rhs);
+        friend Functional operator+(const Functional& lhs, const dtype::real& rhs);
+        friend Functional operator+(const dtype::real& lhs, const Functional& rhs);
+        friend Functional operator-(const Functional& lhs, const Functional& rhs);
+        friend Functional operator-(const Functional& lhs, const dtype::real& rhs);
+        friend Functional operator-(const dtype::real& lhs, const Functional& rhs);
+        friend Functional operator*(const Functional& lhs, const Functional& rhs);
+        friend Functional operator*(const Functional& lhs, const dtype::real& rhs);
+        friend Functional operator*(const dtype::real& lhs, const Functional& rhs);
+        friend Functional operator/(const Functional& lhs, const Functional& rhs);
+        friend Functional operator/(const Functional& lhs, const dtype::real& rhs);
+        friend Functional operator/(const dtype::real& lhs, const Functional& rhs);
 
         // comparison operations
-        Function min(const Function& rhs);
-        Function max(const Function& rhs);
+        Functional min(const Functional& rhs);
+        Functional max(const Functional& rhs);
 
         // enable easier compatibility with rest of distmesh
         operator function_t() { return this->function_; }
@@ -87,7 +86,6 @@ namespace functional {
         // stores std function
         function_t function_;
     };
-}
 }
 
 #endif

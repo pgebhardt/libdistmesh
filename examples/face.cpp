@@ -1,7 +1,7 @@
 #include <distmesh/distmesh.h>
 #include <fstream>
 
-distmesh::functional::Function elliptical(
+distmesh::Functional elliptical(
     distmesh::dtype::real f1, distmesh::dtype::real f2, distmesh::dtype::real r,
     distmesh::dtype::real x0, distmesh::dtype::real y0) {
     return DISTMESH_FUNCTIONAL({

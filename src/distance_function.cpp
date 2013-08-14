@@ -21,7 +21,7 @@
 #include "distmesh/distmesh.h"
 
 // creates distance function of rectangular domain
-distmesh::functional::Function distmesh::distance_function::rectangular(
+distmesh::Functional distmesh::distance_function::rectangular(
     dtype::array<dtype::real> rectangle) {
     return DISTMESH_FUNCTIONAL({
         dtype::array<dtype::real> result =
@@ -39,7 +39,7 @@ distmesh::functional::Function distmesh::distance_function::rectangular(
 // creates distance function for elliptical domains
 // Note: not a real distance function but a level function,
 // which is sufficient
-distmesh::functional::Function distmesh::distance_function::elliptical(
+distmesh::Functional distmesh::distance_function::elliptical(
     dtype::array<dtype::real> radii, dtype::array<dtype::real> midpoint) {
     return DISTMESH_FUNCTIONAL({
         if (midpoint.cols() == points.cols()) {
@@ -62,7 +62,7 @@ distmesh::functional::Function distmesh::distance_function::elliptical(
 }
 
 // creates distance function for circular domains
-distmesh::functional::Function
+distmesh::Functional
     distmesh::distance_function::circular(
     dtype::real radius, dtype::array<dtype::real> midpoint) {
     return DISTMESH_FUNCTIONAL({
