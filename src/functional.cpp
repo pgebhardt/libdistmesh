@@ -20,26 +20,68 @@
 
 #include "distmesh/distmesh.h"
 
-// generate new function with difference of two
-distmesh::functional::function_t distmesh::functional::diff(
-    function_t function1, function_t function2) {
+distmesh::functional::Function::Function(const function_t& func)
+    : function_(func) { }
+
+distmesh::functional::Function::Function(const Function& rhs)
+    : function_(rhs.function()) { }
+
+distmesh::dtype::array<distmesh::dtype::real> distmesh::functional::Function::operator()(
+    const Eigen::Ref<dtype::array<dtype::real>>& points) const {
+    return this->function()(points);
+}
+
+distmesh::functional::Function distmesh::functional::Function::operator-() {
+    Function func(*this);
     return DISTMESH_FUNCTIONAL({
-        return function1(points).max(-function2(points));
+        return -func(points);
     });
 }
 
-// generates new functional with intersect of two
-distmesh::functional::function_t distmesh::functional::intersect(
-    function_t function1, function_t function2) {
+distmesh::functional::Function& distmesh::functional::Function::operator+=(
+    const Function& rhs) {
+    function_t func = this->function();
+    this->function() = DISTMESH_FUNCTIONAL({
+        return func(points).max(rhs(points));
+    });
+    return *this;
+}
+
+distmesh::functional::Function& distmesh::functional::Function::operator-=(
+    const Function& rhs) {
+    function_t func = this->function();
+    this->function() = DISTMESH_FUNCTIONAL({
+        return func(points).max(-rhs(points));
+    });
+    return *this;
+}
+
+distmesh::functional::Function& distmesh::functional::Function::operator*=(
+    const Function& rhs) {
+    function_t func = this->function();
+    this->function() = DISTMESH_FUNCTIONAL({
+        return func(points).min(rhs(points));
+    });
+    return *this;
+}
+
+distmesh::functional::Function distmesh::functional::operator+(
+    const Function& lhs, const Function& rhs) {
     return DISTMESH_FUNCTIONAL({
-        return function1(points).max(function2(points));
+        return lhs(points).max(rhs(points));
     });
 }
 
-// generates new functional with union of two
-distmesh::functional::function_t distmesh::functional::union_(
-    function_t function1, function_t function2) {
+distmesh::functional::Function distmesh::functional::operator-(
+    const Function& lhs, const Function& rhs) {
     return DISTMESH_FUNCTIONAL({
-        return function1(points).min(function2(points));
+        return lhs(points).max(-rhs(points));
+    });
+}
+
+distmesh::functional::Function distmesh::functional::operator*(
+    const Function& lhs, const Function& rhs) {
+    return DISTMESH_FUNCTIONAL({
+        return lhs(points).min(rhs(points));
     });
 }
