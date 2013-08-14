@@ -25,8 +25,8 @@ distmesh::functional::function_t
     distmesh::distance_function::rectangular(
     dtype::array<dtype::real> rectangle) {
     return DISTMESH_FUNCTIONAL({
-        dtype::array<dtype::real> result(points.rows(), 1);
-        result = (points.col(0) - rectangle(0, 0))
+        dtype::array<dtype::real> result =
+            (points.col(0) - rectangle(0, 0))
             .min(rectangle(0, 1) - points.col(0));
         for (dtype::index dim = 1; dim < points.cols(); ++dim) {
             result = result
@@ -43,19 +43,18 @@ distmesh::functional::function_t
 distmesh::functional::function_t distmesh::distance_function::elliptical(
     dtype::array<dtype::real> radii, dtype::array<dtype::real> midpoint) {
     return DISTMESH_FUNCTIONAL({
-        // move points towards midpoint
-        dtype::array<dtype::real> norm_points;
-        if (midpoint.cols() == 0) {
-            norm_points = points;
+        if (midpoint.cols() == points.cols()) {
+            if (radii.cols() == points.cols()) {
+                return ((points - midpoint).rowwise() / radii.row(0)).square().rowwise().sum().sqrt() - 1.0;
+            } else {
+                return (points - midpoint).square().rowwise().sum().sqrt() - 1.0;
+            }
         } else {
-            norm_points = points.rowwise() - midpoint.row(0);
-        }
-
-        // apply ellipse equation
-        if (radii.cols() == 0) {
-            return norm_points.square().rowwise().sum().sqrt() - 1.0;
-        } else {
-            return (norm_points.rowwise() / radii.row(0)).square().rowwise().sum().sqrt() - 1.0;
+            if (radii.cols() == points.cols()) {
+                return (points.rowwise() / radii.row(0)).square().rowwise().sum().sqrt() - 1.0;
+            } else {
+                return points.square().rowwise().sum().sqrt() - 1.0;
+            }
         }
     });
 }
@@ -65,15 +64,10 @@ distmesh::functional::function_t
     distmesh::distance_function::circular(
     dtype::real radius, dtype::array<dtype::real> midpoint) {
     return DISTMESH_FUNCTIONAL({
-        // move points towards midpoint
-        dtype::array<dtype::real> norm_points;
-        if (midpoint.cols() == 0) {
-            norm_points = points;
+        if (midpoint.cols() == points.cols()) {
+            return (points - midpoint).square().rowwise().sum().sqrt() - radius;
         } else {
-            norm_points = points.rowwise() - midpoint.row(0);
+            return points.square().rowwise().sum().sqrt() - radius;
         }
-
-        // apply circle equation
-        return norm_points.square().rowwise().sum().sqrt() - radius;
     });
 }
