@@ -42,7 +42,16 @@ distmesh::functional::Function& distmesh::functional::Function::operator+=(
     const Function& rhs) {
     function_t func = this->function();
     this->function() = DISTMESH_FUNCTIONAL({
-        return func(points).max(rhs(points));
+        return func(points) + rhs(points);
+    });
+    return *this;
+}
+
+distmesh::functional::Function& distmesh::functional::Function::operator+=(
+    const dtype::real& rhs) {
+    function_t func = this->function();
+    this->function() = DISTMESH_FUNCTIONAL({
+        return func(points) + rhs;
     });
     return *this;
 }
@@ -51,7 +60,16 @@ distmesh::functional::Function& distmesh::functional::Function::operator-=(
     const Function& rhs) {
     function_t func = this->function();
     this->function() = DISTMESH_FUNCTIONAL({
-        return func(points).max(-rhs(points));
+        return func(points) - rhs(points);
+    });
+    return *this;
+}
+
+distmesh::functional::Function& distmesh::functional::Function::operator-=(
+    const dtype::real& rhs) {
+    function_t func = this->function();
+    this->function() = DISTMESH_FUNCTIONAL({
+        return func(points) - rhs;
     });
     return *this;
 }
@@ -60,7 +78,16 @@ distmesh::functional::Function& distmesh::functional::Function::operator*=(
     const Function& rhs) {
     function_t func = this->function();
     this->function() = DISTMESH_FUNCTIONAL({
-        return func(points).min(rhs(points));
+        return func(points) * rhs(points);
+    });
+    return *this;
+}
+
+distmesh::functional::Function& distmesh::functional::Function::operator*=(
+    const dtype::real& rhs) {
+    function_t func = this->function();
+    this->function() = DISTMESH_FUNCTIONAL({
+        return func(points) * rhs;
     });
     return *this;
 }
@@ -68,18 +95,74 @@ distmesh::functional::Function& distmesh::functional::Function::operator*=(
 distmesh::functional::Function distmesh::functional::operator+(
     const Function& lhs, const Function& rhs) {
     return DISTMESH_FUNCTIONAL({
-        return lhs(points).max(rhs(points));
+        return lhs(points) + rhs(points);
+    });
+}
+
+distmesh::functional::Function distmesh::functional::operator+(
+    const Function& lhs, const dtype::real& rhs) {
+    return DISTMESH_FUNCTIONAL({
+        return lhs(points) + rhs;
+    });
+}
+
+distmesh::functional::Function distmesh::functional::operator+(
+    const dtype::real& lhs, const Function& rhs) {
+    return DISTMESH_FUNCTIONAL({
+        return lhs + rhs(points);
     });
 }
 
 distmesh::functional::Function distmesh::functional::operator-(
     const Function& lhs, const Function& rhs) {
     return DISTMESH_FUNCTIONAL({
-        return lhs(points).max(-rhs(points));
+        return lhs(points) - rhs(points);
+    });
+}
+
+distmesh::functional::Function distmesh::functional::operator-(
+    const Function& lhs, const dtype::real& rhs) {
+    return DISTMESH_FUNCTIONAL({
+        return lhs(points) - rhs;
+    });
+}
+
+distmesh::functional::Function distmesh::functional::operator-(
+    const dtype::real& lhs, const Function& rhs) {
+    return DISTMESH_FUNCTIONAL({
+        return lhs - rhs(points);
     });
 }
 
 distmesh::functional::Function distmesh::functional::operator*(
+    const Function& lhs, const Function& rhs) {
+    return DISTMESH_FUNCTIONAL({
+        return lhs(points) * rhs(points);
+    });
+}
+
+distmesh::functional::Function distmesh::functional::operator*(
+    const Function& lhs, const dtype::real& rhs) {
+    return DISTMESH_FUNCTIONAL({
+        return lhs(points) * rhs;
+    });
+}
+
+distmesh::functional::Function distmesh::functional::operator*(
+    const dtype::real& lhs, const Function& rhs) {
+    return DISTMESH_FUNCTIONAL({
+        return lhs * rhs(points);
+    });
+}
+
+distmesh::functional::Function distmesh::functional::operator&&(
+    const Function& lhs, const Function& rhs) {
+    return DISTMESH_FUNCTIONAL({
+        return lhs(points).max(rhs(points));
+    });
+}
+
+distmesh::functional::Function distmesh::functional::operator||(
     const Function& lhs, const Function& rhs) {
     return DISTMESH_FUNCTIONAL({
         return lhs(points).min(rhs(points));
