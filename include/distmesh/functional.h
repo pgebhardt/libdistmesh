@@ -57,6 +57,8 @@ namespace functional {
         Function& operator-=(const dtype::real& rhs);
         Function& operator*=(const Function& rhs);
         Function& operator*=(const dtype::real& rhs);
+        Function& operator/=(const Function& rhs);
+        Function& operator/=(const dtype::real& rhs);
         friend Function operator+(const Function& lhs, const Function& rhs);
         friend Function operator+(const Function& lhs, const dtype::real& rhs);
         friend Function operator+(const dtype::real& lhs, const Function& rhs);
@@ -66,10 +68,13 @@ namespace functional {
         friend Function operator*(const Function& lhs, const Function& rhs);
         friend Function operator*(const Function& lhs, const dtype::real& rhs);
         friend Function operator*(const dtype::real& lhs, const Function& rhs);
+        friend Function operator/(const Function& lhs, const Function& rhs);
+        friend Function operator/(const Function& lhs, const dtype::real& rhs);
+        friend Function operator/(const dtype::real& lhs, const Function& rhs);
 
-        // boolean operations
-        friend Function operator&&(const Function& lhs, const Function& rhs);
-        friend Function operator||(const Function& lhs, const Function& rhs);
+        // comparison operations
+        Function min(const Function& rhs);
+        Function max(const Function& rhs);
 
         // enable easier compatibility with rest of distmesh
         operator function_t() { return this->function_; }

@@ -22,17 +22,16 @@ int main() {
     midpoints << -0.5, 0.5, 0.5, 0.5;
 
     auto distance_function =
-        distmesh::distance_function::rectangular(bounding_box) -
-        distmesh::distance_function::circular(0.25, midpoints.row(0)) -
-        distmesh::distance_function::circular(0.25, midpoints.row(1)) -
-        elliptical(1.0, 10.0, 0.75, 0.0, -0.5) -
-        elliptical(3.0, 1.0, 0.15, 0.0, 0.1);
+        distmesh::distance_function::rectangular(bounding_box)
+            .max(-distmesh::distance_function::circular(0.25, midpoints.row(0)))
+            .max(-distmesh::distance_function::circular(0.25, midpoints.row(1)))
+            .max(-elliptical(1.0, 10.0, 0.75, 0.0, -0.5))
+            .max(-elliptical(3.0, 1.0, 0.15, 0.0, 0.1));
 
     // create mesh
     auto mesh = distmesh::distmesh(distance_function,
-        DISTMESH_FUNCTIONAL({
-            return 0.2 - distance_function(points);
-        }), 0.02, bounding_box, fixed_points);
+        0.2 - distance_function,
+        0.02, bounding_box, fixed_points);
 
     // plot mesh
     std::ofstream points_file;
