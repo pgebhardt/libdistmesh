@@ -21,8 +21,7 @@
 #include "distmesh/distmesh.h"
 
 // creates distance function of rectangular domain
-distmesh::functional::function_t
-    distmesh::distance_function::rectangular(
+distmesh::functional::function_t distmesh::distance_function::rectangular(
     dtype::array<dtype::real> rectangle) {
     return DISTMESH_FUNCTIONAL({
         dtype::array<dtype::real> result =
@@ -45,13 +44,16 @@ distmesh::functional::function_t distmesh::distance_function::elliptical(
     return DISTMESH_FUNCTIONAL({
         if (midpoint.cols() == points.cols()) {
             if (radii.cols() == points.cols()) {
-                return ((points - midpoint).rowwise() / radii.row(0)).square().rowwise().sum().sqrt() - 1.0;
+                return ((points.rowwise() - midpoint.row(0)).rowwise() / radii.row(0))
+                    .square().rowwise().sum().sqrt() - 1.0;
             } else {
-                return (points - midpoint).square().rowwise().sum().sqrt() - 1.0;
+                return (points.rowwise() - midpoint.row(0))
+                    .square().rowwise().sum().sqrt() - 1.0;
             }
         } else {
             if (radii.cols() == points.cols()) {
-                return (points.rowwise() / radii.row(0)).square().rowwise().sum().sqrt() - 1.0;
+                return (points.rowwise() / radii.row(0))
+                    .square().rowwise().sum().sqrt() - 1.0;
             } else {
                 return points.square().rowwise().sum().sqrt() - 1.0;
             }
@@ -65,7 +67,8 @@ distmesh::functional::function_t
     dtype::real radius, dtype::array<dtype::real> midpoint) {
     return DISTMESH_FUNCTIONAL({
         if (midpoint.cols() == points.cols()) {
-            return (points - midpoint).square().rowwise().sum().sqrt() - radius;
+            return (points.rowwise() - midpoint.row(0))
+                .square().rowwise().sum().sqrt() - radius;
         } else {
             return points.square().rowwise().sum().sqrt() - radius;
         }
