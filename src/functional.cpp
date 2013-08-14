@@ -18,31 +18,28 @@
 // Contact: patrik.gebhardt@rub.de
 // --------------------------------------------------------------------
 
-#ifndef LIBDISTMESH_INCLUDE_DISTMESH_H
-#define LIBDISTMESH_INCLUDE_DISTMESH_H
+#include "distmesh/distmesh.h"
 
-#include "common.h"
-#include "dtype.h"
-#include "settings.h"
-#include "functional.h"
-#include "distance_function.h"
-#include "edge_length_function.h"
-#include "triangulation.h"
-#include "utils.h"
-
-// namespace distmesh
-namespace distmesh {
-    // apply the distmesh algorithm
-    std::tuple<dtype::array<dtype::real>, dtype::array<dtype::index>> distmesh(
-        functional::function_t distance_function,
-        functional::function_t edge_length_function,
-        dtype::real edge_length_base,
-        dtype::array<dtype::real> bounding_box,
-        dtype::array<dtype::real> fixed_points=dtype::array<dtype::real>());
-
-    // determine boundary edges of given triangulation
-    dtype::array<dtype::index> boundedges(
-        const Eigen::Ref<dtype::array<dtype::index>>& triangulation);
+// generate new function with difference of two
+distmesh::functional::function_t distmesh::functional::diff(
+    function_t function1, function_t function2) {
+    return DISTMESH_FUNCTIONAL({
+        return function1(points).max(-function2(points));
+    });
 }
 
-#endif
+// generates new functional with intersect of two
+distmesh::functional::function_t distmesh::functional::intersect(
+    function_t function1, function_t function2) {
+    return DISTMESH_FUNCTIONAL({
+        return function1(points).max(function2(points));
+    });
+}
+
+// generates new functional with union of two
+distmesh::functional::function_t distmesh::functional::union_(
+    function_t function1, function_t function2) {
+    return DISTMESH_FUNCTIONAL({
+        return function1(points).min(function2(points));
+    });
+}

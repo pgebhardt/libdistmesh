@@ -21,9 +21,9 @@
 #include "distmesh/distmesh.h"
 
 // uniform edge length
-distmesh::edge_length_function::function_t
+distmesh::functional::function_t
     distmesh::edge_length_function::uniform() {
-    return DISTMESH_EDGE_LENGTH_FUNCTION({
+    return DISTMESH_FUNCTIONAL({
         return dtype::array<dtype::real>::Ones(points.rows(), 1);
     });
 }

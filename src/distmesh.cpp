@@ -26,8 +26,8 @@
 // apply the distmesh algorithm
 std::tuple<distmesh::dtype::array<distmesh::dtype::real>,
     distmesh::dtype::array<distmesh::dtype::index>> distmesh::distmesh(
-    distance_function::function_t distance_function,
-    edge_length_function::function_t edge_length_function,
+    functional::function_t distance_function,
+    functional::function_t edge_length_function,
     dtype::real edge_length_base,
     dtype::array<dtype::real> bounding_box,
     dtype::array<dtype::real> fixed_points) {
@@ -94,12 +94,8 @@ std::tuple<distmesh::dtype::array<distmesh::dtype::real>,
             hbars.pow(points.cols()).sum()), 1.0 / points.cols());
 
         // calculate force vector for each bar
-        dtype::array<dtype::real> force = ((desired_bar_length - bar_length)
-            / bar_length).max(0.0);
-        dtype::array<dtype::real> force_vector(bar_indices.rows(), points.cols());
-        for (dtype::index dim = 0; dim < points.cols(); ++dim) {
-            force_vector.col(dim) = force * bar_vector.col(dim);
-        }
+        dtype::array<dtype::real> force_vector = bar_vector.colwise() *
+            ((desired_bar_length - bar_length) / bar_length).max(0.0).col(0);
 
         // move points
         buffer_stop_criterion = points;
