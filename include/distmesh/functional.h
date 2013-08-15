@@ -38,10 +38,11 @@ namespace distmesh {
             const Eigen::Ref<dtype::array<dtype::real>>&)> function_t;
 
         // create class from function type
-        Functional(const function_t& func);
+        Functional(const function_t& func) :function_(func) {}
 
         // copy constructor
-        Functional(const Functional& rhs);
+        Functional(const Functional& rhs) : function_(rhs.function()) {}
+        Functional(Functional&& rhs) : function_(std::move(rhs.function())) {}
 
         // evaluate function by call
         dtype::array<dtype::real> operator()(

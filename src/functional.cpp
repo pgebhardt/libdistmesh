@@ -20,12 +20,6 @@
 
 #include "distmesh/distmesh.h"
 
-distmesh::Functional::Functional(const function_t& func)
-    : function_(func) { }
-
-distmesh::Functional::Functional(const Functional& rhs)
-    : function_(rhs.function()) { }
-
 distmesh::dtype::array<distmesh::dtype::real> distmesh::Functional::operator()(
     const Eigen::Ref<dtype::array<dtype::real>>& points) const {
     return this->function()(points);
