@@ -26,7 +26,6 @@
 #include "settings.h"
 #include "functional.h"
 #include "distance_function.h"
-#include "edge_length_function.h"
 #include "triangulation.h"
 #include "utils.h"
 
@@ -34,8 +33,9 @@
 namespace distmesh {
     // apply the distmesh algorithm
     std::tuple<dtype::array<dtype::real>, dtype::array<dtype::index>> distmesh(
-        Functional distance_function, Functional edge_length_function,
-        dtype::real edge_length_base, dtype::array<dtype::real> bounding_box,
+        Functional distance_function, dtype::real edge_length_base,
+        Functional edge_length_function=1.0,
+        dtype::array<dtype::real> bounding_box=dtype::array<dtype::real>(),
         dtype::array<dtype::real> fixed_points=dtype::array<dtype::real>());
 
     // determine boundary edges of given triangulation

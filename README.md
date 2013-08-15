@@ -24,15 +24,8 @@ Example
 #include <distmesh/distmesh.h>
 
 int main() {
-    // bounding box in which the algorithm tries to create points
-    distmesh::dtype::array<distmesh::dtype::real> bounding_box(2, 2);
-    bounding_box << -1.0, 1.0, -1.0, 1.0;
-
     // create mesh
-    auto mesh = distmesh::distmesh(
-        distmesh::distance_function::circular(1.0),
-        distmesh::edge_length_function::uniform(),
-        0.2, bounding_box);
+    auto mesh = distmesh::distmesh(distmesh::distance_function::circular(1.0), 0.2);
 
     return 0;
 }
@@ -43,9 +36,9 @@ int main() {
 #include <distmesh/distmesh.h>
 
 int main() {
-    // bounding box in which the algorithm tries to create points
-    distmesh::dtype::array<distmesh::dtype::real> bounding_box(2, 2);
-    bounding_box << -1.0, 1.0, -1.0, 1.0;
+    // description of rectangular domain
+    distmesh::dtype::array<distmesh::dtype::real> rectangle(2, 2);
+    rectangle << -1.0, 1.0, -1.0, 1.0;
 
     // fixed points at the corners of domain to guarantee convergence
     distmesh::dtype::array<distmesh::dtype::real> fixed_points(4, 2);
@@ -53,10 +46,10 @@ int main() {
 
     // create mesh
     auto mesh = distmesh::distmesh(
-        distmesh::distance_function::rectangular(bounding_box)
+        distmesh::distance_function::rectangular(rectangle)
             .max(-distmesh::distance_function::circular(0.5)),
-        0.05 + 0.3 * distmesh::distance_function::circular(0.5),
-        0.05, bounding_box, fixed_points);
+        0.05, 0.05 + 0.3 * distmesh::distance_function::circular(0.5),
+        rectangle, fixed_points);
 
     return 0;
 }

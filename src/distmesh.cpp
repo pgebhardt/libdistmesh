@@ -26,12 +26,12 @@
 // apply the distmesh algorithm
 std::tuple<distmesh::dtype::array<distmesh::dtype::real>,
     distmesh::dtype::array<distmesh::dtype::index>> distmesh::distmesh(
-    Functional distance_function, Functional edge_length_function,
-    dtype::real edge_length_base, dtype::array<dtype::real> bounding_box,
+    Functional distance_function, dtype::real edge_length_base,
+    Functional edge_length_function, dtype::array<dtype::real> bounding_box,
     dtype::array<dtype::real> fixed_points) {
     // create initial distribution in bounding_box
     dtype::array<dtype::real> points = utils::create_point_list(distance_function,
-        edge_length_function, edge_length_base, bounding_box, fixed_points);
+        edge_length_base, edge_length_function, bounding_box, fixed_points);
 
     // create initial triangulation
     dtype::array<dtype::index> triangulation = triangulation::delaunay(points);

@@ -2,24 +2,18 @@
 #include <fstream>
 
 int main() {
-    // bounding box in which the algorithm tries to create points
-    distmesh::dtype::array<distmesh::dtype::real> bounding_box(2, 2);
-    bounding_box << -1.0, 1.0, -1.0, 1.0;
-
-    // fixed points at the corners of domain to guarantee convergence
-    distmesh::dtype::array<distmesh::dtype::real> fixed_points(4, 2);
-    fixed_points << -1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0;
-
+    // midpoints of ears
     distmesh::dtype::array<distmesh::dtype::real> midpoints(2, 2);
     midpoints << -0.8, 0.8, 0.8, 0.8;
 
+    // distance function as union of 3 circles
     auto distance_function = distmesh::distance_function::circular()
         .min(distmesh::distance_function::circular(0.5, midpoints.row(0)))
         .min(distmesh::distance_function::circular(0.5, midpoints.row(1)));
 
     // create mesh
-    auto mesh = distmesh::distmesh(distance_function,
-        0.5 - distance_function, 0.05, bounding_box);
+    auto mesh = distmesh::distmesh(distance_function, 0.05,
+        0.5 - distance_function);
 
     // plot mesh
     std::ofstream points_file;

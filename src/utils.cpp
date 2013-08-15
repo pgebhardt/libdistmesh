@@ -27,9 +27,15 @@
 
 // create point list
 distmesh::dtype::array<distmesh::dtype::real> distmesh::utils::create_point_list(
-    Functional distance_function, Functional edge_length_function,
-    dtype::real edge_length_base, dtype::array<dtype::real> bounding_box,
+    Functional distance_function, dtype::real edge_length_base,
+    Functional edge_length_function, dtype::array<dtype::real> bounding_box,
     dtype::array<dtype::real> fixed_points) {
+    // check for empty bounding_box
+    if ((bounding_box.rows() == 0) && (bounding_box.cols() == 0)) {
+        bounding_box = dtype::array<dtype::real>(2, 2);
+        bounding_box << -1.0, 1.0, -1.0, 1.0;
+    }
+
     // calculate max number of points per dimension and
     // max total point coun and create initial array
     dtype::array<dtype::index> max_points_per_dimension(

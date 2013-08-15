@@ -22,14 +22,8 @@
 #include <fstream>
 
 int main() {
-    // bounding box in which the algorithm tries to create points
-    distmesh::dtype::array<distmesh::dtype::real> bounding_box(2, 2);
-    bounding_box << -1.0, 1.0, -1.0, 1.0;
-
-    auto mesh = distmesh::distmesh(
-        distmesh::distance_function::circular(1.0),
-        distmesh::edge_length_function::uniform(),
-        0.2, bounding_box);
+    // create mesh
+    auto mesh = distmesh::distmesh(distmesh::distance_function::circular(1.0), 0.2);
 
     // plot mesh
     std::ofstream points_file;

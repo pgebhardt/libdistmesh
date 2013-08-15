@@ -61,10 +61,9 @@ namespace utils {
 
 
     // create point list
-    dtype::array<dtype::real> create_point_list(
-        Functional distance_function, Functional edge_length_function,
-        dtype::real edge_length_base, dtype::array<dtype::real> bounding_box,
-        dtype::array<dtype::real> fixed_points);
+    dtype::array<dtype::real> create_point_list(Functional distance_function,
+        dtype::real edge_length_base, Functional edge_length_function,
+        dtype::array<dtype::real> bounding_box, dtype::array<dtype::real> fixed_points);
 
     // find unique bars
     dtype::array<dtype::index> find_unique_bars(
