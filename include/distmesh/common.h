@@ -22,7 +22,6 @@
 #define LIBDISTMESH_INCLUDE_COMMON_H
 
 // standard c++ includes
-#include <iostream>
 #include <functional>
 #include <tuple>
 

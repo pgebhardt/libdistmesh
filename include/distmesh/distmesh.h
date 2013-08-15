@@ -31,11 +31,14 @@
 
 // namespace distmesh
 namespace distmesh {
+    // easy creation of n-dimensional bounding_box
+    dtype::array<dtype::real> bounding_box(dtype::index dimension);
+
     // apply the distmesh algorithm
     std::tuple<dtype::array<dtype::real>, dtype::array<dtype::index>> distmesh(
         Functional distance_function, dtype::real edge_length_base,
         Functional edge_length_function=1.0,
-        dtype::array<dtype::real> bounding_box=dtype::array<dtype::real>(),
+        dtype::array<dtype::real> bounding_box=distmesh::bounding_box(2),
         dtype::array<dtype::real> fixed_points=dtype::array<dtype::real>());
 
     // determine boundary edges of given triangulation

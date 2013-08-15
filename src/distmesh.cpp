@@ -23,6 +23,15 @@
 #include <set>
 #include <algorithm>
 
+// easy creation of n-dimensional bounding_box
+distmesh::dtype::array<distmesh::dtype::real> distmesh::bounding_box(
+    dtype::index dimension) {
+    dtype::array<dtype::real> box(dimension, 2);
+    box.col(0).fill(-1.0);
+    box.col(1).fill(1.0);
+    return box;
+}
+
 // apply the distmesh algorithm
 std::tuple<distmesh::dtype::array<distmesh::dtype::real>,
     distmesh::dtype::array<distmesh::dtype::index>> distmesh::distmesh(
