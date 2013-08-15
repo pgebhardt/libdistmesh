@@ -13,7 +13,7 @@ int main() {
 
     // create mesh
     auto mesh = distmesh::distmesh(distance_function, 0.05,
-        0.5 - distance_function);
+        0.5 - distance_function, distmesh::bounding_box(2) * 2.0);
 
     // plot mesh
     std::ofstream points_file;
