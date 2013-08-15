@@ -76,9 +76,6 @@ namespace distmesh {
         Functional min(const Functional& rhs);
         Functional max(const Functional& rhs);
 
-        // enable easier compatibility with rest of distmesh
-        operator function_t() { return this->function_; }
-
         // accessors
         function_t& function() { return this->function_; }
         const function_t& function() const { return this->function_; }

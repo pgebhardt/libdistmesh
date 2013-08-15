@@ -62,10 +62,8 @@ namespace utils {
 
     // create point list
     dtype::array<dtype::real> create_point_list(
-        Functional::function_t distance_function,
-        Functional::function_t edge_length_function,
-        dtype::real edge_length_base,
-        dtype::array<dtype::real> bounding_box,
+        Functional distance_function, Functional edge_length_function,
+        dtype::real edge_length_base, dtype::array<dtype::real> bounding_box,
         dtype::array<dtype::real> fixed_points);
 
     // find unique bars
@@ -75,8 +73,7 @@ namespace utils {
 
     // project points outside of boundary back to it
     void project_points_to_function(
-        Functional::function_t distance_function,
-        dtype::real edge_length_base,
+        Functional distance_function, dtype::real edge_length_base,
         Eigen::Ref<dtype::array<dtype::real>> points);
 }
 }

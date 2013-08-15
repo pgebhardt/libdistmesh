@@ -27,10 +27,8 @@
 
 // create point list
 distmesh::dtype::array<distmesh::dtype::real> distmesh::utils::create_point_list(
-    Functional::function_t distance_function,
-    Functional::function_t edge_length_function,
-    dtype::real edge_length_base,
-    dtype::array<dtype::real> bounding_box,
+    Functional distance_function, Functional edge_length_function,
+    dtype::real edge_length_base, dtype::array<dtype::real> bounding_box,
     dtype::array<dtype::real> fixed_points) {
     // calculate max number of points per dimension and
     // max total point coun and create initial array
@@ -128,8 +126,7 @@ distmesh::dtype::array<distmesh::dtype::index> distmesh::utils::find_unique_bars
 
 // project points outside of boundary back to it
 void distmesh::utils::project_points_to_function(
-    Functional::function_t distance_function,
-    dtype::real edge_length_base,
+    Functional distance_function, dtype::real edge_length_base,
     Eigen::Ref<dtype::array<dtype::real>> points) {
     // evaluate distance function at points
     dtype::array<dtype::real> distance = distance_function(points);

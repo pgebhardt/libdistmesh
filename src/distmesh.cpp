@@ -26,10 +26,8 @@
 // apply the distmesh algorithm
 std::tuple<distmesh::dtype::array<distmesh::dtype::real>,
     distmesh::dtype::array<distmesh::dtype::index>> distmesh::distmesh(
-    Functional::function_t distance_function,
-    Functional::function_t edge_length_function,
-    dtype::real edge_length_base,
-    dtype::array<dtype::real> bounding_box,
+    Functional distance_function, Functional edge_length_function,
+    dtype::real edge_length_base, dtype::array<dtype::real> bounding_box,
     dtype::array<dtype::real> fixed_points) {
     // create initial distribution in bounding_box
     dtype::array<dtype::real> points = utils::create_point_list(distance_function,
