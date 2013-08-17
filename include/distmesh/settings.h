@@ -29,6 +29,7 @@ namespace settings {
     static const dtype::real general_precision = 1e-1;
     static const dtype::real deltaT = 1e-1;
     static const dtype::index max_steps = 10000;
+    static const unsigned random_seed = std::chrono::system_clock::now().time_since_epoch().count();
 }
 }
 

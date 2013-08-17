@@ -24,6 +24,7 @@
 // standard c++ includes
 #include <functional>
 #include <tuple>
+#include <chrono>
 
 // Eigen lib for array handling
 #include <Eigen/Dense>

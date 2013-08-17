@@ -20,7 +20,6 @@
 
 #include "distmesh/distmesh.h"
 #include <random>
-#include <chrono>
 #include <limits>
 #include <set>
 #include <array>
@@ -61,8 +60,7 @@ distmesh::dtype::array<distmesh::dtype::real> distmesh::utils::create_point_list
         initial_points, inside);
 
     // initialize random number generator
-    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-    std::default_random_engine random_generator(seed);
+    std::default_random_engine random_generator(settings::random_seed);
     std::uniform_real_distribution<dtype::real> random_distribution(0.0, 1.0);
 
     // calculate propability to keep point in point list based on
