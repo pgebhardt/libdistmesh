@@ -40,7 +40,6 @@ distmesh::dtype::array<distmesh::dtype::index>
     // calculate delaunay triangulation
     qh_new_qhull(points.cols(), points.rows(), points_rowmajor.data(), False,
         (char*)flags.c_str(), nullptr, stderr);
-    qh_triangulate();
 
     // count all upper delaunay facets
     dtype::index facet_count = 0;
