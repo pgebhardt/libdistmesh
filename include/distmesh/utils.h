@@ -67,7 +67,6 @@ namespace utils {
 
     // find unique bars
     dtype::array<dtype::index> find_unique_bars(
-        const Eigen::Ref<dtype::array<dtype::real>>& points,
         const Eigen::Ref<dtype::array<dtype::index>>& triangulation);
 
     // project points outside of boundary back to it

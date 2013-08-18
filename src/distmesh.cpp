@@ -77,7 +77,7 @@ std::tuple<distmesh::dtype::array<distmesh::dtype::real>,
                 circumcenter_criterion);
 
             // find unique bar indices
-            bar_indices = utils::find_unique_bars(points, triangulation);
+            bar_indices = utils::find_unique_bars(triangulation);
 
             buffer_retriangulation_criterion = points;
         }

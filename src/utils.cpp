@@ -24,6 +24,14 @@
 #include <set>
 #include <array>
 
+distmesh::dtype::index factorial(distmesh::dtype::index n) {
+    if (n <= 1) {
+        return 1;
+    } else {
+        return n * factorial(n - 1);
+    }
+}
+
 // create point list
 distmesh::dtype::array<distmesh::dtype::real> distmesh::utils::create_point_list(
     Functional distance_function, dtype::real edge_length_base,
@@ -93,27 +101,37 @@ distmesh::dtype::array<distmesh::dtype::real> distmesh::utils::create_point_list
 
 // find unique bars
 distmesh::dtype::array<distmesh::dtype::index> distmesh::utils::find_unique_bars(
-    const Eigen::Ref<dtype::array<dtype::real>>& points,
     const Eigen::Ref<dtype::array<dtype::index>>& triangulation) {
-    // fill set of sorted bar indices
-    std::set<std::array<dtype::index, 2>> bar_indices_set;
-    std::array<dtype::index, 2> bar = {{0, 0}};
-    for (dtype::index triangle = 0; triangle < triangulation.rows(); ++triangle)
-    for (dtype::index i = 0; i < points.cols() + 1; ++i) {
-        if (triangulation(triangle, i) > triangulation(triangle, (i + 1) % (points.cols() + 1))) {
-            bar[0] = triangulation(triangle, i);
-            bar[1] = triangulation(triangle, (i + 1) % (points.cols() + 1));
-        } else {
-            bar[0] = triangulation(triangle, (i + 1) % (points.cols() + 1));
-            bar[1] = triangulation(triangle, i);
+    // find all combinations
+    dtype::array<dtype::index> combinations(factorial(triangulation.cols()) /
+        (factorial(2) * factorial(triangulation.cols() - 2)), 2);
+    combinations.fill(0);
+    combinations.row(0) << 0, 1;
+    for (dtype::index combination = 1; combination < combinations.rows(); ++combination) {
+        combinations(combination, 0) = combinations(combination - 1, 0);
+        combinations(combination, 1) = combinations(combination - 1, 1) + 1;
+        if (combinations(combination, 1) >= triangulation.cols()) {
+            combinations(combination, 0) = combinations(combination - 1, 0) + 1;
+            combinations(combination, 1) = combinations(combination, 0) + 1;
         }
-        bar_indices_set.insert(bar);
+    }
+
+    // find unique bars for all combinations
+    std::set<std::array<dtype::index, 2>> bar_set;
+    std::array<dtype::index, 2> bar = {{0, 0}};
+    for (dtype::index combination = 0; combination < combinations.rows(); ++combination) {
+        for (dtype::index triangle = 0; triangle < triangulation.rows(); ++triangle) {
+            bar[0] = triangulation(triangle, combinations(combination, 0));
+            bar[1] = triangulation(triangle, combinations(combination, 1));
+
+            bar_set.insert(bar);
+        }
     }
 
     // copy set to eigen array
-    dtype::array<dtype::index> bar_indices(bar_indices_set.size(), 2);
+    dtype::array<dtype::index> bar_indices(bar_set.size(), 2);
     dtype::index bar_index = 0;
-    for (auto & bar : bar_indices_set) {
+    for (const auto& bar : bar_set) {
         bar_indices(bar_index, 0) = bar[0];
         bar_indices(bar_index, 1) = bar[1];
         bar_index++;
