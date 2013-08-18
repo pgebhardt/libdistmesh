@@ -99,22 +99,36 @@ distmesh::dtype::array<distmesh::dtype::real> distmesh::utils::create_point_list
     return final_points;
 }
 
+// create array with all unique combinations n over k
+distmesh::dtype::array<distmesh::dtype::index> distmesh::utils::n_over_k(
+    dtype::index n, dtype::index k) {
+    // fill an array with all unique combinations n over k,
+    // starting with 0, 1, 2, ...
+    dtype::array<dtype::index> combinations =
+        dtype::array<dtype::index>::Zero(factorial(n) /
+            (factorial(k) * factorial(n - k)), k);
+    combinations.row(0).setLinSpaced(k, 0, k - 1);
+
+    for (dtype::index combination = 1; combination < combinations.rows(); ++combination) {
+        combinations.row(combination) = combinations.row(combination - 1);
+        for (int col = k - 1; col >= 0; --col) {
+            combinations(combination, col) = combinations(combination - 1, col) + 1;
+            if (combinations(combination, col) >= n) {
+                combinations(combination, col) = combinations(combination, col - 1) + 2;
+            } else {
+                break;
+            }
+        }
+    }
+
+    return combinations;
+}
+
 // find unique bars
 distmesh::dtype::array<distmesh::dtype::index> distmesh::utils::find_unique_bars(
     const Eigen::Ref<dtype::array<dtype::index>>& triangulation) {
-    // find all combinations
-    dtype::array<dtype::index> combinations(factorial(triangulation.cols()) /
-        (factorial(2) * factorial(triangulation.cols() - 2)), 2);
-    combinations.fill(0);
-    combinations.row(0) << 0, 1;
-    for (dtype::index combination = 1; combination < combinations.rows(); ++combination) {
-        combinations(combination, 0) = combinations(combination - 1, 0);
-        combinations(combination, 1) = combinations(combination - 1, 1) + 1;
-        if (combinations(combination, 1) >= triangulation.cols()) {
-            combinations(combination, 0) = combinations(combination - 1, 0) + 1;
-            combinations(combination, 1) = combinations(combination, 0) + 1;
-        }
-    }
+    // find all unique combinations
+    dtype::array<dtype::index> combinations = n_over_k(triangulation.cols(), 2);
 
     // find unique bars for all combinations
     std::set<std::array<dtype::index, 2>> bar_set;

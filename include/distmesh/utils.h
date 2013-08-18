@@ -65,6 +65,9 @@ namespace utils {
         dtype::real edge_length_base, Functional edge_length_function,
         dtype::array<dtype::real> bounding_box, dtype::array<dtype::real> fixed_points);
 
+    // create array with all unique combinations n over k
+    dtype::array<dtype::index> n_over_k(dtype::index n, dtype::index k);
+
     // find unique bars
     dtype::array<dtype::index> find_unique_bars(
         const Eigen::Ref<dtype::array<dtype::index>>& triangulation);
