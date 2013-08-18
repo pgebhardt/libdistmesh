@@ -24,7 +24,8 @@
 #include <set>
 #include <array>
 
-distmesh::dtype::index factorial(distmesh::dtype::index n) {
+// calculate factorial recursively
+distmesh::dtype::index distmesh::utils::factorial(distmesh::dtype::index n) {
     if (n <= 1) {
         return 1;
     } else {
@@ -63,7 +64,8 @@ distmesh::dtype::array<distmesh::dtype::real> distmesh::utils::create_point_list
     }
 
     // reject points outside of region defined by distance_function
-    dtype::array<bool> inside = distance_function(initial_points) < settings::general_precision * edge_length_base;
+    dtype::array<bool> inside = distance_function(initial_points) <
+        settings::general_precision * edge_length_base;
     dtype::array<dtype::real> inside_points = select_masked_array_elements<dtype::real>(
         initial_points, inside);
 
@@ -133,13 +135,12 @@ distmesh::dtype::array<distmesh::dtype::index> distmesh::utils::find_unique_bars
     // find unique bars for all combinations
     std::set<std::array<dtype::index, 2>> bar_set;
     std::array<dtype::index, 2> bar = {{0, 0}};
-    for (dtype::index combination = 0; combination < combinations.rows(); ++combination) {
-        for (dtype::index triangle = 0; triangle < triangulation.rows(); ++triangle) {
-            bar[0] = triangulation(triangle, combinations(combination, 0));
-            bar[1] = triangulation(triangle, combinations(combination, 1));
+    for (dtype::index combination = 0; combination < combinations.rows(); ++combination)
+    for (dtype::index triangle = 0; triangle < triangulation.rows(); ++triangle) {
+        bar[0] = triangulation(triangle, combinations(combination, 0));
+        bar[1] = triangulation(triangle, combinations(combination, 1));
 
-            bar_set.insert(bar);
-        }
+        bar_set.insert(bar);
     }
 
     // copy set to eigen array

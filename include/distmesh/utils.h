@@ -59,6 +59,8 @@ namespace utils {
         return result;
     }
 
+    // calculate factorial recursively
+    distmesh::dtype::index factorial(dtype::index n);
 
     // create point list
     dtype::array<dtype::real> create_point_list(Functional distance_function,
