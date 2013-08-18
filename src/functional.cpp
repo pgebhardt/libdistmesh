@@ -25,8 +25,8 @@ distmesh::dtype::array<distmesh::dtype::real> distmesh::Functional::operator()(
     return this->function()(points);
 }
 
-distmesh::Functional distmesh::Functional::operator-() {
-    Functional func(*this);
+distmesh::Functional distmesh::Functional::operator-() const {
+    function_t func = this->function();;
     return DISTMESH_FUNCTIONAL({
         return -func(points);
     });
@@ -189,7 +189,7 @@ distmesh::Functional distmesh::operator/(
 }
 
 distmesh::Functional distmesh::Functional::min(
-    const Functional& rhs) {
+    const Functional& rhs) const {
     Functional res(this->function());
     return DISTMESH_FUNCTIONAL({
         return res(points).min(rhs(points));
@@ -197,7 +197,7 @@ distmesh::Functional distmesh::Functional::min(
 }
 
 distmesh::Functional distmesh::Functional::max(
-    const Functional& rhs) {
+    const Functional& rhs) const {
     Functional res(this->function());
     return DISTMESH_FUNCTIONAL({
         return res(points).max(rhs(points));

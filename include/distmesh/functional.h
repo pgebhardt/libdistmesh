@@ -54,7 +54,7 @@ namespace distmesh {
 
         // basic arithmetic operations
         Functional& operator+() { return *this; }
-        Functional operator-();
+        Functional operator-() const;
         Functional& operator+=(const Functional& rhs);
         Functional& operator+=(const dtype::real& rhs);
         Functional& operator-=(const Functional& rhs);
@@ -77,8 +77,8 @@ namespace distmesh {
         friend Functional operator/(const dtype::real& lhs, const Functional& rhs);
 
         // comparison operations
-        Functional min(const Functional& rhs);
-        Functional max(const Functional& rhs);
+        Functional min(const Functional& rhs) const;
+        Functional max(const Functional& rhs) const;
 
         // accessors
         function_t& function() { return this->function_; }
