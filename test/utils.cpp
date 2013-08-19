@@ -21,6 +21,42 @@
 #include "gtest/gtest.h"
 #include "distmesh/distmesh.h"
 
+TEST(UtilsTest, SelectMaskedArrayElements) {
+    distmesh::dtype::array<distmesh::dtype::real> array(4, 2);
+    array << 1.0, 2.0, 2.0, 3.0, 3.0, 4.0, 4.0, 5.0;
+
+    distmesh::dtype::array<bool> mask(4, 1);
+    mask << true, false, false, true;
+
+    auto masked_array = distmesh::utils::select_masked_array_elements<
+        distmesh::dtype::real>(array, mask);
+
+    distmesh::dtype::array<distmesh::dtype::real> test_masked_array(2, 2);
+    test_masked_array << 1.0, 2.0, 4.0, 5.0;
+
+    EXPECT_EQ(masked_array.rows(), 2u);
+    EXPECT_EQ(masked_array.cols(), 2u);
+    EXPECT_TRUE((masked_array == test_masked_array).all());
+};
+
+TEST(UtilsTest, SelectMaskedIndexedElements) {
+    distmesh::dtype::array<distmesh::dtype::real> array(4, 2);
+    array << 1.0, 2.0, 2.0, 3.0, 3.0, 4.0, 4.0, 5.0;
+
+    distmesh::dtype::array<distmesh::dtype::index> indices(2, 1);
+    indices << 1, 3;
+
+    auto indexed_array = distmesh::utils::select_indexed_array_elements<
+        distmesh::dtype::real>(array, indices);
+
+    distmesh::dtype::array<distmesh::dtype::real> test_indexed_array(2, 2);
+    test_indexed_array << 2.0, 3.0, 4.0, 5.0;
+
+    EXPECT_EQ(indexed_array.rows(), 2u);
+    EXPECT_EQ(indexed_array.cols(), 2u);
+    EXPECT_TRUE((indexed_array == test_indexed_array).all());
+};
+
 TEST(UtilsTest, Factorial) {
     EXPECT_EQ(distmesh::utils::factorial(0), 1u);
     EXPECT_EQ(distmesh::utils::factorial(1), 1u);
