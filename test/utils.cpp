@@ -21,6 +21,8 @@
 #include "gtest/gtest.h"
 #include "distmesh/distmesh.h"
 
+#include <iostream>
+
 TEST(UtilsTest, SelectMaskedArrayElements) {
     distmesh::dtype::array<distmesh::dtype::real> array(4, 2);
     array << 1.0, 2.0, 2.0, 3.0, 3.0, 4.0, 4.0, 5.0;
@@ -81,4 +83,19 @@ TEST(UtilsTest, NOverK) {
                          1, 3,
                          2, 3;
     EXPECT_TRUE((combinations == test_combinations).all());
+};
+
+TEST(UtilsTest, PointsInsidePoly) {
+    distmesh::dtype::array<distmesh::dtype::real> polygon(4, 2);
+    polygon << -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0;
+
+    distmesh::dtype::array<distmesh::dtype::real> points(3, 2);
+    points << 0.0, 0.0, -2.0, 0.0, 0.0, 4.0;
+
+    auto inside = distmesh::utils::points_inside_poly(points, polygon);
+
+    distmesh::dtype::array<bool> test_inside(3, 1);
+    test_inside << true, false, false;
+
+    EXPECT_TRUE((inside == test_inside).all());
 };

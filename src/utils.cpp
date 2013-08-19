@@ -24,6 +24,8 @@
 #include <set>
 #include <array>
 
+#include <iostream>
+
 // calculate factorial recursively
 distmesh::dtype::index distmesh::utils::factorial(distmesh::dtype::index n) {
     if (n <= 1) {
@@ -184,4 +186,23 @@ void distmesh::utils::project_points_to_function(
                 0.0);
         }
     }
+}
+
+// check whether points lies inside or outside of polygon
+distmesh::dtype::array<bool> distmesh::utils::points_inside_poly(
+    const Eigen::Ref<dtype::array<dtype::real>>& points,
+    const Eigen::Ref<dtype::array<dtype::real>>& polygon) {
+    dtype::array<bool> inside(points.rows(), 1);
+    inside.fill(false);
+
+    for (dtype::index i = 0, j = polygon.rows() - 1;
+        i < polygon.rows(); j = i++) {
+        inside = (((points.col(1) < polygon(i, 1)) != (points.col(1) < polygon(j, 1))) &&
+            (points.col(0) < (polygon(j, 0) - polygon(i, 0)) * (points.col(1) - polygon(i, 1)) /
+            (polygon(j, 1) - polygon(i, 1)) + polygon(i, 0))).select(
+            inside.select(dtype::array<bool>::Constant(points.rows(), 1, false),
+                dtype::array<bool>::Constant(points.rows(), 1, true)), inside);
+    }
+
+    return inside;
 }
