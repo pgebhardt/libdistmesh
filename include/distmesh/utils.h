@@ -31,7 +31,7 @@ namespace utils {
     dtype::array<type> select_masked_array_elements(
         const Eigen::Ref<dtype::array<type>>& array,
         const Eigen::Ref<dtype::array<bool>>& mask) {
-        dtype::array<type> result(array.rows(), array.cols());
+        dtype::array<type> result(mask.count(), array.cols());
         dtype::index result_count = 0;
         for (dtype::index row = 0; row < array.rows(); ++row) {
             if (mask(row, 0)) {
@@ -39,7 +39,6 @@ namespace utils {
                 result_count++;
             }
         }
-        result.conservativeResize(result_count, array.cols());
 
         return result;
     }
