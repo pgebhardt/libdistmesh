@@ -114,10 +114,10 @@ distmesh::dtype::array<distmesh::dtype::index> distmesh::utils::n_over_k(
     for (dtype::index combination = 1; combination < combinations.rows(); ++combination) {
         combinations.row(combination) = combinations.row(combination - 1);
         for (int col = k - 1; col >= 0; --col) {
-            combinations(combination, col) = combinations(combination - 1, col) + 1;
-            if (combinations(combination, col) >= n) {
-                combinations(combination, col) = combinations(combination, col - 1) + 2;
-            } else {
+            combinations.block(combination, col, 1, k - col).row(0)
+                .setLinSpaced(k - col, combinations(combination, col) + 1,
+                    combinations(combination, col) + k - col);
+            if (combinations(combination, k - 1)  < n) {
                 break;
             }
         }
