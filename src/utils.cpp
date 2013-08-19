@@ -24,8 +24,6 @@
 #include <set>
 #include <array>
 
-#include <iostream>
-
 // calculate factorial recursively
 distmesh::dtype::index distmesh::utils::factorial(distmesh::dtype::index n) {
     if (n <= 1) {
@@ -88,7 +86,7 @@ distmesh::dtype::array<distmesh::dtype::real> distmesh::utils::create_point_list
 
     // reject points with wrong propability
     dtype::real propability_norm = propability.minCoeff();
-    dtype::index final_point_count = fixed_points.rows();
+    dtype::index final_point_count = 0;
     for (dtype::index point = 0; point < propability.rows(); ++point) {
         if (random_distribution(random_generator) <
             std::pow(propability_norm / propability(point, 0),
@@ -189,17 +187,17 @@ void distmesh::utils::project_points_to_function(
 }
 
 // check whether points lies inside or outside of polygon
-distmesh::dtype::array<distmesh::dtype::index> distmesh::utils::points_inside_poly(
+distmesh::dtype::array<distmesh::dtype::real> distmesh::utils::points_inside_poly(
     const Eigen::Ref<dtype::array<dtype::real>>& points,
     const Eigen::Ref<dtype::array<dtype::real>>& polygon) {
-    dtype::array<distmesh::dtype::index> inside(points.rows(), 1);
+    dtype::array<distmesh::dtype::real> inside(points.rows(), 1);
     inside.fill(0.0);
 
     for (dtype::index i = 0, j = polygon.rows() - 1;
         i < polygon.rows(); j = i++) {
         inside = (((points.col(1) < polygon(i, 1)) != (points.col(1) < polygon(j, 1))) &&
             (points.col(0) < (polygon(j, 0) - polygon(i, 0)) * (points.col(1) - polygon(i, 1)) /
-            (polygon(j, 1) - polygon(i, 1)) + polygon(i, 0))).select(1 - inside, inside);
+            (polygon(j, 1) - polygon(i, 1)) + polygon(i, 0))).select(1.0 - inside, inside);
     }
 
     return inside;

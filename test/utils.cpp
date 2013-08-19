@@ -94,8 +94,8 @@ TEST(UtilsTest, PointsInsidePoly) {
 
     auto inside = distmesh::utils::points_inside_poly(points, polygon);
 
-    distmesh::dtype::array<distmesh::dtype::index> test_inside(3, 1);
-    test_inside << 1, 0, 0;
+    distmesh::dtype::array<distmesh::dtype::real> test_inside(3, 1);
+    test_inside << 1.0, 0.0, 0.0;
 
     EXPECT_TRUE((inside == test_inside).all());
 };

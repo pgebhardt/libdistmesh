@@ -79,7 +79,7 @@ namespace utils {
         Eigen::Ref<dtype::array<dtype::real>> points);
 
     // check whether points lies inside or outside of polygon
-    distmesh::dtype::array<distmesh::dtype::index> points_inside_poly(
+    distmesh::dtype::array<distmesh::dtype::real> points_inside_poly(
         const Eigen::Ref<dtype::array<dtype::real>>& points,
         const Eigen::Ref<dtype::array<dtype::real>>& polygon);
 }
