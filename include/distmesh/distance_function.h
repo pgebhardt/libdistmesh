@@ -39,6 +39,7 @@ namespace distance_function {
         dtype::array<dtype::real> midpoint=dtype::array<dtype::real>());
 
     // creates distance function for domain described by polygon
+    // Only 2D domains supported
     Functional polygon(
         const Eigen::Ref<dtype::array<dtype::real>>& polygon);
 }

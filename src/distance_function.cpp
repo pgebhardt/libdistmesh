@@ -78,6 +78,12 @@ distmesh::Functional
 // creates distance function for domain described by polygon
 distmesh::Functional distmesh::distance_function::polygon(
     const Eigen::Ref<dtype::array<dtype::real>>& polygon) {
+    // check input
+    if (polygon.cols() != 2) {
+        throw std::invalid_argument(
+            "distmesh::distance_function::polygon: polygon.cols() != 2");
+    }
+
     return DISTMESH_FUNCTIONAL({
         dtype::array<dtype::real> v(points.rows(), 2);
         dtype::array<dtype::real> w(points.rows(), 2);
