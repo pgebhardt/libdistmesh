@@ -76,9 +76,10 @@ namespace distmesh {
         friend Functional operator/(const Functional& lhs, const dtype::real& rhs);
         friend Functional operator/(const dtype::real& lhs, const Functional& rhs);
 
-        // comparison operations
+        // mathematical methods
         Functional min(const Functional& rhs) const;
         Functional max(const Functional& rhs) const;
+        Functional abs() const;
 
         // accessors
         function_t& function() { return this->function_; }

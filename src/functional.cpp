@@ -203,3 +203,10 @@ distmesh::Functional distmesh::Functional::max(
         return res(points).max(rhs(points));
     });
 }
+
+distmesh::Functional distmesh::Functional::abs() const {
+    Functional res(this->function());
+    return DISTMESH_FUNCTIONAL({
+        return res(points).abs();
+    });
+}
