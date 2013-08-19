@@ -37,6 +37,10 @@ namespace distance_function {
     // creates distance function for circular domains
     Functional circular(dtype::real radius=1.0,
         dtype::array<dtype::real> midpoint=dtype::array<dtype::real>());
+
+    // creates distance function for domain described by polygon
+    Functional polygon(
+        const Eigen::Ref<dtype::array<dtype::real>>& polygon);
 }
 }
 

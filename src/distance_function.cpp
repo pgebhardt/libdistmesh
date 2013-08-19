@@ -74,3 +74,36 @@ distmesh::Functional
         }
     });
 }
+
+// creates distance function for domain described by polygon
+distmesh::Functional distmesh::distance_function::polygon(
+    const Eigen::Ref<dtype::array<dtype::real>>& polygon) {
+    return DISTMESH_FUNCTIONAL({
+        dtype::array<dtype::real> v(points.rows(), 2);
+        dtype::array<dtype::real> w(points.rows(), 2);
+        dtype::array<dtype::real> c1(points.rows(), 1);
+        dtype::array<dtype::real> c2(points.rows(), 1);
+        dtype::array<dtype::real> distance(points.rows(), polygon.rows());
+
+        for (dtype::index i = 0, j = polygon.rows() - 1;
+            i < polygon.rows(); j = i++) {
+            v.rowwise() = polygon.row(i) - polygon.row(j);
+            w = points.rowwise() - polygon.row(j);
+
+            c1 = v.col(0) * w.col(0) + v.col(1) * w.col(1);
+            c2 = v.col(0) * v.col(0) + v.col(1) * v.col(1);
+
+            distance.col(i) =
+                (c1 <= 0.0).select(
+                    (points.rowwise() - polygon.row(j)).square().rowwise().sum().sqrt(),
+                (c1 >= c2).select(
+                    (points.rowwise() - polygon.row(i)).square().rowwise().sum().sqrt(),
+                    (points - ((v.colwise() * (c1 / c2).col(0)).rowwise() + polygon.row(j)))
+                        .square().rowwise().sum().sqrt()
+                ));
+        }
+
+        return (1.0 - 2.0 * utils::points_inside_poly(points, polygon)) *
+            distance.rowwise().minCoeff();
+    });
+}
