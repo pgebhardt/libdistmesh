@@ -48,6 +48,10 @@ namespace distmesh {
         Functional(const Functional& rhs) : function_(rhs.function()) {}
         Functional(Functional&& rhs) : function_(std::move(rhs.function())) {}
 
+        // assignment operator
+        Functional& operator=(const Functional& rhs);
+        Functional& operator=(Functional&& rhs);
+
         // evaluate function by call
         dtype::array<dtype::real> operator()(
             const Eigen::Ref<dtype::array<dtype::real>>& points) const;

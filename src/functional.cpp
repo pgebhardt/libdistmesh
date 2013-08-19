@@ -20,6 +20,18 @@
 
 #include "distmesh/distmesh.h"
 
+// assignment operator
+distmesh::Functional& distmesh::Functional::operator=(
+    const Functional& rhs) {
+    this->function() = rhs.function();
+    return *this;
+}
+distmesh::Functional& distmesh::Functional::operator=(
+    Functional&& rhs) {
+    this->function() = std::move(rhs.function());
+    return *this;
+}
+
 distmesh::dtype::array<distmesh::dtype::real> distmesh::Functional::operator()(
     const Eigen::Ref<dtype::array<dtype::real>>& points) const {
     return this->function()(points);
