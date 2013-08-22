@@ -25,7 +25,7 @@
 #include <functional>
 #include <tuple>
 #include <chrono>
-#include <exception>
+#include <stdexcept>
 
 // Eigen lib for array handling
 #include <Eigen/Dense>
