@@ -22,7 +22,7 @@ import os
 import glob
 
 # create environment
-env = Environment()
+env = Environment(ENV=os.environ)
 
 # add paths and library
 env.Append(

@@ -19,9 +19,10 @@
 # --------------------------------------------------------------------
 
 import sconshelper
+import os
 
 # create environment
-env = Environment()
+env = Environment(ENV=os.environ)
 
 # use clang++
 env.Replace(CXX='clang++')
