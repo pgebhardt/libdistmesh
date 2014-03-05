@@ -31,10 +31,8 @@ env.Replace(CXX='clang++')
 sconshelper.Library(name='distmesh', env=env, arguments=ARGUMENTS,
     CXXFLAGS=[
         '-std=c++11',
-        '-O4',
         ],
     LINKFLAGS=[
-        '-O4',
         ],
     CPPPATH=[
         '/usr/include/eigen3/',
