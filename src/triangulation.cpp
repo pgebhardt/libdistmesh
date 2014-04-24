@@ -38,6 +38,9 @@ distmesh::dtype::array<distmesh::dtype::index>
     std::string flags = "qhull d Qt Qbb Qc Qz";
 
     // calculate delaunay triangulation
+    if (qh_qh) {
+        qh_save_qhull();
+    }
     qh_new_qhull(points.cols(), points.rows(), points_rowmajor.data(), False,
         (char*)flags.c_str(), nullptr, stderr);
     qh_triangulate();
