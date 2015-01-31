@@ -146,7 +146,7 @@ distmesh::dtype::array<distmesh::dtype::index> distmesh::boundedges(
     for (dtype::index combination = 0; combination < combinations.rows(); ++combination)
     for (dtype::index triangle = 0; triangle < triangulation.rows(); ++triangle) {
         // get current edge
-        for (dtype::index vertex = 0; vertex < edge.size(); ++vertex) {
+        for (size_t vertex = 0; vertex < edge.size(); ++vertex) {
             edge[vertex] = triangulation(triangle, combinations(combination, vertex));
         }
 

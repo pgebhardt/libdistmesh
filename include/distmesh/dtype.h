@@ -24,15 +24,15 @@
 // namespace distmesh::dtype
 namespace distmesh {
 namespace dtype {
-    // basic scalar types
-    typedef double real;
-    typedef unsigned int index;
-
     // basic linear algebra types
     template <
         class type
     >
     using array = Eigen::Array<type, Eigen::Dynamic, Eigen::Dynamic>;
+
+    // basic scalar types
+    typedef double real;
+    typedef Eigen::ArrayXf::Index index;
 }
 }
 
