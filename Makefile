@@ -5,9 +5,14 @@ PROJECT := distmesh
 BUILD_DIR := build
 PREFIX ?= /usr/local
 
+# Compiler
+AR := ar rcs
+CXX := clang++
+
 # Cross compile for arm architecture
 ARM ?= 0
 ifeq ($(ARM), 1)
+	CXX := arm-linux-gnueabihf-g++
 	TARGET_ARCH := armv7-linux-gnueabihf
 endif
 
@@ -15,19 +20,10 @@ endif
 TARGET_ARCH ?= $(shell uname -m)-$(shell uname)
 BUILD_DIR := $(BUILD_DIR)/$(TARGET_ARCH)
 
-
 # The target shared library and static library names
 LIB_BUILD_DIR := $(BUILD_DIR)/lib
 NAME := $(LIB_BUILD_DIR)/lib$(PROJECT).so
 STATIC_NAME := $(LIB_BUILD_DIR)/lib$(PROJECT)_static.a
-
-# Compiler
-AR := ar rcs
-CXX := clang++
-
-ifeq ($(ARM), 1)
-	CXX := arm-linux-gnueabihf-g++
-endif
 
 # Version Define
 GIT_VERSION := $(shell git describe --tags --long)
@@ -40,6 +36,7 @@ INCLUDE_DIRS := /usr/local/include ./include
 # Compiler Flags
 COMMON_FLAGS := $(addprefix -I, $(INCLUDE_DIRS)) -DGIT_VERSION=\"$(GIT_VERSION)\" -O3
 CFLAGS := -std=c++11 -fPIC
+LINKFLAGS := -O3 -fPIC
 LDFLAGS := $(addprefix -l, $(LIBRARIES)) $(addprefix -L, $(LIBRARY_DIRS))
 
 # Source Files
@@ -61,12 +58,12 @@ examples: $(EXAMPLE_BINS)
 
 $(EXAMPLE_BINS): % : %.o $(STATIC_NAME)
 	@mkdir -p $(BUILD_DIR)/examples
-	@cp examples/plot_mesh.py $(BUILD_DIR)/examples
-	$(CXX) $< $(STATIC_NAME) -o $@ $(LDFLAGS)
+	@cp -u examples/plot_mesh.py $(BUILD_DIR)/examples
+	$(CXX) $< $(STATIC_NAME) -o $@ $(LDFLAGS) $(LINKFLAGS)
 
 $(NAME): $(CXX_OBJS) $(CU_OBJS)
 	@mkdir -p $(LIB_BUILD_DIR)
-	$(CXX) -shared -o $@ $(CXX_OBJS) $(CU_OBJS)
+	$(CXX) -shared -o $@ $(CXX_OBJS) $(CU_OBJS) $(LINKFLAGS)
 
 $(STATIC_NAME): $(CXX_OBJS) $(CU_OBJS)
 	@mkdir -p $(LIB_BUILD_DIR)
