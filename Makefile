@@ -74,10 +74,10 @@ $(BUILD_DIR)/%.o: %.cpp $(HXX_SRCS)
 	@$(foreach d, $(subst /, ,${@D}), mkdir -p $d && cd $d && ):
 	$(CXX) $(CFLAGS) $(COMMON_FLAGS) -c -o $@ $<
 
-clean:
-	@rm -rf $(BUILD_DIR)
-
-install:
+install: $(NAME) $(STATIC_NAME) $(HXX_SRCS)
 	install -m 0644 $(NAME) $(PREFIX)/lib
 	install -m 0644 $(STATIC_NAME) $(PREFIX)/lib
 	$(foreach f, $(HXX_SRCS), install -D -m 0644 $f $(PREFIX)/$f && ):
+
+clean:
+	@rm -rf $(BUILD_DIR)
