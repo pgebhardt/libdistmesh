@@ -66,11 +66,11 @@ $(EXAMPLE_BINS): % : %.o $(STATIC_NAME)
 
 $(NAME): $(CXX_OBJS) $(CU_OBJS)
 	@mkdir -p $(LIB_BUILD_DIR)
-	$(CXX) -shared -o $@ $(CXX_OBJS) $(CU_OBJS) $(LDFLAGS)
+	$(CXX) -shared -o $@ $(CXX_OBJS) $(CU_OBJS)
 
 $(STATIC_NAME): $(CXX_OBJS) $(CU_OBJS)
 	@mkdir -p $(LIB_BUILD_DIR)
-	$(AR) $@ $(CXX_OBJS) $(CU_OBJS) $(LDFLAGS)
+	$(AR) $@ $(CXX_OBJS) $(CU_OBJS)
 
 $(BUILD_DIR)/%.o: %.cpp $(HXX_SRCS)
 	@$(foreach d, $(subst /, ,${@D}), mkdir -p $d && cd $d && ):
