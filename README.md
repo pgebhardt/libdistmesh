@@ -11,9 +11,7 @@ Simply clone the repository, update submodules and make sure all dependencies ar
 For building the project the [SCons](http://www.scons.org/) build system is used:
 
     git clone https://github.com/schansge/libdistmesh.git
-    git submodule update --init
-    scons
-    scons install
+    make && make install
 
 Example
 -------
@@ -36,12 +34,8 @@ int main() {
 #include <distmesh/distmesh.h>
 
 int main() {
-    // description of rectangular domain
-    distmesh::dtype::array<distmesh::dtype::real> rectangle(2, 2);
-    rectangle << -1.0, 1.0, -1.0, 1.0;
-
     // fixed points at the corners of domain to guarantee convergence
-    distmesh::dtype::array<distmesh::dtype::real> fixed_points(4, 2);
+    Eigen::ArrayXXd fixed_points(4, 2);
     fixed_points << -1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0;
 
     // create mesh
@@ -49,7 +43,7 @@ int main() {
         distmesh::distance_function::rectangular(rectangle)
             .max(-distmesh::distance_function::circular(0.5)),
         0.05, 0.05 + 0.3 * distmesh::distance_function::circular(0.5),
-        rectangle, fixed_points);
+        distmesh::bounding_box(2), fixed_points);
 
     return 0;
 }
@@ -62,8 +56,8 @@ libDistMesh uses some C++11 features and compiles properly with both clang
 and gcc. For linear algebra operations and the delaunay triangulation two
 libraries are needed for building and using libDistMesh:
 
-* [Eigen](http://eigen.tuxfamily.org/) 3.2.0
-* [QHull](http://www.qhull.org/) 2012.1 (building only)
+* [Eigen](http://eigen.tuxfamily.org/) >= 3.2.0
+* [QHull](http://www.qhull.org/) >= 2012.1
 
 References
 ----------
