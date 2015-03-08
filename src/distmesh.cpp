@@ -81,21 +81,21 @@ std::tuple<Eigen::ArrayXXd, Eigen::ArrayXXi> distmesh::distmesh(
         // calculate bar vectors and their length
         Eigen::ArrayXXd bar_vector = utils::select_indexed_array_elements<double>(points, bar_indices.col(0)) -
             utils::select_indexed_array_elements<double>(points, bar_indices.col(1));
-        auto bar_length = bar_vector.square().rowwise().sum().sqrt();
+        Eigen::ArrayXXd bar_length = bar_vector.square().rowwise().sum().sqrt();
 
         // evaluate edge_length_function at midpoints of bars
-        auto hbars = edge_length_function(0.5 *
+        Eigen::ArrayXXd hbars = edge_length_function(0.5 *
             (utils::select_indexed_array_elements<double>(points, bar_indices.col(0)) +
             utils::select_indexed_array_elements<double>(points, bar_indices.col(1))));
 
         // calculate desired bar length
-        auto desired_bar_length = hbars *
+        Eigen::ArrayXXd desired_bar_length = hbars *
             (1.0 + 0.4 / std::pow(2.0, points.cols() - 1)) *
             std::pow((bar_length.pow(points.cols()).sum() /
             hbars.pow(points.cols()).sum()), 1.0 / points.cols());
 
         // calculate force vector for each bar
-        auto force_vector = bar_vector.colwise() *
+        Eigen::ArrayXXd force_vector = bar_vector.colwise() *
             ((desired_bar_length - bar_length) / bar_length).max(0.0).col(0);
 
         // move points
