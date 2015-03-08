@@ -62,9 +62,9 @@ INCLUDE_DIRS := ./include
 # Compiler Flags
 ##############################
 GIT_VERSION := $(shell git describe --tags --long)
-COMMON_FLAGS := $(addprefix -I, $(INCLUDE_DIRS)) -DGIT_VERSION=\"$(GIT_VERSION)\" -O3
+COMMON_FLAGS := $(addprefix -I, $(INCLUDE_DIRS)) -DGIT_VERSION=\"$(GIT_VERSION)\" -O3 -Wall -Wextra
 CFLAGS := -std=c++11 -fPIC
-LINKFLAGS := -O3 -fPIC -static-libgcc -static-libstdc++
+LINKFLAGS := -O3 -fPIC -static-libstdc++
 LDFLAGS := $(addprefix -l, $(LIBRARIES)) $(addprefix -L, $(LIBRARY_DIRS))
 
 ##############################
@@ -90,7 +90,7 @@ examples: $(EXAMPLE_BINS)
 
 $(EXAMPLE_BINS): $(BUILD_DIR)/examples/% : $(BUILD_DIR)/objs/examples/%.o $(STATIC_NAME)
 	@mkdir -p $(BUILD_DIR)/examples
-	@cp -u examples/plot_mesh.py $(BUILD_DIR)/examples
+	@cp examples/plot_mesh.py $(BUILD_DIR)/examples
 	$(CXX) $< $(STATIC_NAME) -o $@ $(LDFLAGS) $(LINKFLAGS)
 
 $(NAME): $(CXX_OBJS) $(CU_OBJS)
