@@ -1,67 +1,57 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8">
+    <meta charset='utf-8'>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>libDistMesh by schansge</title>
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-    <script src="javascripts/respond.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+
     <!--[if lt IE 9]>
-      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-    <!--[if lt IE 8]>
-    <link rel="stylesheet" href="stylesheets/ie.css">
-    <![endif]-->
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 
+    <title>libDistMesh by schansge</title>
   </head>
+
   <body>
-      <div id="header">
-        <nav>
-          <li class="fork"><a href="https://github.com/schansge/libdistmesh">View On GitHub</a></li>
-          <li class="downloads"><a href="https://github.com/schansge/libdistmesh/zipball/master">ZIP</a></li>
-          <li class="downloads"><a href="https://github.com/schansge/libdistmesh/tarball/master">TAR</a></li>
-          <li class="title">DOWNLOADS</li>
-        </nav>
-      </div><!-- end header -->
+    <header>
+      <div class="inner">
+        <h1>libDistMesh</h1>
+        <h2>libDistMesh: A Simple Mesh Generator in C++</h2>
+        <a href="https://github.com/schansge/libdistmesh" class="button"><small>View project on</small> GitHub</a>
+      </div>
+    </header>
 
-    <div class="wrapper">
-
-      <section>
-        <div id="title">
-          <h1>libDistMesh</h1>
-          <p>libDistMesh: A Simple Mesh Generator in C++</p>
-          <hr>
-          <span class="credits left">Project maintained by <a href="https://github.com/schansge">schansge</a></span>
-          <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="https://twitter.com/michigangraham">mattgraham</a></span>
-        </div>
-
-        <h1>
-<a name="libdistmesh-a-simple-mesh-generator-in-c" class="anchor" href="#libdistmesh-a-simple-mesh-generator-in-c"><span class="octicon octicon-link"></span></a>libDistMesh: A Simple Mesh Generator in C++</h1>
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <h1>
+<a id="libdistmesh-a-simple-mesh-generator-in-c" class="anchor" href="#libdistmesh-a-simple-mesh-generator-in-c" aria-hidden="true"><span class="octicon octicon-link"></span></a>libDistMesh: A Simple Mesh Generator in C++</h1>
 
 <p>libDistMesh is a C++ implementation of the original <a href="http://persson.berkeley.edu/distmesh/">DistMesh</a>
 algorithm for generating unstructured triangular and tetrahedral meshes using <em>signed distance functions</em>.</p>
 
 <h2>
-<a name="getting-started" class="anchor" href="#getting-started"><span class="octicon octicon-link"></span></a>Getting Started</h2>
+<a id="getting-started" class="anchor" href="#getting-started" aria-hidden="true"><span class="octicon octicon-link"></span></a>Getting Started</h2>
 
 <p>Simply clone the repository, update submodules and make sure all dependencies are installed.
 For building the project the <a href="http://www.scons.org/">SCons</a> build system is used:</p>
 
 <pre><code>git clone https://github.com/schansge/libdistmesh.git
-git submodule update --init
-scons
-scons install
+make &amp;&amp; make install
 </code></pre>
 
 <h2>
-<a name="example" class="anchor" href="#example"><span class="octicon octicon-link"></span></a>Example</h2>
+<a id="example" class="anchor" href="#example" aria-hidden="true"><span class="octicon octicon-link"></span></a>Example</h2>
 
 <ul>
 <li>Uniform Mesh on Unit Circle:</li>
-</ul><pre><code>#include &lt;distmesh/distmesh.h&gt;
+</ul>
+
+<pre><code>#include &lt;distmesh/distmesh.h&gt;
 
 int main() {
     // create mesh
@@ -73,15 +63,13 @@ int main() {
 
 <ul>
 <li>Rectangle with circular hole, refined at circle boundary:</li>
-</ul><pre><code>#include &lt;distmesh/distmesh.h&gt;
+</ul>
+
+<pre><code>#include &lt;distmesh/distmesh.h&gt;
 
 int main() {
-    // description of rectangular domain
-    distmesh::dtype::array&lt;distmesh::dtype::real&gt; rectangle(2, 2);
-    rectangle &lt;&lt; -1.0, 1.0, -1.0, 1.0;
-
     // fixed points at the corners of domain to guarantee convergence
-    distmesh::dtype::array&lt;distmesh::dtype::real&gt; fixed_points(4, 2);
+    Eigen::ArrayXXd fixed_points(4, 2);
     fixed_points &lt;&lt; -1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0;
 
     // create mesh
@@ -89,14 +77,14 @@ int main() {
         distmesh::distance_function::rectangular(rectangle)
             .max(-distmesh::distance_function::circular(0.5)),
         0.05, 0.05 + 0.3 * distmesh::distance_function::circular(0.5),
-        rectangle, fixed_points);
+        distmesh::bounding_box(2), fixed_points);
 
     return 0;
 }
 </code></pre>
 
 <h2>
-<a name="dependencies" class="anchor" href="#dependencies"><span class="octicon octicon-link"></span></a>Dependencies</h2>
+<a id="dependencies" class="anchor" href="#dependencies" aria-hidden="true"><span class="octicon octicon-link"></span></a>Dependencies</h2>
 
 <p>libDistMesh uses some C++11 features and compiles properly with both clang
 and gcc. For linear algebra operations and the delaunay triangulation two
@@ -104,11 +92,13 @@ libraries are needed for building and using libDistMesh:</p>
 
 <ul>
 <li>
-<a href="http://eigen.tuxfamily.org/">Eigen</a> 3.2.0</li>
+<a href="http://eigen.tuxfamily.org/">Eigen</a> &gt;= 3.2.0</li>
 <li>
-<a href="http://www.qhull.org/">QHull</a> 2012.1 (building only)</li>
-</ul><h2>
-<a name="references" class="anchor" href="#references"><span class="octicon octicon-link"></span></a>References</h2>
+<a href="http://www.qhull.org/">QHull</a> &gt;= 2012.1</li>
+</ul>
+
+<h2>
+<a id="references" class="anchor" href="#references" aria-hidden="true"><span class="octicon octicon-link"></span></a>References</h2>
 
 <p>The DistMesh algorithm is described in the following two references.
 If you use the algorithm in a program or publication, please
@@ -121,11 +111,26 @@ below.</p>
 <li><p>P.-O. Persson, <strong>Mesh Generation for Implicit Geometries</strong>.
 Ph.D. thesis, <em>Department of Mathematics, MIT</em>, Dec 2004 (<a href="http://persson.berkeley.edu/thesis/persson-thesis-color.pdf">PDF</a>)</p></li>
 </ul>
-      </section>
+        </section>
 
+        <aside id="sidebar">
+          <a href="https://github.com/schansge/libdistmesh/zipball/master" class="button">
+            <small>Download</small>
+            .zip file
+          </a>
+          <a href="https://github.com/schansge/libdistmesh/tarball/master" class="button">
+            <small>Download</small>
+            .tar.gz file
+          </a>
+
+          <p class="repo-owner"><a href="https://github.com/schansge/libdistmesh"></a> is maintained by <a href="https://github.com/schansge">schansge</a>.</p>
+
+          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
+      </div>
     </div>
-    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
-              <script type="text/javascript">
+
+            <script type="text/javascript">
             var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
             document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
           </script>
