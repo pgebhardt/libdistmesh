@@ -23,15 +23,15 @@
 
 int main() {
     // fixed points at the corners of domain to guarantee convergence
-    distmesh::dtype::array<distmesh::dtype::real> fixed_points(4, 2);
+    Eigen::ArrayXXd fixed_points(4, 2);
     fixed_points << -1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0;
 
     // midpoints of eyes, mouth and nose
-    distmesh::dtype::array<distmesh::dtype::real> midpoints(4, 2);
+    Eigen::ArrayXXd midpoints(4, 2);
     midpoints << -0.5, 0.5, 0.5, 0.5, 0.0, -0.5, 0.0, 0.1;
 
     // radii of eliptical mouth and nose
-    distmesh::dtype::array<distmesh::dtype::real> radii(2, 2);
+    Eigen::ArrayXXd radii(2, 2);
     radii << 0.75, 0.75 / std::sqrt(10.0), 0.15 / std::sqrt(3.0), 0.15;
 
     auto distance_function = distmesh::distance_function::rectangular(

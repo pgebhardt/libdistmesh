@@ -25,8 +25,7 @@
 namespace distmesh {
 namespace triangulation {
     // create delaunay triangulation from points array
-    dtype::array<dtype::index> delaunay(
-        const Eigen::Ref<dtype::array<dtype::real>>& points);
+    Eigen::ArrayXXi delaunay(Eigen::Ref<const Eigen::ArrayXXd> points);
 }
 }
 

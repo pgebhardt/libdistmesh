@@ -23,9 +23,7 @@
 
 // macro for easies creation of distmesh lambda functions
 #define DISTMESH_FUNCTIONAL(function_body) \
-    (distmesh::Functional( \
-        [=](const Eigen::Ref<distmesh::dtype::array<distmesh::dtype::real>>& points) -> \
-        distmesh::dtype::array<distmesh::dtype::real> \
+    (distmesh::Functional([=](Eigen::Ref<const Eigen::ArrayXXd> points) -> Eigen::ArrayXXd \
         function_body))
 
 // namespace distmesh
@@ -34,14 +32,13 @@ namespace distmesh {
     class Functional {
     public:
         // function type of Functional callable
-        typedef std::function<dtype::array<dtype::real>(
-            const Eigen::Ref<dtype::array<dtype::real>>&)> function_t;
+        typedef std::function<Eigen::ArrayXXd(Eigen::Ref<const Eigen::ArrayXXd>)> function_t;
 
         // create class from function type
         Functional(const function_t& func) : function_(func) {}
-        Functional(const dtype::real& constant) :
+        Functional(double constant) :
             Functional(DISTMESH_FUNCTIONAL({
-                return dtype::array<dtype::real>::Constant(points.rows(), 1, constant);
+                return Eigen::ArrayXXd::Constant(points.rows(), 1, constant);
             })) {}
 
         // copy constructor
@@ -53,32 +50,31 @@ namespace distmesh {
         Functional& operator=(Functional&& rhs);
 
         // evaluate function by call
-        dtype::array<dtype::real> operator()(
-            const Eigen::Ref<dtype::array<dtype::real>>& points) const;
+        Eigen::ArrayXXd operator() (Eigen::Ref<const Eigen::ArrayXXd> points) const;
 
         // basic arithmetic operations
         Functional& operator+() { return *this; }
         Functional operator-() const;
         Functional& operator+=(const Functional& rhs);
-        Functional& operator+=(const dtype::real& rhs);
+        Functional& operator+=(const double& rhs);
         Functional& operator-=(const Functional& rhs);
-        Functional& operator-=(const dtype::real& rhs);
+        Functional& operator-=(const double& rhs);
         Functional& operator*=(const Functional& rhs);
-        Functional& operator*=(const dtype::real& rhs);
+        Functional& operator*=(const double& rhs);
         Functional& operator/=(const Functional& rhs);
-        Functional& operator/=(const dtype::real& rhs);
+        Functional& operator/=(const double& rhs);
         friend Functional operator+(const Functional& lhs, const Functional& rhs);
-        friend Functional operator+(const Functional& lhs, const dtype::real& rhs);
-        friend Functional operator+(const dtype::real& lhs, const Functional& rhs);
+        friend Functional operator+(const Functional& lhs, const double& rhs);
+        friend Functional operator+(const double& lhs, const Functional& rhs);
         friend Functional operator-(const Functional& lhs, const Functional& rhs);
-        friend Functional operator-(const Functional& lhs, const dtype::real& rhs);
-        friend Functional operator-(const dtype::real& lhs, const Functional& rhs);
+        friend Functional operator-(const Functional& lhs, const double& rhs);
+        friend Functional operator-(const double& lhs, const Functional& rhs);
         friend Functional operator*(const Functional& lhs, const Functional& rhs);
-        friend Functional operator*(const Functional& lhs, const dtype::real& rhs);
-        friend Functional operator*(const dtype::real& lhs, const Functional& rhs);
+        friend Functional operator*(const Functional& lhs, const double& rhs);
+        friend Functional operator*(const double& lhs, const Functional& rhs);
         friend Functional operator/(const Functional& lhs, const Functional& rhs);
-        friend Functional operator/(const Functional& lhs, const dtype::real& rhs);
-        friend Functional operator/(const dtype::real& lhs, const Functional& rhs);
+        friend Functional operator/(const Functional& lhs, const double& rhs);
+        friend Functional operator/(const double& lhs, const Functional& rhs);
 
         // mathematical methods
         Functional min(const Functional& rhs) const;

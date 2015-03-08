@@ -28,12 +28,13 @@ namespace utils {
     template <
         class type
     >
-    dtype::array<type> select_masked_array_elements(
-        const Eigen::Ref<dtype::array<type>>& array,
-        const Eigen::Ref<dtype::array<bool>>& mask) {
-        dtype::array<type> result(mask.count(), array.cols());
-        dtype::index result_count = 0;
-        for (dtype::index row = 0; row < array.rows(); ++row) {
+    Eigen::Array<type, Eigen::Dynamic, Eigen::Dynamic> select_masked_array_elements(
+        Eigen::Ref<const Eigen::Array<type, Eigen::Dynamic, Eigen::Dynamic>> array,
+        Eigen::Ref<const Eigen::Array<bool, Eigen::Dynamic, Eigen::Dynamic>> mask) {
+        Eigen::Array<type, Eigen::Dynamic, Eigen::Dynamic> result(mask.count(), array.cols());
+
+        int result_count = 0;
+        for (int row = 0; row < array.rows(); ++row) {
             if (mask(row, 0)) {
                 result.row(result_count) = array.row(row);
                 result_count++;
@@ -47,11 +48,12 @@ namespace utils {
     template <
         class type
     >
-    dtype::array<type> select_indexed_array_elements(
-        const Eigen::Ref<dtype::array<type>>& array,
-        const Eigen::Ref<dtype::array<dtype::index>>& indices) {
-        dtype::array<type> result(indices.rows(), array.cols());
-        for (dtype::index row = 0; row < indices.rows(); ++row) {
+    Eigen::Array<type, Eigen::Dynamic, Eigen::Dynamic> select_indexed_array_elements(
+        Eigen::Ref<const Eigen::Array<type, Eigen::Dynamic, Eigen::Dynamic>> array,
+        Eigen::Ref<const Eigen::ArrayXXi> indices) {
+        Eigen::Array<type, Eigen::Dynamic, Eigen::Dynamic> result(indices.rows(), array.cols());
+
+        for (int row = 0; row < indices.rows(); ++row) {
             result.row(row) = array.row(indices(row, 0));
         }
 
@@ -59,29 +61,29 @@ namespace utils {
     }
 
     // calculate factorial recursively
-    distmesh::dtype::index factorial(dtype::index n);
+    unsigned factorial(unsigned n);
 
     // create point list
-    dtype::array<dtype::real> create_point_list(Functional distance_function,
-        dtype::real edge_length_base, Functional edge_length_function,
-        dtype::array<dtype::real> bounding_box, dtype::array<dtype::real> fixed_points);
+    Eigen::ArrayXXd create_point_list(Functional distance_function,
+        double edge_length_base, Functional edge_length_function,
+        Eigen::Ref<const Eigen::ArrayXXd> bounding_box,
+        Eigen::Ref<const Eigen::ArrayXXd> fixed_points);
 
     // create array with all unique combinations n over k
-    dtype::array<dtype::index> n_over_k(dtype::index n, dtype::index k);
+    Eigen::ArrayXXi n_over_k(unsigned n, unsigned k);
 
     // find unique bars
-    dtype::array<dtype::index> find_unique_bars(
-        const Eigen::Ref<dtype::array<dtype::index>>& triangulation);
+    Eigen::ArrayXXi find_unique_bars(Eigen::Ref<const Eigen::ArrayXXi> triangulation);
 
     // project points outside of boundary back to it
     void project_points_to_function(
-        Functional distance_function, dtype::real edge_length_base,
-        Eigen::Ref<dtype::array<dtype::real>> points);
+        Functional distance_function, double edge_length_base,
+        Eigen::Ref<Eigen::ArrayXXd> points);
 
     // check whether points lies inside or outside of polygon
-    distmesh::dtype::array<distmesh::dtype::real> points_inside_poly(
-        const Eigen::Ref<dtype::array<dtype::real>>& points,
-        const Eigen::Ref<dtype::array<dtype::real>>& polygon);
+    Eigen::ArrayXXd points_inside_poly(
+        Eigen::Ref<const Eigen::ArrayXXd> points,
+        Eigen::Ref<const Eigen::ArrayXXd> polygon);
 }
 }
 

@@ -22,11 +22,11 @@
 #include <fstream>
 
 int main() {
-    distmesh::dtype::array<distmesh::dtype::real> bounding_box(2, 2);
+    Eigen::ArrayXXd bounding_box(2, 2);
     bounding_box << 0.0, 1.0, 0.0, 1.0;
 
     // fixed points at corners of domain to guarantee convergence
-    distmesh::dtype::array<distmesh::dtype::real> fixed_points(4, 2);
+    Eigen::ArrayXXd fixed_points(4, 2);
     fixed_points << 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0;
 
     // distance function for rectangular domain
@@ -34,7 +34,7 @@ int main() {
         distmesh::distance_function::rectangular(bounding_box);
 
     // corner points of polygon
-    distmesh::dtype::array<distmesh::dtype::real> poly(2, 2);
+    Eigen::ArrayXXd poly(2, 2);
     poly << 0.3, 0.7, 0.7, 0.5;
 
     // edge size function

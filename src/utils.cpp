@@ -25,7 +25,7 @@
 #include <array>
 
 // calculate factorial recursively
-distmesh::dtype::index distmesh::utils::factorial(distmesh::dtype::index n) {
+unsigned distmesh::utils::factorial(unsigned n) {
     if (n <= 1) {
         return 1;
     } else {
@@ -34,28 +34,26 @@ distmesh::dtype::index distmesh::utils::factorial(distmesh::dtype::index n) {
 }
 
 // create point list
-distmesh::dtype::array<distmesh::dtype::real> distmesh::utils::create_point_list(
-    Functional distance_function, dtype::real edge_length_base,
-    Functional edge_length_function, dtype::array<dtype::real> bounding_box,
-    dtype::array<dtype::real> fixed_points) {
+Eigen::ArrayXXd distmesh::utils::create_point_list(
+    Functional distance_function, double edge_length_base,
+    Functional edge_length_function, Eigen::Ref<const Eigen::ArrayXXd> bounding_box,
+    Eigen::Ref<const Eigen::ArrayXXd> fixed_points) {
     // calculate max number of points per dimension and
     // max total point coun and create initial array
-    dtype::array<dtype::index> max_points_per_dimension(
-        bounding_box.rows(), 1);
-    dtype::index max_point_count = 1;
-    for (dtype::index dim = 0; dim < bounding_box.rows(); ++dim) {
+    Eigen::ArrayXXi max_points_per_dimension(bounding_box.rows(), 1);
+    int max_point_count = 1;
+    for (int dim = 0; dim < bounding_box.rows(); ++dim) {
         max_points_per_dimension(dim, 0) = 1 +
             (bounding_box(dim, 1) - bounding_box(dim, 0)) /
             edge_length_base;
         max_point_count *= max_points_per_dimension(dim, 0);
     }
-    dtype::array<dtype::real> initial_points(
-        max_point_count, bounding_box.rows());
+    Eigen::ArrayXXd initial_points(max_point_count, bounding_box.rows());
 
     // fill point list with evenly distributed points
-    dtype::index same_value_count = 1;
-    for (dtype::index dim = 0; dim < bounding_box.rows(); ++dim) {
-        for (dtype::index point = 0; point < max_point_count; ++point) {
+    int same_value_count = 1;
+    for (int dim = 0; dim < bounding_box.rows(); ++dim) {
+        for (int point = 0; point < max_point_count; ++point) {
             initial_points(point, dim) = bounding_box(dim, 0) +
                 edge_length_base * ((point / same_value_count) %
                 max_points_per_dimension(dim, 0));
@@ -64,30 +62,29 @@ distmesh::dtype::array<distmesh::dtype::real> distmesh::utils::create_point_list
     }
 
     // reject points outside of region defined by distance_function
-    dtype::array<bool> inside = distance_function(initial_points) <
+    auto inside = distance_function(initial_points) <
         settings::general_precision * edge_length_base;
-    dtype::array<dtype::real> inside_points = select_masked_array_elements<dtype::real>(
-        initial_points, inside);
+    auto inside_points = select_masked_array_elements<double>(initial_points, inside);
 
     // initialize random number generator
     std::default_random_engine random_generator(settings::random_seed);
-    std::uniform_real_distribution<dtype::real> random_distribution(0.0, 1.0);
+    std::uniform_real_distribution<double> random_distribution(0.0, 1.0);
 
     // calculate propability to keep point in point list based on
     // edge_length_function
-    dtype::array<dtype::real> propability = edge_length_function(inside_points);
+    auto propability = edge_length_function(inside_points);
 
     // add fixed points to final list first
-    dtype::array<dtype::real> final_points(inside_points.rows() + fixed_points.rows(),
+    Eigen::ArrayXXd final_points(inside_points.rows() + fixed_points.rows(),
         bounding_box.rows());
-    for (dtype::index fixed_point = 0; fixed_point < fixed_points.rows(); ++fixed_point) {
+    for (int fixed_point = 0; fixed_point < fixed_points.rows(); ++fixed_point) {
         final_points.row(fixed_point) = fixed_points.row(fixed_point);
     }
 
     // reject points with wrong propability
-    dtype::real propability_norm = propability.minCoeff();
-    dtype::index final_point_count = 0;
-    for (dtype::index point = 0; point < propability.rows(); ++point) {
+    auto propability_norm = propability.minCoeff();
+    int final_point_count = 0;
+    for (int point = 0; point < propability.rows(); ++point) {
         if (random_distribution(random_generator) <
             std::pow(propability_norm / propability(point, 0),
                 bounding_box.rows())) {
@@ -102,22 +99,20 @@ distmesh::dtype::array<distmesh::dtype::real> distmesh::utils::create_point_list
 }
 
 // create array with all unique combinations n over k
-distmesh::dtype::array<distmesh::dtype::index> distmesh::utils::n_over_k(
-    dtype::index n, dtype::index k) {
+Eigen::ArrayXXi distmesh::utils::n_over_k(unsigned n, unsigned k) {
     // fill an array with all unique combinations n over k,
     // starting with 0, 1, 2, ...
-    dtype::array<dtype::index> combinations =
-        dtype::array<dtype::index>::Zero(factorial(n) /
+    Eigen::ArrayXXi combinations = Eigen::ArrayXXi::Zero(factorial(n) /
             (factorial(k) * factorial(n - k)), k);
     combinations.row(0).setLinSpaced(k, 0, k - 1);
 
-    for (dtype::index combination = 1; combination < combinations.rows(); ++combination) {
+    for (int combination = 1; combination < combinations.rows(); ++combination) {
         combinations.row(combination) = combinations.row(combination - 1);
         for (int col = k - 1; col >= 0; --col) {
             combinations.block(combination, col, 1, k - col).row(0)
                 .setLinSpaced(k - col, combinations(combination, col) + 1,
                     combinations(combination, col) + k - col);
-            if (combinations(combination, k - 1)  < n) {
+            if (combinations(combination, k - 1) < (int)n) {
                 break;
             }
         }
@@ -127,16 +122,15 @@ distmesh::dtype::array<distmesh::dtype::index> distmesh::utils::n_over_k(
 }
 
 // find unique bars
-distmesh::dtype::array<distmesh::dtype::index> distmesh::utils::find_unique_bars(
-    const Eigen::Ref<dtype::array<dtype::index>>& triangulation) {
+Eigen::ArrayXXi distmesh::utils::find_unique_bars(Eigen::Ref<const Eigen::ArrayXXi> triangulation) {
     // find all unique combinations
-    dtype::array<dtype::index> combinations = n_over_k(triangulation.cols(), 2);
+    auto combinations = n_over_k(triangulation.cols(), 2);
 
     // find unique bars for all combinations
-    std::set<std::array<dtype::index, 2>> bar_set;
-    std::array<dtype::index, 2> bar = {{0, 0}};
-    for (dtype::index combination = 0; combination < combinations.rows(); ++combination)
-    for (dtype::index triangle = 0; triangle < triangulation.rows(); ++triangle) {
+    std::set<std::array<int, 2>> bar_set;
+    std::array<int, 2> bar = {{0, 0}};
+    for (int combination = 0; combination < combinations.rows(); ++combination)
+    for (int triangle = 0; triangle < triangulation.rows(); ++triangle) {
         bar[0] = triangulation(triangle, combinations(combination, 0));
         bar[1] = triangulation(triangle, combinations(combination, 1));
 
@@ -144,8 +138,8 @@ distmesh::dtype::array<distmesh::dtype::index> distmesh::utils::find_unique_bars
     }
 
     // copy set to eigen array
-    dtype::array<dtype::index> bar_indices(bar_set.size(), 2);
-    dtype::index bar_index = 0;
+    Eigen::ArrayXXi bar_indices(bar_set.size(), 2);
+    Eigen::ArrayXXi::Index bar_index = 0;
     for (const auto& bar : bar_set) {
         bar_indices(bar_index, 0) = bar[0];
         bar_indices(bar_index, 1) = bar[1];
@@ -157,28 +151,28 @@ distmesh::dtype::array<distmesh::dtype::index> distmesh::utils::find_unique_bars
 
 // project points outside of boundary back to it
 void distmesh::utils::project_points_to_function(
-    Functional distance_function, dtype::real edge_length_base,
-    Eigen::Ref<dtype::array<dtype::real>> points) {
+    Functional distance_function, double edge_length_base,
+    Eigen::Ref<Eigen::ArrayXXd> points) {
     // evaluate distance function at points
-    dtype::array<dtype::real> distance = distance_function(points);
+    auto distance = distance_function(points);
 
     // check for points outside of boundary
-    dtype::array<bool> outside = distance > 0.0;
+    auto outside = distance > 0.0;
     if (outside.any()) {
         // calculate gradient
-        dtype::array<dtype::real> gradient(points.rows(), points.cols());
-        dtype::array<dtype::real> deltaX(points.rows(), points.cols());
-        dtype::array<dtype::real> h;
+        Eigen::ArrayXXd gradient(points.rows(), points.cols());
+        Eigen::ArrayXXd deltaX(points.rows(), points.cols());
+        Eigen::ArrayXXd h;
         deltaX.fill(0.0);
-        for (dtype::index dim = 0; dim < points.cols(); ++dim) {
-            deltaX.col(dim).fill(std::sqrt(std::numeric_limits<dtype::real>::epsilon()) * edge_length_base);
+        for (int dim = 0; dim < points.cols(); ++dim) {
+            deltaX.col(dim).fill(std::sqrt(std::numeric_limits<double>::epsilon()) * edge_length_base);
             h = points + deltaX;
             gradient.col(dim) = (distance_function(h) - distance) /
-                (std::sqrt(std::numeric_limits<dtype::real>::epsilon()) * edge_length_base);
+                (std::sqrt(std::numeric_limits<double>::epsilon()) * edge_length_base);
             deltaX.col(dim).fill(0.0);
         }
 
-        for (dtype::index dim = 0; dim < points.cols(); ++dim) {
+        for (int dim = 0; dim < points.cols(); ++dim) {
             points.col(dim) -= outside.select(
                 gradient.col(dim) * distance.col(0) / gradient.square().rowwise().sum(),
                 0.0);
@@ -187,13 +181,13 @@ void distmesh::utils::project_points_to_function(
 }
 
 // check whether points lies inside or outside of polygon
-distmesh::dtype::array<distmesh::dtype::real> distmesh::utils::points_inside_poly(
-    const Eigen::Ref<dtype::array<dtype::real>>& points,
-    const Eigen::Ref<dtype::array<dtype::real>>& polygon) {
-    dtype::array<distmesh::dtype::real> inside(points.rows(), 1);
+Eigen::ArrayXXd distmesh::utils::points_inside_poly(
+    Eigen::Ref<const Eigen::ArrayXXd> points,
+    Eigen::Ref<const Eigen::ArrayXXd> polygon) {
+    Eigen::ArrayXXd inside(points.rows(), 1);
     inside.fill(0.0);
 
-    for (dtype::index i = 0, j = polygon.rows() - 1;
+    for (int i = 0, j = polygon.rows() - 1;
         i < polygon.rows(); j = i++) {
         inside = (((points.col(1) < polygon(i, 1)) != (points.col(1) < polygon(j, 1))) &&
             (points.col(0) < (polygon(j, 0) - polygon(i, 0)) * (points.col(1) - polygon(i, 1)) /

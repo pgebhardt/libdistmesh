@@ -22,12 +22,12 @@
 
 // creates distance function of rectangular domain
 distmesh::Functional distmesh::distance_function::rectangular(
-    dtype::array<dtype::real> rectangle) {
+    Eigen::Ref<const Eigen::ArrayXXd> rectangle) {
     return DISTMESH_FUNCTIONAL({
-        dtype::array<dtype::real> result =
+        Eigen::ArrayXXd result =
             (points.col(0) - rectangle(0, 0))
             .min(rectangle(0, 1) - points.col(0));
-        for (dtype::index dim = 1; dim < points.cols(); ++dim) {
+        for (int dim = 1; dim < points.cols(); ++dim) {
             result = result
                 .min((points.col(dim) - rectangle(dim, 0)))
                 .min(rectangle(dim, 1) - points.col(dim));
@@ -40,7 +40,7 @@ distmesh::Functional distmesh::distance_function::rectangular(
 // Note: not a real distance function but a level function,
 // which is sufficient
 distmesh::Functional distmesh::distance_function::elliptical(
-    dtype::array<dtype::real> radii, dtype::array<dtype::real> midpoint) {
+    Eigen::Ref<const Eigen::ArrayXXd> radii, Eigen::Ref<const Eigen::ArrayXXd> midpoint) {
     return DISTMESH_FUNCTIONAL({
         if (midpoint.cols() == points.cols()) {
             if (radii.cols() == points.cols()) {
@@ -63,8 +63,8 @@ distmesh::Functional distmesh::distance_function::elliptical(
 
 // creates distance function for circular domains
 distmesh::Functional
-    distmesh::distance_function::circular(
-    dtype::real radius, dtype::array<dtype::real> midpoint) {
+    distmesh::distance_function::circular(double radius,
+    Eigen::Ref<const Eigen::ArrayXXd> midpoint) {
     return DISTMESH_FUNCTIONAL({
         if (midpoint.cols() == points.cols()) {
             return (points.rowwise() - midpoint.row(0))
@@ -77,7 +77,7 @@ distmesh::Functional
 
 // creates distance function for domain described by polygon
 distmesh::Functional distmesh::distance_function::polygon(
-    const Eigen::Ref<dtype::array<dtype::real>>& polygon) {
+    Eigen::Ref<const Eigen::ArrayXXd> polygon) {
     // check input
     if (polygon.cols() != 2) {
         throw std::invalid_argument(
@@ -85,13 +85,13 @@ distmesh::Functional distmesh::distance_function::polygon(
     }
 
     return DISTMESH_FUNCTIONAL({
-        dtype::array<dtype::real> v(points.rows(), 2);
-        dtype::array<dtype::real> w(points.rows(), 2);
-        dtype::array<dtype::real> c1(points.rows(), 1);
-        dtype::array<dtype::real> c2(points.rows(), 1);
-        dtype::array<dtype::real> distance(points.rows(), polygon.rows());
+        Eigen::ArrayXXd v(points.rows(), 2);
+        Eigen::ArrayXXd w(points.rows(), 2);
+        Eigen::ArrayXXd c1(points.rows(), 1);
+        Eigen::ArrayXXd c2(points.rows(), 1);
+        Eigen::ArrayXXd distance(points.rows(), polygon.rows());
 
-        for (dtype::index i = 0, j = polygon.rows() - 1;
+        for (int i = 0, j = polygon.rows() - 1;
             i < polygon.rows(); j = i++) {
             v.rowwise() = polygon.row(i) - polygon.row(j);
             w = points.rowwise() - polygon.row(j);

@@ -22,7 +22,6 @@
 #define LIBDISTMESH_INCLUDE_DISTMESH_H
 
 #include "common.h"
-#include "dtype.h"
 #include "settings.h"
 #include "functional.h"
 #include "distance_function.h"
@@ -32,18 +31,17 @@
 // namespace distmesh
 namespace distmesh {
     // easy creation of n-dimensional bounding_box
-    dtype::array<dtype::real> bounding_box(dtype::index dimension);
+    Eigen::ArrayXXd bounding_box(unsigned dimension);
 
     // apply the distmesh algorithm
-    std::tuple<dtype::array<dtype::real>, dtype::array<dtype::index>> distmesh(
-        Functional distance_function, dtype::real edge_length_base,
+    std::tuple<Eigen::ArrayXXd, Eigen::ArrayXXi> distmesh(
+        Functional distance_function, double edge_length_base,
         Functional edge_length_function=1.0,
-        dtype::array<dtype::real> bounding_box=distmesh::bounding_box(2),
-        dtype::array<dtype::real> fixed_points=dtype::array<dtype::real>());
+        Eigen::Ref<const Eigen::ArrayXXd> bounding_box=distmesh::bounding_box(2),
+        Eigen::Ref<const Eigen::ArrayXXd> fixed_points=Eigen::ArrayXXd());
 
     // determine boundary edges of given triangulation
-    dtype::array<dtype::index> boundedges(
-        const Eigen::Ref<dtype::array<dtype::index>>& triangulation);
+    Eigen::ArrayXXi boundedges(Eigen::Ref<const Eigen::ArrayXXi> triangulation);
 }
 
 #endif

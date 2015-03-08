@@ -23,11 +23,11 @@
 
 int main() {
     // description of rectangular domain
-    distmesh::dtype::array<distmesh::dtype::real> rectangle(2, 2);
+    Eigen::ArrayXXd rectangle(2, 2);
     rectangle << -1.0, 1.0, -1.0, 1.0;
 
     // fixed points at the corners of domain to guarantee convergence
-    distmesh::dtype::array<distmesh::dtype::real> fixed_points(4, 2);
+    Eigen::ArrayXXd fixed_points(4, 2);
     fixed_points << -1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0;
 
     // create mesh

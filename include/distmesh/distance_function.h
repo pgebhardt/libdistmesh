@@ -25,23 +25,21 @@
 namespace distmesh {
 namespace distance_function {
     // creates distance function of rectangular domain
-    Functional rectangular(dtype::array<dtype::real> rectangle);
+    Functional rectangular(Eigen::Ref<const Eigen::ArrayXXd> rectangle);
 
     // creates distance function for elliptical domains
     // Note: not a real distance function but a level function,
     // which is sufficient
-    Functional elliptical(
-        dtype::array<dtype::real> radii=dtype::array<dtype::real>(),
-        dtype::array<dtype::real> midpoint=dtype::array<dtype::real>());
+    Functional elliptical(Eigen::Ref<const Eigen::ArrayXXd> radii=Eigen::ArrayXXd(),
+        Eigen::Ref<const Eigen::ArrayXXd> midpoint=Eigen::ArrayXXd());
 
     // creates distance function for circular domains
-    Functional circular(dtype::real radius=1.0,
-        dtype::array<dtype::real> midpoint=dtype::array<dtype::real>());
+    Functional circular(double radius=1.0,
+        Eigen::Ref<const Eigen::ArrayXXd> midpoint=Eigen::ArrayXXd());
 
     // creates distance function for domain described by polygon
     // Only 2D domains supported
-    Functional polygon(
-        const Eigen::Ref<dtype::array<dtype::real>>& polygon);
+    Functional polygon(Eigen::Ref<const Eigen::ArrayXXd> polygon);
 }
 }
 
