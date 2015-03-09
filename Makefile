@@ -110,7 +110,7 @@ examples: $(EXAMPLES_BINS)
 $(EXAMPLES_BINS): $(BUILD_DIR)/examples/% : $(BUILD_DIR)/objs/examples/%.o $(UTILS_OBJS) $(STATIC_NAME)
 	@echo [ Linking ] $@
 	@mkdir -p $(BUILD_DIR)/examples
-	@cp -u examples/plot_mesh.py $(BUILD_DIR)/examples
+	@cp examples/plot_mesh.py $(BUILD_DIR)/examples
 	@$(CXX) -o $@ $< $(UTILS_OBJS) $(STATIC_NAME) $(COMMON_FLAGS) $(LDFLAGS) $(LINKFLAGS)
 
 $(NAME): $(CXX_OBJS)
