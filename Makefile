@@ -22,62 +22,81 @@
 PROJECT := distmesh
 
 ##############################
-# Directories
+# Load build configuration
 ##############################
-BUILD_DIR := build
+CONFIG_FILE ?= Makefile.config
+include $(CONFIG_FILE)
+
+##############################
+# Main output directories
+##############################
 prefix ?= /usr/local
+ROOT_BUILD_DIR := build
+
+# adjust build dir for debug configuration
+DEBUG ?= 0
+ifeq ($(DEBUG), 1)
+	BUILD_DIR := $(ROOT_BUILD_DIR)/debug
+else
+	BUILD_DIR := $(ROOT_BUILD_DIR)/release
+endif
 
 ##############################
 # Compiler
 ##############################
 AR := ar rcs
-CXX := clang++
+CXX ?= /usr/bin/g++
 
-# Cross compile for arm architecture
-ARM ?= 0
-ifeq ($(ARM), 1)
-	CXX := arm-linux-gnueabihf-g++
-	TARGET_ARCH := armv7-linux-gnueabihf
+# use of custom compiler
+ifdef CUSTOM_CXX
+	CXX := $(CUSTOM_CXX)
 endif
 
 # Target build architecture
-TARGET_ARCH ?= $(shell uname -m)-$(shell uname)
-BUILD_DIR := $(BUILD_DIR)/$(TARGET_ARCH)
+TARGET_ARCH_NAME ?= $(shell $(CXX) -dumpmachine)
+BUILD_DIR := $(BUILD_DIR)/$(TARGET_ARCH_NAME)
 
 ##############################
-# The target shared library and static library names
+# The shared library and static library names
 ##############################
-LIB_BUILD_DIR := $(BUILD_DIR)/lib
-NAME := $(LIB_BUILD_DIR)/lib$(PROJECT).so
-STATIC_NAME := $(LIB_BUILD_DIR)/lib$(PROJECT)_static.a
+NAME := $(BUILD_DIR)/lib/lib$(PROJECT).so
+STATIC_NAME := $(BUILD_DIR)/lib/lib$(PROJECT)_static.a
 
 ##############################
 # Includes and libraries
 ##############################
 LIBRARIES := qhull
-LIBRARY_DIRS :=
-INCLUDE_DIRS := ./include
+LIBRARY_DIRS +=
+INCLUDE_DIRS += ./include
 
 ##############################
 # Compiler Flags
 ##############################
 GIT_VERSION := $(shell git describe --tags --long)
-COMMON_FLAGS := $(addprefix -I, $(INCLUDE_DIRS)) -DGIT_VERSION=\"$(GIT_VERSION)\" -O3 -Wall -Wextra
-CFLAGS := -std=c++11 -fPIC
-LINKFLAGS := -O3 -fPIC -static-libstdc++
-LDFLAGS := $(addprefix -l, $(LIBRARIES)) $(addprefix -L, $(LIBRARY_DIRS))
+COMMON_FLAGS := $(addprefix -I, $(INCLUDE_DIRS)) -DGIT_VERSION=\"$(GIT_VERSION)\"
+CXXFLAGS := -std=c++11 -fPIC
+LINKFLAGS := -fPIC -static-libstdc++
+LDFLAGS := $(addprefix -l, $(LIBRARIES)) $(addprefix -L, $(LIBRARY_DIRS)) $(addprefix -Xlinker -rpath , $(LIBRARY_DIRS))
+
+# Set compiler flags for debug configuration
+ifeq ($(DEBUG), 1)
+	COMMON_FLAGS += -g -O0 -DDEBUG
+else
+	COMMON_FLAGS += -O3 -DNDEBUG
+endif
 
 ##############################
 # Source Files
 ##############################
 CXX_SRCS := $(shell find src -name "*.cpp")
 HXX_SRCS := $(shell find include -name "*.h")
-EXAMPLE_SRCS := $(shell find examples -name "*.cpp")
+EXAMPLES_SRCS := $(shell find examples -name "*.cpp")
+EXAMPLES_SRCS := $(filter-out $(UTILS_SRCS), $(EXAMPLES_SRCS))
 
 # Object files
 CXX_OBJS := $(addprefix $(BUILD_DIR)/objs/, $(CXX_SRCS:.cpp=.o))
-EXAMPLE_OBJS := $(addprefix $(BUILD_DIR)/objs/, $(EXAMPLE_SRCS:.cpp=.o))
-EXAMPLE_BINS := $(patsubst examples%.cpp, $(BUILD_DIR)/examples%, $(EXAMPLE_SRCS))
+EXAMPLES_OBJS := $(addprefix $(BUILD_DIR)/objs/, $(EXAMPLES_SRCS:.cpp=.o))
+EXAMPLES_BINS := $(patsubst examples%.cpp, $(BUILD_DIR)/examples%, $(EXAMPLES_SRCS))
 
 ##############################
 # Build targets
@@ -86,29 +105,34 @@ EXAMPLE_BINS := $(patsubst examples%.cpp, $(BUILD_DIR)/examples%, $(EXAMPLE_SRCS
 
 all: $(NAME) $(STATIC_NAME) examples
 
-examples: $(EXAMPLE_BINS)
+examples: $(EXAMPLES_BINS)
 
-$(EXAMPLE_BINS): $(BUILD_DIR)/examples/% : $(BUILD_DIR)/objs/examples/%.o $(STATIC_NAME)
+$(EXAMPLES_BINS): $(BUILD_DIR)/examples/% : $(BUILD_DIR)/objs/examples/%.o $(UTILS_OBJS) $(STATIC_NAME)
+	@echo [ Linking ] $@
 	@mkdir -p $(BUILD_DIR)/examples
 	@cp examples/plot_mesh.py $(BUILD_DIR)/examples
-	$(CXX) $< $(STATIC_NAME) -o $@ $(LDFLAGS) $(LINKFLAGS)
+	@$(CXX) -o $@ $< $(UTILS_OBJS) $(STATIC_NAME) $(COMMON_FLAGS) $(LDFLAGS) $(LINKFLAGS)
 
-$(NAME): $(CXX_OBJS) $(CU_OBJS)
-	@mkdir -p $(LIB_BUILD_DIR)
-	$(CXX) -shared -o $@ $(CXX_OBJS) $(CU_OBJS) $(LDFLAGS) $(LINKFLAGS)
+$(NAME): $(CXX_OBJS)
+	@echo [ Linking ] $@
+	@mkdir -p $(BUILD_DIR)/lib
+	@$(CXX) -shared -o $@ $(CXX_OBJS) $(COMMON_FLAGS) $(LDFLAGS) $(LINKFLAGS)
 
-$(STATIC_NAME): $(CXX_OBJS) $(CU_OBJS)
-	@mkdir -p $(LIB_BUILD_DIR)
-	$(AR) $@ $(CXX_OBJS) $(CU_OBJS)
+$(STATIC_NAME): $(CXX_OBJS)
+	@echo [ Linking ] $@
+	@mkdir -p $(BUILD_DIR)/lib
+	@$(AR) $@ $(CXX_OBJS)
 
 $(BUILD_DIR)/objs/%.o: %.cpp $(HXX_SRCS)
+	@echo [ CXX ] $<
 	@$(foreach d, $(subst /, ,${@D}), mkdir -p $d && cd $d && ):
-	$(CXX) $(CFLAGS) $(COMMON_FLAGS) -c -o $@ $<
+	@$(CXX) $(CXXFLAGS) $(COMMON_FLAGS) -c -o $@ $<
 
-install: $(NAME) $(STATIC_NAME) $(HXX_SRCS)
+install: $(NAME) $(STATIC_NAME) $(HXX_SRCS) $(EXAMPLES_BINS)
 	@install -m 0644 $(NAME) $(prefix)/lib
 	@install -m 0644 $(STATIC_NAME) $(prefix)/lib
 	@$(foreach f, $(HXX_SRCS), install -D -m 0644 $f $(prefix)/$f && ):
+	@$(foreach f, $(EXAMPLES_BINS), install -m 0755 $f $(prefix)/bin && ):
 
 clean:
-	@rm -rf $(BUILD_DIR)
+	@rm -rf $(ROOT_BUILD_DIR)
