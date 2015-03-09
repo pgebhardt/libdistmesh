@@ -53,7 +53,7 @@ std::tuple<Eigen::ArrayXXd, Eigen::ArrayXXi> distmesh::distmesh(
     Eigen::ArrayXXi bar_indices;
     for (unsigned step = 0; step < settings::max_steps; ++step) {
         // retriangulate if point movement is above tolerance
-        auto retriangulation_criterion =
+        double retriangulation_criterion =
             ((points - buffer_retriangulation_criterion).square().rowwise().sum().sqrt() /
             edge_length_base).maxCoeff();
         if (retriangulation_criterion > settings::retriangulation_tolerance) {

@@ -62,9 +62,8 @@ Eigen::ArrayXXd distmesh::utils::create_point_list(
     }
 
     // reject points outside of region defined by distance_function
-    auto inside = distance_function(initial_points) <
-        settings::general_precision * edge_length_base;
-    auto inside_points = select_masked_array_elements<double>(initial_points, inside);
+    Eigen::ArrayXXd inside_points = select_masked_array_elements<double>(initial_points,
+        distance_function(initial_points) < settings::general_precision * edge_length_base);
 
     // initialize random number generator
     std::default_random_engine random_generator(settings::random_seed);
@@ -72,7 +71,7 @@ Eigen::ArrayXXd distmesh::utils::create_point_list(
 
     // calculate propability to keep point in point list based on
     // edge_length_function
-    auto propability = edge_length_function(inside_points);
+    Eigen::ArrayXXd propability = edge_length_function(inside_points);
 
     // add fixed points to final list first
     Eigen::ArrayXXd final_points(inside_points.rows() + fixed_points.rows(),
