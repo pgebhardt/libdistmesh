@@ -37,11 +37,11 @@ std::tuple<Eigen::ArrayXXd, Eigen::ArrayXXi> distmesh::distmesh(
     Functional edge_length_function, Eigen::Ref<const Eigen::ArrayXXd> bounding_box,
     Eigen::Ref<const Eigen::ArrayXXd> fixed_points) {
     // create initial distribution in bounding_box
-    auto points = utils::create_point_list(distance_function,
+    Eigen::ArrayXXd points = utils::create_point_list(distance_function,
         edge_length_base, edge_length_function, bounding_box, fixed_points);
 
     // create initial triangulation
-    auto triangulation = triangulation::delaunay(points);
+    Eigen::ArrayXXi triangulation = triangulation::delaunay(points);
 
     // create points buffer for retriangulation and stop criterion
     Eigen::ArrayXXd buffer_retriangulation_criterion(
