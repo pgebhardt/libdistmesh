@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with libDistMesh.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright (C) 2013 Patrik Gebhardt
+// Copyright (C) 2015 Patrik Gebhardt
 // Contact: patrik.gebhardt@rub.de
 // --------------------------------------------------------------------
 
@@ -25,80 +25,84 @@
 #include <array>
 
 // calculate factorial recursively
-unsigned distmesh::utils::factorial(unsigned n) {
+unsigned distmesh::utils::factorial(unsigned const n) {
     if (n <= 1) {
         return 1;
-    } else {
+    }
+    else {
         return n * factorial(n - 1);
     }
 }
 
 // create point list
-Eigen::ArrayXXd distmesh::utils::create_point_list(
-    Functional distance_function, double edge_length_base,
-    Functional edge_length_function, Eigen::Ref<const Eigen::ArrayXXd> bounding_box,
-    Eigen::Ref<const Eigen::ArrayXXd> fixed_points) {
+Eigen::ArrayXXd distmesh::utils::createPointList(
+    Functional const& distanceFunction, double const baseEdgeLength,
+    Functional const& edgeLengthFunction, Eigen::Ref<Eigen::ArrayXXd const> const boundingBox,
+    Eigen::Ref<Eigen::ArrayXXd const> const fixedPoints) {
     // calculate max number of points per dimension and
     // max total point coun and create initial array
-    Eigen::ArrayXXi max_points_per_dimension(bounding_box.rows(), 1);
-    int max_point_count = 1;
-    for (int dim = 0; dim < bounding_box.rows(); ++dim) {
-        max_points_per_dimension(dim, 0) = 1 +
-            (bounding_box(dim, 1) - bounding_box(dim, 0)) /
-            edge_length_base;
-        max_point_count *= max_points_per_dimension(dim, 0);
+    Eigen::ArrayXi maxPointsPerDimension(boundingBox.rows());
+    int maxPointCount = 1;
+    for (int dim = 0; dim < boundingBox.rows(); ++dim) {
+        maxPointsPerDimension(dim) = 1 +
+            (boundingBox(dim, 1) - boundingBox(dim, 0)) /
+            baseEdgeLength;
+        maxPointCount *= maxPointsPerDimension(dim);
     }
-    Eigen::ArrayXXd initial_points(max_point_count, bounding_box.rows());
+    Eigen::ArrayXXd points(maxPointCount, boundingBox.rows());
 
     // fill point list with evenly distributed points
-    int same_value_count = 1;
-    for (int dim = 0; dim < bounding_box.rows(); ++dim) {
-        for (int point = 0; point < max_point_count; ++point) {
-            initial_points(point, dim) = bounding_box(dim, 0) +
-                edge_length_base * ((point / same_value_count) %
-                max_points_per_dimension(dim, 0));
+    int sameValueCount = 1;
+    for (int dim = 0; dim < boundingBox.rows(); ++dim) {
+        for (int point = 0; point < maxPointCount; ++point) {
+            points(point, dim) = boundingBox(dim, 0) +
+                baseEdgeLength * ((point / sameValueCount) %
+                maxPointsPerDimension(dim));
         }
-        same_value_count *= max_points_per_dimension(dim, 0);
+        sameValueCount *= maxPointsPerDimension(dim);
     }
 
-    // reject points outside of region defined by distance_function
-    Eigen::ArrayXXd inside_points = select_masked_array_elements<double>(initial_points,
-        distance_function(initial_points) < settings::general_precision * edge_length_base);
+    // reject points outside of region defined by distance function
+    points = selectMaskedArrayElements<double>(points,
+        distanceFunction(points) < settings::generalPrecision * baseEdgeLength);
 
-    // initialize random number generator
-    std::default_random_engine random_generator(settings::random_seed);
-    std::uniform_real_distribution<double> random_distribution(0.0, 1.0);
-
-    // calculate propability to keep point in point list based on
-    // edge_length_function
-    Eigen::ArrayXXd propability = edge_length_function(inside_points);
+    // clear dublicate points
+    Eigen::Array<bool, Eigen::Dynamic, 1> isDublicate =
+        Eigen::Array<bool, Eigen::Dynamic, 1>::Constant(points.rows(), true);
+    for (int i = 0; i < fixedPoints.rows(); ++i)
+    for (int j = 0; j < points.rows(); ++j) {
+        isDublicate(j) &= !(fixedPoints.row(i) == points.row(j)).all();
+    }
+    points = selectMaskedArrayElements<double>(points, isDublicate);
 
     // add fixed points to final list first
-    Eigen::ArrayXXd final_points(inside_points.rows() + fixed_points.rows(),
-        bounding_box.rows());
-    for (int fixed_point = 0; fixed_point < fixed_points.rows(); ++fixed_point) {
-        final_points.row(fixed_point) = fixed_points.row(fixed_point);
-    }
+    Eigen::ArrayXXd finalPoints(points.rows() + fixedPoints.rows(), boundingBox.rows());
+    finalPoints.block(0, 0, fixedPoints.rows(), 2) = fixedPoints;
+
+    // initialize random number generator
+    std::default_random_engine randomGenerator(settings::randomSeed);
+    std::uniform_real_distribution<double> randomDistribution(0.0, 1.0);
 
     // reject points with wrong propability
-    auto propability_norm = propability.minCoeff();
-    int final_point_count = 0;
+    Eigen::ArrayXXd propability = edgeLengthFunction(points);
+    double propabilityNorm = propability.minCoeff();
+    int finalPointCount = 0;
     for (int point = 0; point < propability.rows(); ++point) {
-        if (random_distribution(random_generator) <
-            std::pow(propability_norm / propability(point, 0),
-                bounding_box.rows())) {
-            final_points.row(final_point_count + fixed_points.rows()) = inside_points.row(point);
-            final_point_count++;
+        if (randomDistribution(randomGenerator) <
+            std::pow(propabilityNorm / propability(point, 0),
+                boundingBox.rows())) {
+            finalPoints.row(finalPointCount + fixedPoints.rows()) = points.row(point);
+            finalPointCount++;
         }
     }
-    final_points.conservativeResize(final_point_count + fixed_points.rows(),
-        bounding_box.rows());
+    finalPoints.conservativeResize(finalPointCount + fixedPoints.rows(),
+        boundingBox.rows());
 
-    return final_points;
+    return finalPoints;
 }
 
 // create array with all unique combinations n over k
-Eigen::ArrayXXi distmesh::utils::n_over_k(unsigned n, unsigned k) {
+Eigen::ArrayXXi distmesh::utils::nOverK(unsigned const n, unsigned const k) {
     // fill an array with all unique combinations n over k,
     // starting with 0, 1, 2, ...
     Eigen::ArrayXXi combinations = Eigen::ArrayXXi::Zero(factorial(n) /
@@ -121,9 +125,9 @@ Eigen::ArrayXXi distmesh::utils::n_over_k(unsigned n, unsigned k) {
 }
 
 // find unique bars
-Eigen::ArrayXXi distmesh::utils::find_unique_bars(Eigen::Ref<const Eigen::ArrayXXi> triangulation) {
+Eigen::ArrayXXi distmesh::utils::findUniqueBars(Eigen::Ref<Eigen::ArrayXXi const> const triangulation) {
     // find all unique combinations
-    auto combinations = n_over_k(triangulation.cols(), 2);
+    auto combinations = nOverK(triangulation.cols(), 2);
 
     // find unique bars for all combinations
     std::set<std::array<int, 2>> bar_set;
@@ -149,14 +153,14 @@ Eigen::ArrayXXi distmesh::utils::find_unique_bars(Eigen::Ref<const Eigen::ArrayX
 }
 
 // project points outside of boundary back to it
-void distmesh::utils::project_points_to_function(
-    Functional distance_function, double edge_length_base,
+void distmesh::utils::projectPointsToFunction(
+    Functional const& distanceFunction, double const baseEdgeLength,
     Eigen::Ref<Eigen::ArrayXXd> points) {
     // evaluate distance function at points
-    auto distance = distance_function(points);
+    Eigen::ArrayXd distance = distanceFunction(points);
 
     // check for points outside of boundary
-    auto outside = distance > 0.0;
+    Eigen::Array<bool, Eigen::Dynamic, 1> outside = distance > 0.0;
     if (outside.any()) {
         // calculate gradient
         Eigen::ArrayXXd gradient(points.rows(), points.cols());
@@ -164,25 +168,25 @@ void distmesh::utils::project_points_to_function(
         Eigen::ArrayXXd h;
         deltaX.fill(0.0);
         for (int dim = 0; dim < points.cols(); ++dim) {
-            deltaX.col(dim).fill(std::sqrt(std::numeric_limits<double>::epsilon()) * edge_length_base);
+            deltaX.col(dim).fill(std::sqrt(std::numeric_limits<double>::epsilon()) * baseEdgeLength);
             h = points + deltaX;
-            gradient.col(dim) = (distance_function(h) - distance) /
-                (std::sqrt(std::numeric_limits<double>::epsilon()) * edge_length_base);
+            gradient.col(dim) = (distanceFunction(h) - distance) /
+                (std::sqrt(std::numeric_limits<double>::epsilon()) * baseEdgeLength);
             deltaX.col(dim).fill(0.0);
         }
 
         for (int dim = 0; dim < points.cols(); ++dim) {
             points.col(dim) -= outside.select(
-                gradient.col(dim) * distance.col(0) / gradient.square().rowwise().sum(),
+                gradient.col(dim) * distance / gradient.square().rowwise().sum(),
                 0.0);
         }
     }
 }
 
 // check whether points lies inside or outside of polygon
-Eigen::ArrayXXd distmesh::utils::points_inside_poly(
-    Eigen::Ref<const Eigen::ArrayXXd> points,
-    Eigen::Ref<const Eigen::ArrayXXd> polygon) {
+Eigen::ArrayXXd distmesh::utils::pointsInsidePoly(
+    Eigen::Ref<Eigen::ArrayXXd const> const points,
+    Eigen::Ref<Eigen::ArrayXXd const> const polygon) {
     Eigen::ArrayXXd inside(points.rows(), 1);
     inside.fill(0.0);
 

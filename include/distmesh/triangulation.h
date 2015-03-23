@@ -14,18 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with libDistMesh.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright (C) 2013 Patrik Gebhardt
+// Copyright (C) 2015 Patrik Gebhardt
 // Contact: patrik.gebhardt@rub.de
 // --------------------------------------------------------------------
 
 #ifndef LIBDISTMESH_INCLUDE_TRIANGULATION_H
 #define LIBDISTMESH_INCLUDE_TRIANGULATION_H
 
-// namespace distmesh::triangulation
 namespace distmesh {
 namespace triangulation {
     // create delaunay triangulation from points array
-    Eigen::ArrayXXi delaunay(Eigen::Ref<const Eigen::ArrayXXd> points);
+    Eigen::ArrayXXi delaunay(Eigen::Ref<Eigen::ArrayXXd const> const points);
 }
 }
 

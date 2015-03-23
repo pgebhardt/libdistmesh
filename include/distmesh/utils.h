@@ -28,16 +28,16 @@ namespace utils {
     template <
         class type
     >
-    Eigen::Array<type, Eigen::Dynamic, Eigen::Dynamic> select_masked_array_elements(
-        Eigen::Ref<const Eigen::Array<type, Eigen::Dynamic, Eigen::Dynamic>> array,
-        Eigen::Ref<const Eigen::Array<bool, Eigen::Dynamic, Eigen::Dynamic>> mask) {
+    Eigen::Array<type, Eigen::Dynamic, Eigen::Dynamic> selectMaskedArrayElements(
+        Eigen::Ref<Eigen::Array<type, Eigen::Dynamic, Eigen::Dynamic> const> const array,
+        Eigen::Ref<Eigen::Array<bool, Eigen::Dynamic, Eigen::Dynamic> const> const mask) {
         Eigen::Array<type, Eigen::Dynamic, Eigen::Dynamic> result(mask.count(), array.cols());
 
-        int result_count = 0;
+        int resultCount = 0;
         for (int row = 0; row < array.rows(); ++row) {
             if (mask(row, 0)) {
-                result.row(result_count) = array.row(row);
-                result_count++;
+                result.row(resultCount) = array.row(row);
+                resultCount++;
             }
         }
 
@@ -48,9 +48,9 @@ namespace utils {
     template <
         class type
     >
-    Eigen::Array<type, Eigen::Dynamic, Eigen::Dynamic> select_indexed_array_elements(
-        Eigen::Ref<const Eigen::Array<type, Eigen::Dynamic, Eigen::Dynamic>> array,
-        Eigen::Ref<const Eigen::ArrayXXi> indices) {
+    Eigen::Array<type, Eigen::Dynamic, Eigen::Dynamic> selectIndexedArrayElements(
+        Eigen::Ref<Eigen::Array<type, Eigen::Dynamic, Eigen::Dynamic> const> const array,
+        Eigen::Ref<Eigen::ArrayXXi const> const indices) {
         Eigen::Array<type, Eigen::Dynamic, Eigen::Dynamic> result(indices.rows(), array.cols());
 
         for (int row = 0; row < indices.rows(); ++row) {
@@ -61,29 +61,29 @@ namespace utils {
     }
 
     // calculate factorial recursively
-    unsigned factorial(unsigned n);
+    unsigned factorial(unsigned const n);
 
     // create point list
-    Eigen::ArrayXXd create_point_list(Functional distance_function,
-        double edge_length_base, Functional edge_length_function,
-        Eigen::Ref<const Eigen::ArrayXXd> bounding_box,
-        Eigen::Ref<const Eigen::ArrayXXd> fixed_points);
+    Eigen::ArrayXXd createPointList(Functional const& distanceFunction,
+        double const baseEdgeLength, Functional const& edgeLengthFunction,
+        Eigen::Ref<Eigen::ArrayXXd const> const boundingBox,
+        Eigen::Ref<Eigen::ArrayXXd const> const fixedPoints);
 
     // create array with all unique combinations n over k
-    Eigen::ArrayXXi n_over_k(unsigned n, unsigned k);
+    Eigen::ArrayXXi nOverK(unsigned const n, unsigned const k);
 
     // find unique bars
-    Eigen::ArrayXXi find_unique_bars(Eigen::Ref<const Eigen::ArrayXXi> triangulation);
+    Eigen::ArrayXXi findUniqueBars(Eigen::Ref<Eigen::ArrayXXi const> const triangulation);
 
     // project points outside of boundary back to it
-    void project_points_to_function(
-        Functional distance_function, double edge_length_base,
+    void projectPointsToFunction(
+        Functional const& distanceFunction, double const baseEdgeLength,
         Eigen::Ref<Eigen::ArrayXXd> points);
 
     // check whether points lies inside or outside of polygon
-    Eigen::ArrayXXd points_inside_poly(
-        Eigen::Ref<const Eigen::ArrayXXd> points,
-        Eigen::Ref<const Eigen::ArrayXXd> polygon);
+    Eigen::ArrayXXd pointsInsidePoly(
+        Eigen::Ref<Eigen::ArrayXXd const> const points,
+        Eigen::Ref<Eigen::ArrayXXd const> const polygon);
 }
 }
 

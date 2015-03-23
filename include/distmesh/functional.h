@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with libDistMesh.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright (C) 2013 Patrik Gebhardt
+// Copyright (C) 2015 Patrik Gebhardt
 // Contact: patrik.gebhardt@rub.de
 // --------------------------------------------------------------------
 
@@ -23,7 +23,7 @@
 
 // macro for easies creation of distmesh lambda functions
 #define DISTMESH_FUNCTIONAL(function_body) \
-    (distmesh::Functional([=](Eigen::Ref<const Eigen::ArrayXXd> points) -> Eigen::ArrayXXd \
+    (distmesh::Functional([=](Eigen::Ref<Eigen::ArrayXXd const> const points) -> Eigen::ArrayXXd \
         function_body))
 
 // namespace distmesh
@@ -32,58 +32,58 @@ namespace distmesh {
     class Functional {
     public:
         // function type of Functional callable
-        typedef std::function<Eigen::ArrayXXd(Eigen::Ref<const Eigen::ArrayXXd>)> function_t;
+        typedef std::function<Eigen::ArrayXXd(Eigen::Ref<Eigen::ArrayXXd const> const)> function_t;
 
         // create class from function type
-        Functional(const function_t& func) : function_(func) {}
-        Functional(double constant) :
+        Functional(function_t const& func) : function_(func) {}
+        Functional(double const constant) :
             Functional(DISTMESH_FUNCTIONAL({
                 return Eigen::ArrayXXd::Constant(points.rows(), 1, constant);
             })) {}
 
         // copy constructor
-        Functional(const Functional& rhs) : function_(rhs.function()) {}
+        Functional(Functional const& rhs) : function_(rhs.function()) {}
         Functional(Functional&& rhs) : function_(std::move(rhs.function())) {}
 
         // assignment operator
-        Functional& operator=(const Functional& rhs);
+        Functional& operator=(Functional const& rhs);
         Functional& operator=(Functional&& rhs);
 
         // evaluate function by call
-        Eigen::ArrayXXd operator() (Eigen::Ref<const Eigen::ArrayXXd> points) const;
+        Eigen::ArrayXXd operator() (Eigen::Ref<Eigen::ArrayXXd const> const points) const;
 
         // basic arithmetic operations
-        Functional& operator+() { return *this; }
+        Functional operator+() const { return *this; }
         Functional operator-() const;
-        Functional& operator+=(const Functional& rhs);
-        Functional& operator+=(const double& rhs);
-        Functional& operator-=(const Functional& rhs);
-        Functional& operator-=(const double& rhs);
-        Functional& operator*=(const Functional& rhs);
-        Functional& operator*=(const double& rhs);
-        Functional& operator/=(const Functional& rhs);
-        Functional& operator/=(const double& rhs);
-        friend Functional operator+(const Functional& lhs, const Functional& rhs);
-        friend Functional operator+(const Functional& lhs, const double& rhs);
-        friend Functional operator+(const double& lhs, const Functional& rhs);
-        friend Functional operator-(const Functional& lhs, const Functional& rhs);
-        friend Functional operator-(const Functional& lhs, const double& rhs);
-        friend Functional operator-(const double& lhs, const Functional& rhs);
-        friend Functional operator*(const Functional& lhs, const Functional& rhs);
-        friend Functional operator*(const Functional& lhs, const double& rhs);
-        friend Functional operator*(const double& lhs, const Functional& rhs);
-        friend Functional operator/(const Functional& lhs, const Functional& rhs);
-        friend Functional operator/(const Functional& lhs, const double& rhs);
-        friend Functional operator/(const double& lhs, const Functional& rhs);
+        Functional& operator+=(Functional const& rhs);
+        Functional& operator+=(double const rhs);
+        Functional& operator-=(Functional const& rhs);
+        Functional& operator-=(double const rhs);
+        Functional& operator*=(Functional const& rhs);
+        Functional& operator*=(double const rhs);
+        Functional& operator/=(Functional const& rhs);
+        Functional& operator/=(double const rhs);
+        friend Functional operator+(Functional const& lhs, Functional const& rhs);
+        friend Functional operator+(Functional const& lhs, double const rhs);
+        friend Functional operator+(double const lhs, Functional const& rhs);
+        friend Functional operator-(Functional const& lhs, Functional const& rhs);
+        friend Functional operator-(Functional const& lhs, double const rhs);
+        friend Functional operator-(double const lhs, Functional const& rhs);
+        friend Functional operator*(Functional const& lhs, Functional const& rhs);
+        friend Functional operator*(Functional const& lhs, double const rhs);
+        friend Functional operator*(double const lhs, Functional const& rhs);
+        friend Functional operator/(Functional const& lhs, Functional const& rhs);
+        friend Functional operator/(Functional const& lhs, double const rhs);
+        friend Functional operator/(double const lhs, Functional const& rhs);
 
         // mathematical methods
-        Functional min(const Functional& rhs) const;
-        Functional max(const Functional& rhs) const;
+        Functional min(Functional const& rhs) const;
+        Functional max(Functional const& rhs) const;
         Functional abs() const;
 
         // accessors
         function_t& function() { return this->function_; }
-        const function_t& function() const { return this->function_; }
+        function_t const& function() const { return this->function_; }
 
     private:
         // stores std function

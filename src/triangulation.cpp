@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with libDistMesh.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright (C) 2013 Patrik Gebhardt
+// Copyright (C) 2015 Patrik Gebhardt
 // Contact: patrik.gebhardt@rub.de
 // --------------------------------------------------------------------
 
@@ -28,7 +28,7 @@ extern "C" {
 }
 
 Eigen::ArrayXXi distmesh::triangulation::delaunay(
-    Eigen::Ref<const Eigen::ArrayXXd> points) {
+    Eigen::Ref<Eigen::ArrayXXd const> const points) {
     // convert points array to row major format
     Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic,
         Eigen::RowMajor> points_rowmajor = points;

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with libDistMesh.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright (C) 2013 Patrik Gebhardt
+// Copyright (C) 2015 Patrik Gebhardt
 // Contact: patrik.gebhardt@rub.de
 // --------------------------------------------------------------------
 
@@ -31,17 +31,17 @@
 // namespace distmesh
 namespace distmesh {
     // easy creation of n-dimensional bounding_box
-    Eigen::ArrayXXd bounding_box(unsigned dimension);
+    Eigen::ArrayXXd boundingBox(unsigned const dimension);
 
     // apply the distmesh algorithm
     std::tuple<Eigen::ArrayXXd, Eigen::ArrayXXi> distmesh(
-        Functional distance_function, double edge_length_base,
-        Functional edge_length_function=1.0,
-        Eigen::Ref<const Eigen::ArrayXXd> bounding_box=distmesh::bounding_box(2),
-        Eigen::Ref<const Eigen::ArrayXXd> fixed_points=Eigen::ArrayXXd());
+        Functional const& distanceFunction, double const baseEdgeLength,
+        Functional const& edge_length_function=1.0,
+        Eigen::Ref<Eigen::ArrayXXd const> const boundingBox=distmesh::boundingBox(2),
+        Eigen::Ref<Eigen::ArrayXXd const> const fixedPoints=Eigen::ArrayXXd());
 
     // determine boundary edges of given triangulation
-    Eigen::ArrayXXi boundedges(Eigen::Ref<const Eigen::ArrayXXi> triangulation);
+    Eigen::ArrayXXi boundEdges(Eigen::Ref<Eigen::ArrayXXi const> const triangulation);
 }
 
 #endif

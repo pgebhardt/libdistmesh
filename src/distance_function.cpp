@@ -111,7 +111,7 @@ distmesh::Functional distmesh::distance_function::polygon(
                 ));
         }
 
-        return (1.0 - 2.0 * utils::points_inside_poly(points, polygon)) *
+        return (1.0 - 2.0 * utils::pointsInsidePoly(points, polygon)) *
             distance.rowwise().minCoeff();
     });
 }
