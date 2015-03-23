@@ -45,12 +45,7 @@ endif
 # Compiler
 ##############################
 AR := ar rcs
-CXX ?= /usr/bin/g++
-
-# use of custom compiler
-ifdef CUSTOM_CXX
-	CXX := $(CUSTOM_CXX)
-endif
+CXX ?= g++
 
 # Target build architecture
 TARGET_ARCH_NAME ?= $(shell $(CXX) -dumpmachine)

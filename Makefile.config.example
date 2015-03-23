@@ -22,7 +22,7 @@
 # DEBUG := 1
 
 # To customize your choice of compiler, uncomment and set the following.
-CUSTOM_CXX := clang++
+# CXX := clang++
 
 # Add something to include and library paths
 INCLUDE_DIRS := /usr/local/include
