@@ -22,7 +22,7 @@
 
 // creates distance function of rectangular domain
 distmesh::Functional distmesh::distance_function::rectangular(
-    Eigen::Ref<const Eigen::ArrayXXd> rectangle) {
+    Eigen::Ref<Eigen::ArrayXXd const> const rectangle) {
     return DISTMESH_FUNCTIONAL({
         Eigen::ArrayXXd result =
             (points.col(0) - rectangle(0, 0))
@@ -40,19 +40,21 @@ distmesh::Functional distmesh::distance_function::rectangular(
 // Note: not a real distance function but a level function,
 // which is sufficient
 distmesh::Functional distmesh::distance_function::elliptical(
-    Eigen::Ref<const Eigen::ArrayXXd> radii, Eigen::Ref<const Eigen::ArrayXXd> midpoint) {
+    Eigen::Ref<Eigen::ArrayXd const> const radii,
+    Eigen::Ref<Eigen::ArrayXd const> const midpoint) {
     return DISTMESH_FUNCTIONAL({
-        if (midpoint.cols() == points.cols()) {
-            if (radii.cols() == points.cols()) {
-                return ((points.rowwise() - midpoint.row(0)).rowwise() / radii.row(0))
+        if (midpoint.rows() == points.cols()) {
+            if (radii.rows() == points.cols()) {
+                return ((points.rowwise() - midpoint.transpose()).rowwise() / radii.transpose())
                     .square().rowwise().sum().sqrt() - 1.0;
             } else {
-                return (points.rowwise() - midpoint.row(0))
+                return (points.rowwise() - midpoint.transpose())
                     .square().rowwise().sum().sqrt() - 1.0;
             }
-        } else {
-            if (radii.cols() == points.cols()) {
-                return (points.rowwise() / radii.row(0))
+        }
+        else {
+            if (radii.rows() == points.cols()) {
+                return (points.rowwise() / radii.transpose())
                     .square().rowwise().sum().sqrt() - 1.0;
             } else {
                 return points.square().rowwise().sum().sqrt() - 1.0;
@@ -63,11 +65,11 @@ distmesh::Functional distmesh::distance_function::elliptical(
 
 // creates distance function for circular domains
 distmesh::Functional
-    distmesh::distance_function::circular(double radius,
-    Eigen::Ref<const Eigen::ArrayXXd> midpoint) {
+    distmesh::distance_function::circular(double const radius,
+    Eigen::Ref<Eigen::ArrayXd const> const midpoint) {
     return DISTMESH_FUNCTIONAL({
-        if (midpoint.cols() == points.cols()) {
-            return (points.rowwise() - midpoint.row(0))
+        if (midpoint.rows() == points.cols()) {
+            return (points.rowwise() - midpoint.transpose())
                 .square().rowwise().sum().sqrt() - radius;
         } else {
             return points.square().rowwise().sum().sqrt() - radius;
@@ -77,7 +79,7 @@ distmesh::Functional
 
 // creates distance function for domain described by polygon
 distmesh::Functional distmesh::distance_function::polygon(
-    Eigen::Ref<const Eigen::ArrayXXd> polygon) {
+    Eigen::Ref<Eigen::ArrayXXd const> const polygon) {
     // check input
     if (polygon.cols() != 2) {
         throw std::invalid_argument(
