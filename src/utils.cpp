@@ -44,9 +44,8 @@ Eigen::ArrayXXd distmesh::utils::createPointList(
     Eigen::ArrayXi maxPointsPerDimension(boundingBox.rows());
     int maxPointCount = 1;
     for (int dim = 0; dim < boundingBox.rows(); ++dim) {
-        maxPointsPerDimension(dim) = 1 +
-            (boundingBox(dim, 1) - boundingBox(dim, 0)) /
-            baseEdgeLength;
+        maxPointsPerDimension(dim) = ceil((boundingBox(dim, 1) - boundingBox(dim, 0)) /
+            baseEdgeLength);
         maxPointCount *= maxPointsPerDimension(dim);
     }
     Eigen::ArrayXXd points(maxPointCount, boundingBox.rows());
