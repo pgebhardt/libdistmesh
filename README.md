@@ -20,7 +20,7 @@ Example
 
 * Uniform Mesh on Unit Circle:
 
-```C++
+```c++
 #include <distmesh/distmesh.h>
 
 int main() {
@@ -32,7 +32,7 @@ int main() {
 ```
 * Rectangle with circular hole, refined at circle boundary:
 
-```C++
+```c++
 #include <distmesh/distmesh.h>
 
 int main() {
