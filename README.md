@@ -10,39 +10,42 @@ Getting Started
 Simply clone the repository, make sure all dependencies are installed and build it.
 
     git clone https://github.com/schansge/libdistmesh.git
-    make && make install
+    cd libdistmesh
+    cp Makefile.config.example Makefile.config
+    make
+    make install
 
 Example
 -------
 
 * Uniform Mesh on Unit Circle:
 
-```
+```C++
 #include <distmesh/distmesh.h>
 
 int main() {
     // create mesh
-    auto mesh = distmesh::distmesh(distmesh::distance_function::circular(1.0), 0.2);
+    auto mesh = distmesh::distmesh(distmesh::distanceFunction::circular(1.0), 0.2);
 
     return 0;
 }
 ```
 * Rectangle with circular hole, refined at circle boundary:
 
-```
+```C++
 #include <distmesh/distmesh.h>
 
 int main() {
     // fixed points at the corners of domain to guarantee convergence
-    Eigen::ArrayXXd fixed_points(4, 2);
-    fixed_points << -1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0;
+    Eigen::ArrayXXd fixedPoints(4, 2);
+    fixedPoints << -1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0;
 
     // create mesh
     auto mesh = distmesh::distmesh(
-        distmesh::distance_function::rectangular(rectangle)
-            .max(-distmesh::distance_function::circular(0.5)),
-        0.05, 0.05 + 0.3 * distmesh::distance_function::circular(0.5),
-        distmesh::bounding_box(2), fixed_points);
+        distmesh::distanceFunction::rectangular(rectangle)
+            .max(-distmesh::distanceFunction::circular(0.5)),
+        0.05, 0.05 + 0.3 * distmesh::distanceFunction::circular(0.5),
+        distmesh::boundingBox(2), fixedPoints);
 
     return 0;
 }
