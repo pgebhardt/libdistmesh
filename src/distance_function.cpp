@@ -21,7 +21,7 @@
 #include "distmesh/distmesh.h"
 
 // creates distance function of rectangular domain
-distmesh::Functional distmesh::distance_function::rectangular(
+distmesh::Functional distmesh::distanceFunction::rectangular(
     Eigen::Ref<Eigen::ArrayXXd const> const rectangle) {
     return DISTMESH_FUNCTIONAL({
         Eigen::ArrayXXd result =
@@ -39,7 +39,7 @@ distmesh::Functional distmesh::distance_function::rectangular(
 // creates distance function for elliptical domains
 // Note: not a real distance function but a level function,
 // which is sufficient
-distmesh::Functional distmesh::distance_function::elliptical(
+distmesh::Functional distmesh::distanceFunction::elliptical(
     Eigen::Ref<Eigen::ArrayXd const> const radii,
     Eigen::Ref<Eigen::ArrayXd const> const midpoint) {
     return DISTMESH_FUNCTIONAL({
@@ -65,7 +65,7 @@ distmesh::Functional distmesh::distance_function::elliptical(
 
 // creates distance function for circular domains
 distmesh::Functional
-    distmesh::distance_function::circular(double const radius,
+    distmesh::distanceFunction::circular(double const radius,
     Eigen::Ref<Eigen::ArrayXd const> const midpoint) {
     return DISTMESH_FUNCTIONAL({
         if (midpoint.rows() == points.cols()) {
@@ -78,12 +78,12 @@ distmesh::Functional
 }
 
 // creates distance function for domain described by polygon
-distmesh::Functional distmesh::distance_function::polygon(
+distmesh::Functional distmesh::distanceFunction::polygon(
     Eigen::Ref<Eigen::ArrayXXd const> const polygon) {
     // check input
     if (polygon.cols() != 2) {
         throw std::invalid_argument(
-            "distmesh::distance_function::polygon: polygon.cols() != 2");
+            "distmesh::distanceFunction::polygon: polygon.cols() != 2");
     }
 
     return DISTMESH_FUNCTIONAL({

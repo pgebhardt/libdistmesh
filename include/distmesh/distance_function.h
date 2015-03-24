@@ -21,9 +21,8 @@
 #ifndef LIBDISTMESH_INCLUDE_DISTANCE_FUNCTION_H
 #define LIBDISTMESH_INCLUDE_DISTANCE_FUNCTION_H
 
-// namespace distmesh::distance_function
 namespace distmesh {
-namespace distance_function {
+namespace distanceFunction {
     // creates distance function of rectangular domain
     Functional rectangular(Eigen::Ref<Eigen::ArrayXXd const> const rectangle);
 
