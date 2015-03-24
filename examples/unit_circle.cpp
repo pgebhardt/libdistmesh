@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with libDistMesh.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright (C) 2013 Patrik Gebhardt
+// Copyright (C) 2015 Patrik Gebhardt
 // Contact: patrik.gebhardt@rub.de
 // --------------------------------------------------------------------
 
@@ -23,7 +23,7 @@
 
 int main() {
     // create mesh
-    auto mesh = distmesh::distmesh(distmesh::distance_function::circular(1.0), 0.2);
+    auto mesh = distmesh::distmesh(distmesh::distanceFunction::circular(1.0), 0.2);
 
     // plot mesh
     std::ofstream points_file;

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with libDistMesh.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright (C) 2013 Patrik Gebhardt
+// Copyright (C) 2015 Patrik Gebhardt
 // Contact: patrik.gebhardt@rub.de
 // --------------------------------------------------------------------
 
@@ -22,20 +22,16 @@
 #include <fstream>
 
 int main() {
-    // description of rectangular domain
-    Eigen::ArrayXXd rectangle(2, 2);
-    rectangle << -1.0, 1.0, -1.0, 1.0;
-
     // fixed points at the corners of domain to guarantee convergence
-    Eigen::ArrayXXd fixed_points(4, 2);
-    fixed_points << -1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0;
+    Eigen::ArrayXXd fixedPoints(4, 2);
+    fixedPoints << -1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0;
 
     // create mesh
     auto mesh = distmesh::distmesh(
-        distmesh::distance_function::rectangular(rectangle)
-            .max(-distmesh::distance_function::circular(0.5)),
-        0.05, 0.05 + 0.3 * distmesh::distance_function::circular(0.5),
-        rectangle, fixed_points);
+        distmesh::distanceFunction::rectangular(distmesh::boundingBox(2))
+            .max(-distmesh::distanceFunction::circular(0.5)),
+        0.05, 0.05 + 0.3 * distmesh::distanceFunction::circular(0.5),
+        distmesh::boundingBox(2), fixedPoints);
 
     // plot mesh
     std::ofstream points_file;

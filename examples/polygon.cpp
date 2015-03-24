@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with libDistMesh.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright (C) 2013 Patrik Gebhardt
+// Copyright (C) 2015 Patrik Gebhardt
 // Contact: patrik.gebhardt@rub.de
 // --------------------------------------------------------------------
 
@@ -22,9 +22,6 @@
 #include <fstream>
 
 int main() {
-    Eigen::ArrayXXd bounding_box(2, 2);
-    bounding_box << -1.0, 2.0, -1.0, 1.0;
-
     // corner points of polygon
     Eigen::ArrayXXd polygon(10, 2);
     polygon << -0.4, -0.5, 0.4, -0.2, 0.4, -0.7,
@@ -33,8 +30,8 @@ int main() {
 
     // create mesh
     auto mesh = distmesh::distmesh(
-        distmesh::distance_function::polygon(polygon),
-        0.1, 1.0, bounding_box, polygon);
+        distmesh::distanceFunction::polygon(polygon),
+        0.1, 1.0, distmesh::boundingBox(2), polygon);
 
     // plot mesh
     std::ofstream points_file;

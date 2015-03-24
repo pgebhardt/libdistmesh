@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with libDistMesh.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright (C) 2013 Patrik Gebhardt
+// Copyright (C) 2015 Patrik Gebhardt
 // Contact: patrik.gebhardt@rub.de
 // --------------------------------------------------------------------
 
@@ -22,30 +22,30 @@
 #include <fstream>
 
 int main() {
-    Eigen::ArrayXXd bounding_box(2, 2);
-    bounding_box << 0.0, 1.0, 0.0, 1.0;
+    Eigen::ArrayXXd boundingBox(2, 2);
+    boundingBox << 0.0, 1.0, 0.0, 1.0;
 
     // fixed points at corners of domain to guarantee convergence
-    Eigen::ArrayXXd fixed_points(4, 2);
-    fixed_points << 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0;
+    Eigen::ArrayXXd fixedPoints(4, 2);
+    fixedPoints << 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0;
 
     // distance function for rectangular domain
-    auto distance_function =
-        distmesh::distance_function::rectangular(bounding_box);
+    auto distanceFunction =
+        distmesh::distanceFunction::rectangular(boundingBox);
 
     // corner points of polygon
     Eigen::ArrayXXd poly(2, 2);
     poly << 0.3, 0.7, 0.7, 0.5;
 
     // edge size function
-    auto size_function =
-        (0.01 + 0.3 * distmesh::distance_function::circular(0.0).abs())
-        .min(0.025 + 0.3 * distmesh::distance_function::polygon(poly).abs())
+    auto sizeFunction =
+        (0.01 + 0.3 * distmesh::distanceFunction::circular(0.0).abs())
+        .min(0.025 + 0.3 * distmesh::distanceFunction::polygon(poly).abs())
         .min(0.15);
 
     // create mesh
-    auto mesh = distmesh::distmesh(distance_function, 0.01,
-        size_function, bounding_box, fixed_points);
+    auto mesh = distmesh::distmesh(distanceFunction, 0.01,
+        sizeFunction, boundingBox, fixedPoints);
 
     // plot mesh
     std::ofstream points_file;
