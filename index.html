@@ -40,7 +40,10 @@ algorithm for generating unstructured triangular and tetrahedral meshes using <e
 <p>Simply clone the repository, make sure all dependencies are installed and build it.</p>
 
 <pre><code>git clone https://github.com/schansge/libdistmesh.git
-make &amp;&amp; make install
+cd libdistmesh
+cp Makefile.config.example Makefile.config
+make
+make install
 </code></pre>
 
 <h2>
@@ -50,37 +53,35 @@ make &amp;&amp; make install
 <li>Uniform Mesh on Unit Circle:</li>
 </ul>
 
-<pre><code>#include &lt;distmesh/distmesh.h&gt;
+<div class="highlight highlight-c++"><pre>#<span class="pl-k">include</span> <span class="pl-s"><span class="pl-pds">&lt;</span>distmesh/distmesh.h<span class="pl-pds">&gt;</span></span>
 
-int main() {
-    // create mesh
-    auto mesh = distmesh::distmesh(distmesh::distance_function::circular(1.0), 0.2);
+<span class="pl-k">int</span> <span class="pl-en">main</span>() {
+    <span class="pl-c">// create mesh</span>
+    <span class="pl-k">auto</span> mesh = <span class="pl-c1">distmesh::distmesh</span>(<span class="pl-c1">distmesh::distanceFunction::circular</span>(<span class="pl-c1">1.0</span>), <span class="pl-c1">0.2</span>);
 
-    return 0;
-}
-</code></pre>
+    <span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
 
 <ul>
 <li>Rectangle with circular hole, refined at circle boundary:</li>
 </ul>
 
-<pre><code>#include &lt;distmesh/distmesh.h&gt;
+<div class="highlight highlight-c++"><pre>#<span class="pl-k">include</span> <span class="pl-s"><span class="pl-pds">&lt;</span>distmesh/distmesh.h<span class="pl-pds">&gt;</span></span>
 
-int main() {
-    // fixed points at the corners of domain to guarantee convergence
-    Eigen::ArrayXXd fixed_points(4, 2);
-    fixed_points &lt;&lt; -1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0;
+<span class="pl-k">int</span> <span class="pl-en">main</span>() {
+    <span class="pl-c">// fixed points at the corners of domain to guarantee convergence</span>
+    Eigen::ArrayXXd <span class="pl-smi">fixedPoints</span>(<span class="pl-c1">4</span>, <span class="pl-c1">2</span>);
+    fixedPoints &lt;&lt; -<span class="pl-c1">1.0</span>, -<span class="pl-c1">1.0</span>, -<span class="pl-c1">1.0</span>, <span class="pl-c1">1.0</span>, <span class="pl-c1">1.0</span>, -<span class="pl-c1">1.0</span>, <span class="pl-c1">1.0</span>, <span class="pl-c1">1.0</span>;
 
-    // create mesh
-    auto mesh = distmesh::distmesh(
-        distmesh::distance_function::rectangular(rectangle)
-            .max(-distmesh::distance_function::circular(0.5)),
-        0.05, 0.05 + 0.3 * distmesh::distance_function::circular(0.5),
-        distmesh::bounding_box(2), fixed_points);
+    <span class="pl-c">// create mesh</span>
+    <span class="pl-k">auto</span> mesh = <span class="pl-c1">distmesh::distmesh</span>(
+        <span class="pl-c1">distmesh::distanceFunction::rectangular</span>(rectangle)
+            .<span class="pl-c1">max</span>(-<span class="pl-c1">distmesh::distanceFunction::circular</span>(<span class="pl-c1">0.5</span>)),
+        <span class="pl-c1">0.05</span>, <span class="pl-c1">0.05</span> + <span class="pl-c1">0.3</span> * <span class="pl-c1">distmesh::distanceFunction::circular</span>(<span class="pl-c1">0.5</span>),
+        <span class="pl-c1">distmesh::boundingBox</span>(<span class="pl-c1">2</span>), fixedPoints);
 
-    return 0;
-}
-</code></pre>
+    <span class="pl-k">return</span> <span class="pl-c1">0</span>;
+}</pre></div>
 
 <h2>
 <a id="dependencies" class="anchor" href="#dependencies" aria-hidden="true"><span class="octicon octicon-link"></span></a>Dependencies</h2>
