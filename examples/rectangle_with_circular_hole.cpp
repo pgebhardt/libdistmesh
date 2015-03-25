@@ -21,6 +21,20 @@
 #include <distmesh/distmesh.h>
 #include <fstream>
 
+// save eigen array to text file
+template <typename type>
+void savetxt(Eigen::Ref<Eigen::Array<type, Eigen::Dynamic, Eigen::Dynamic> const> const array,
+    std::string const& filename) {
+    // open file
+    std::ofstream file(filename);
+
+    // save array to file with high precision
+    Eigen::IOFormat const format(Eigen::FullPrecision, Eigen::DontAlignCols);
+    file << array.format(format);
+
+    file.close();
+}
+
 int main() {
     // fixed points at the corners of domain to guarantee convergence
     Eigen::ArrayXXd fixedPoints(4, 2);
@@ -33,18 +47,11 @@ int main() {
         0.05, 0.05 + 0.3 * distmesh::distanceFunction::circular(0.5),
         distmesh::boundingBox(2), fixedPoints);
 
-    // plot mesh
-    std::ofstream points_file;
-    std::ofstream triangulation_file;
-    points_file.open("points.txt");
-    triangulation_file.open("triangulation.txt");
+    // save mesh to file
+    savetxt<double>(std::get<0>(mesh), "points.txt");
+    savetxt<int>(std::get<1>(mesh), "triangulation.txt");
 
-    points_file << std::get<0>(mesh);
-    triangulation_file << std::get<1>(mesh);
-
-    points_file.close();
-    triangulation_file.close();
-
+    // plot mesh using python
     system("python plot_mesh.py");
 
     return 0;

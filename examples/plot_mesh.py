@@ -23,7 +23,7 @@ from pylab import *
 def main():
     # load mesh
     points = loadtxt('points.txt')
-    triangulation = loadtxt('triangulation.txt', dtype=int64)
+    triangulation = loadtxt('triangulation.txt', dtype=int)
 
     # plot mesh
     gca().set_aspect('equal')
