@@ -18,8 +18,8 @@
 // Contact: patrik.gebhardt@rub.de
 // --------------------------------------------------------------------
 
-#ifndef LIBDISTMESH_INCLUDE_TRIANGULATION_H
-#define LIBDISTMESH_INCLUDE_TRIANGULATION_H
+#ifndef _29b995ef_16f0_49e8_a6bf_94f852821a14
+#define _29b995ef_16f0_49e8_a6bf_94f852821a14
 
 namespace distmesh {
 namespace triangulation {

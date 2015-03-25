@@ -14,12 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with libDistMesh.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright (C) 2013 Patrik Gebhardt
+// Copyright (C) 2015 Patrik Gebhardt
 // Contact: patrik.gebhardt@rub.de
 // --------------------------------------------------------------------
 
-#ifndef LIBDISTMESH_INCLUDE_UTILS_H
-#define LIBDISTMESH_INCLUDE_UTILS_H
+#ifndef _ab72dafe_805a_473e_bcf0_3a153c844b70
+#define _ab72dafe_805a_473e_bcf0_3a153c844b70
 
 namespace distmesh {
 namespace utils {

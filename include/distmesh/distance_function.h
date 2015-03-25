@@ -18,8 +18,8 @@
 // Contact: patrik.gebhardt@rub.de
 // --------------------------------------------------------------------
 
-#ifndef LIBDISTMESH_INCLUDE_DISTANCE_FUNCTION_H
-#define LIBDISTMESH_INCLUDE_DISTANCE_FUNCTION_H
+#ifndef _7f312bb5_67a5_4eb7_bde7_a4baaed8a573
+#define _7f312bb5_67a5_4eb7_bde7_a4baaed8a573
 
 namespace distmesh {
 namespace distanceFunction {

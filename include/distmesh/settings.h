@@ -18,16 +18,16 @@
 // Contact: patrik.gebhardt@rub.de
 // --------------------------------------------------------------------
 
-#ifndef LIBDISTMESH_INCLUDE_SETTINGS_H
-#define LIBDISTMESH_INCLUDE_SETTINGS_H
+#ifndef _57ca4052_ba33_4235_9a5f_84154336d924
+#define _57ca4052_ba33_4235_9a5f_84154336d924
 
 namespace distmesh {
 namespace settings {
-    static const double retriangulationTolerance = 1e-1;
-    static const double pointMovementTolerance = 1e-3;
-    static const double generalPrecision = 1e-3;
-    static const double deltaT = 1e-1;
-    static const unsigned maxSteps = 10000;
+    static double const retriangulationTolerance = 1e-1;
+    static double const pointMovementTolerance = 1e-3;
+    static double const generalPrecision = 1e-3;
+    static double const deltaT = 1e-1;
+    static unsigned const maxSteps = 10000;
 }
 }
 

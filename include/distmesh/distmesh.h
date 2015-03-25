@@ -18,8 +18,8 @@
 // Contact: patrik.gebhardt@rub.de
 // --------------------------------------------------------------------
 
-#ifndef LIBDISTMESH_INCLUDE_DISTMESH_H
-#define LIBDISTMESH_INCLUDE_DISTMESH_H
+#ifndef _c7492357_ec3f_4dbf_b941_9175e9f79ab0
+#define _c7492357_ec3f_4dbf_b941_9175e9f79ab0
 
 // std c++ lib for handling functors
 #include <functional>

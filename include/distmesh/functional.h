@@ -18,8 +18,8 @@
 // Contact: patrik.gebhardt@rub.de
 // --------------------------------------------------------------------
 
-#ifndef LIBDISTMESH_INCLUDE_FUNCTIONAL_H
-#define LIBDISTMESH_INCLUDE_FUNCTIONAL_H
+#ifndef _f2f87a1d_2511_4053_996f_1156d50b31f1
+#define _f2f87a1d_2511_4053_996f_1156d50b31f1
 
 // macro for easier creation of distmesh lambda functions
 #define DISTMESH_FUNCTIONAL(function_body) \
