@@ -21,7 +21,7 @@
 #ifndef LIBDISTMESH_INCLUDE_FUNCTIONAL_H
 #define LIBDISTMESH_INCLUDE_FUNCTIONAL_H
 
-// macro for easies creation of distmesh lambda functions
+// macro for easier creation of distmesh lambda functions
 #define DISTMESH_FUNCTIONAL(function_body) \
     (distmesh::Functional([=](Eigen::Ref<Eigen::ArrayXXd const> const points) -> Eigen::ArrayXd \
         function_body))
