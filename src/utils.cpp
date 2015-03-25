@@ -138,26 +138,26 @@ Eigen::ArrayXXi distmesh::utils::findUniqueBars(Eigen::Ref<Eigen::ArrayXXi const
     auto combinations = nOverK(triangulation.cols(), 2);
 
     // find unique bars for all combinations
-    std::set<std::array<int, 2>> bar_set;
+    std::set<std::array<int, 2>> uniqueBars;
     std::array<int, 2> bar = {{0, 0}};
     for (int combination = 0; combination < combinations.rows(); ++combination)
     for (int triangle = 0; triangle < triangulation.rows(); ++triangle) {
         bar[0] = triangulation(triangle, combinations(combination, 0));
         bar[1] = triangulation(triangle, combinations(combination, 1));
 
-        bar_set.insert(bar);
+        uniqueBars.insert(bar);
     }
 
     // copy set to eigen array
-    Eigen::ArrayXXi bar_indices(bar_set.size(), 2);
-    Eigen::ArrayXXi::Index bar_index = 0;
-    for (const auto& bar : bar_set) {
-        bar_indices(bar_index, 0) = bar[0];
-        bar_indices(bar_index, 1) = bar[1];
-        bar_index++;
+    Eigen::ArrayXXi barIndices(uniqueBars.size(), 2);
+    int index = 0;
+    for (auto const& bar : uniqueBars) {
+        barIndices(index, 0) = bar[0];
+        barIndices(index, 1) = bar[1];
+        index++;
     }
 
-    return bar_indices;
+    return barIndices;
 }
 
 // project points outside of boundary back to it
@@ -195,11 +195,9 @@ void distmesh::utils::projectPointsToFunction(
 Eigen::ArrayXXd distmesh::utils::pointsInsidePoly(
     Eigen::Ref<Eigen::ArrayXXd const> const points,
     Eigen::Ref<Eigen::ArrayXXd const> const polygon) {
-    Eigen::ArrayXXd inside(points.rows(), 1);
-    inside.fill(0.0);
+    Eigen::ArrayXXd inside = Eigen::ArrayXXd::Zero(points.rows(), 1);
 
-    for (int i = 0, j = polygon.rows() - 1;
-        i < polygon.rows(); j = i++) {
+    for (int i = 0, j = polygon.rows() - 1; i < polygon.rows(); j = i++) {
         inside = (((points.col(1) < polygon(i, 1)) != (points.col(1) < polygon(j, 1))) &&
             (points.col(0) < (polygon(j, 0) - polygon(i, 0)) * (points.col(1) - polygon(i, 1)) /
             (polygon(j, 1) - polygon(i, 1)) + polygon(i, 0))).select(1.0 - inside, inside);

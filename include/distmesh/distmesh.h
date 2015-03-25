@@ -32,13 +32,13 @@
 #include "distance_function.h"
 
 namespace distmesh {
-    // easy creation of n-dimensional bounding_box
-    Eigen::ArrayXXd boundingBox(unsigned const dimension);
+    // easy creation of n-dimensional bounding box
+    Eigen::ArrayXXd boundingBox(unsigned const dimensions);
 
     // apply the distmesh algorithm
     std::tuple<Eigen::ArrayXXd, Eigen::ArrayXXi> distmesh(
         Functional const& distanceFunction, double const baseEdgeLength,
-        Functional const& edge_length_function=1.0,
+        Functional const& edgeLengthFunction=1.0,
         Eigen::Ref<Eigen::ArrayXXd const> const boundingBox=distmesh::boundingBox(2),
         Eigen::Ref<Eigen::ArrayXXd const> const fixedPoints=Eigen::ArrayXXd());
 

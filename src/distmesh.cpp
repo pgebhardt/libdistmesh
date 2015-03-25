@@ -28,8 +28,8 @@
 #include "distmesh/triangulation.h"
 
 // easy creation of n-dimensional bounding_box
-Eigen::ArrayXXd distmesh::boundingBox(unsigned const dimension) {
-    Eigen::ArrayXXd box(dimension, 2);
+Eigen::ArrayXXd distmesh::boundingBox(unsigned const dimensions) {
+    Eigen::ArrayXXd box(dimensions, 2);
     box.col(0).fill(-1.0);
     box.col(1).fill(1.0);
     return box;
@@ -47,17 +47,18 @@ std::tuple<Eigen::ArrayXXd, Eigen::ArrayXXi> distmesh::distmesh(
     // create initial triangulation
     Eigen::ArrayXXi triangulation = triangulation::delaunay(points);
 
-    // create points buffer for retriangulation and stop criterion
-    Eigen::ArrayXXd buffer_retriangulation_criterion(
+    // create buffer to store old point locations to calculate
+    // retriangulation and stop criterion
+    Eigen::ArrayXXd retriangulationCriterionBuffer = Eigen::ArrayXXd::Constant(
+        points.rows(), points.cols(), INFINITY);
+    Eigen::ArrayXXd stopCriterionBuffer = Eigen::ArrayXXd::Zero(
         points.rows(), points.cols());
-    Eigen::ArrayXXd buffer_stop_criterion;
-    buffer_retriangulation_criterion.fill(INFINITY);
 
     // main distmesh loop
-    Eigen::ArrayXXi bar_indices;
+    Eigen::ArrayXXi barIndices;
     for (unsigned step = 0; step < settings::maxSteps; ++step) {
         // retriangulate if point movement is above tolerance
-        double retriangulationCriterion = (points - buffer_retriangulation_criterion)
+        double retriangulationCriterion = (points - retriangulationCriterionBuffer)
             .square().rowwise().sum().sqrt().maxCoeff();
         if (retriangulationCriterion > settings::retriangulationTolerance * baseEdgeLength) {
             // update triangulation
@@ -76,48 +77,50 @@ std::tuple<Eigen::ArrayXXd, Eigen::ArrayXXi> distmesh::distmesh(
                 distanceFunction(circumcenter) < -settings::generalPrecision * baseEdgeLength);
 
             // find unique bar indices
-            bar_indices = utils::findUniqueBars(triangulation);
+            barIndices = utils::findUniqueBars(triangulation);
 
-            buffer_retriangulation_criterion = points;
+            // store current points positions
+            retriangulationCriterionBuffer = points;
         }
 
         // calculate bar vectors and their length
-        Eigen::ArrayXXd bar_vector = utils::selectIndexedArrayElements<double>(points, bar_indices.col(0)) -
-            utils::selectIndexedArrayElements<double>(points, bar_indices.col(1));
-        Eigen::ArrayXXd bar_length = bar_vector.square().rowwise().sum().sqrt();
+        Eigen::ArrayXXd barVector = utils::selectIndexedArrayElements<double>(points, barIndices.col(0)) -
+            utils::selectIndexedArrayElements<double>(points, barIndices.col(1));
+        Eigen::ArrayXd barLength = barVector.square().rowwise().sum().sqrt();
 
         // evaluate edgeLengthFunction at midpoints of bars
         Eigen::ArrayXXd hbars = edgeLengthFunction(0.5 *
-            (utils::selectIndexedArrayElements<double>(points, bar_indices.col(0)) +
-            utils::selectIndexedArrayElements<double>(points, bar_indices.col(1))));
+            (utils::selectIndexedArrayElements<double>(points, barIndices.col(0)) +
+            utils::selectIndexedArrayElements<double>(points, barIndices.col(1))));
 
         // calculate desired bar length
-        Eigen::ArrayXXd desired_bar_length = hbars *
+        Eigen::ArrayXd targetBarLength = hbars *
             (1.0 + 0.4 / std::pow(2.0, points.cols() - 1)) *
-            std::pow((bar_length.pow(points.cols()).sum() /
+            std::pow((barLength.pow(points.cols()).sum() /
             hbars.pow(points.cols()).sum()), 1.0 / points.cols());
 
         // calculate force vector for each bar
-        Eigen::ArrayXXd force_vector = bar_vector.colwise() *
-            ((desired_bar_length - bar_length) / bar_length).max(0.0).col(0);
+        Eigen::ArrayXXd forceVector = barVector.colwise() *
+            ((targetBarLength - barLength) / barLength).max(0.0);
+
+        // store current points positions
+        stopCriterionBuffer = points;
 
         // move points
-        buffer_stop_criterion = points;
-        for (int bar = 0; bar < bar_indices.rows(); ++bar) {
-            if (bar_indices(bar, 0) >= fixedPoints.rows()) {
-                points.row(bar_indices(bar, 0)) += settings::deltaT * force_vector.row(bar);
+        for (int bar = 0; bar < barIndices.rows(); ++bar) {
+            if (barIndices(bar, 0) >= fixedPoints.rows()) {
+                points.row(barIndices(bar, 0)) += settings::deltaT * forceVector.row(bar);
             }
-            if (bar_indices(bar, 1) >= fixedPoints.rows()) {
-                points.row(bar_indices(bar, 1)) -= settings::deltaT * force_vector.row(bar);
+            if (barIndices(bar, 1) >= fixedPoints.rows()) {
+                points.row(barIndices(bar, 1)) -= settings::deltaT * forceVector.row(bar);
             }
         }
 
         // project points outside of domain to boundary
-        utils::projectPointsToFunction(distanceFunction,
-            baseEdgeLength, points);
+        utils::projectPointsToFunction(distanceFunction, baseEdgeLength, points);
 
         // stop criterion
-        double stopCriterion = (points - buffer_stop_criterion).square().rowwise().sum().sqrt().maxCoeff();
+        double stopCriterion = (points - stopCriterionBuffer).square().rowwise().sum().sqrt().maxCoeff();
         if (stopCriterion < settings::pointMovementTolerance * baseEdgeLength) {
             break;
         }
@@ -128,39 +131,40 @@ std::tuple<Eigen::ArrayXXd, Eigen::ArrayXXi> distmesh::distmesh(
 
 // determine boundary edges of given triangulation
 Eigen::ArrayXXi distmesh::boundEdges(Eigen::Ref<Eigen::ArrayXXi const> const triangulation) {
-    std::set<std::vector<int>> edge_set;
-    std::vector<std::vector<int>> boundary_edges;
+    std::set<std::vector<int>> uniqueEdges;
+    std::vector<std::vector<int>> boundaryEdges;
     std::vector<int> edge(triangulation.cols() - 1);
 
     // find all possible combinations of edges
-    auto combinations = utils::nOverK(triangulation.cols(), triangulation.cols() - 1);
+    Eigen::ArrayXXi combinations = utils::nOverK(triangulation.cols(), triangulation.cols() - 1);
 
     // find edges, which only appear once in triangulation
     for (int combination = 0; combination < combinations.rows(); ++combination)
     for (int triangle = 0; triangle < triangulation.rows(); ++triangle) {
         // get current edge
-        for (size_t vertex = 0; vertex < edge.size(); ++vertex) {
-            edge[vertex] = triangulation(triangle, combinations(combination, vertex));
+        for (size_t point = 0; point < edge.size(); ++point) {
+            edge[point] = triangulation(triangle, combinations(combination, point));
         }
 
         // insert edge in set to get info about multiple appearance
-        if (!std::get<1>(edge_set.insert(edge))) {
+        if (!std::get<1>(uniqueEdges.insert(edge))) {
             // find edge in vector and delete it
-            auto it = std::find(boundary_edges.begin(), boundary_edges.end(), edge);
-            if (it != boundary_edges.end()) {
-                boundary_edges.erase(it);
+            auto it = std::find(boundaryEdges.begin(), boundaryEdges.end(), edge);
+            if (it != boundaryEdges.end()) {
+                boundaryEdges.erase(it);
             }
-        } else {
-            boundary_edges.push_back(edge);
+        }
+        else {
+            boundaryEdges.push_back(edge);
         }
     }
 
     // convert stl vector to eigen array
-    Eigen::ArrayXXi boundary_array(boundary_edges.size(), edge.size());
-    for (int edge = 0; edge < boundary_array.rows(); ++edge)
-    for (int vertex = 0; vertex < boundary_array.cols(); ++vertex) {
-        boundary_array(edge, vertex) = boundary_edges[edge][vertex];
+    Eigen::ArrayXXi boundary(boundaryEdges.size(), edge.size());
+    for (int edge = 0; edge < boundary.rows(); ++edge)
+    for (int point = 0; point < boundary.cols(); ++point) {
+        boundary(edge, point) = boundaryEdges[edge][point];
     }
 
-    return boundary_array;
+    return boundary;
 }

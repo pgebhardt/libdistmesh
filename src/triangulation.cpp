@@ -33,7 +33,7 @@ Eigen::ArrayXXi distmesh::triangulation::delaunay(
     Eigen::Ref<Eigen::ArrayXXd const> const points) {
     // convert points array to row major format
     Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic,
-        Eigen::RowMajor> points_rowmajor = points;
+        Eigen::RowMajor> pointsRowMajor = points;
 
     // set flags for qhull
     std::string flags = "qhull d Qt Qbb Qc Qz";
@@ -42,7 +42,7 @@ Eigen::ArrayXXi distmesh::triangulation::delaunay(
     if (qh_qh) {
         qh_save_qhull();
     }
-    qh_new_qhull(points.cols(), points.rows(), points_rowmajor.data(), False,
+    qh_new_qhull(points.cols(), points.rows(), pointsRowMajor.data(), False,
         (char*)flags.c_str(), nullptr, stderr);
     qh_triangulate();
 
