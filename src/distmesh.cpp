@@ -18,10 +18,14 @@
 // Contact: patrik.gebhardt@rub.de
 // --------------------------------------------------------------------
 
-#include "distmesh/distmesh.h"
 #include <vector>
 #include <set>
 #include <algorithm>
+
+#include "distmesh/distmesh.h"
+#include "distmesh/settings.h"
+#include "distmesh/utils.h"
+#include "distmesh/triangulation.h"
 
 // easy creation of n-dimensional bounding_box
 Eigen::ArrayXXd distmesh::boundingBox(unsigned const dimension) {

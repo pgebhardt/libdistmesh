@@ -19,13 +19,15 @@
 // --------------------------------------------------------------------
 
 #include <stdio.h>
-#include "distmesh/distmesh.h"
 
 // qhull library used to calculate delaunay triangulation
 extern "C" {
-#define qh_QHimport
-#include <qhull/qhull_a.h>
+    #define qh_QHimport
+    #include <qhull/qhull_a.h>
 }
+
+#include "distmesh/distmesh.h"
+#include "distmesh/triangulation.h"
 
 Eigen::ArrayXXi distmesh::triangulation::delaunay(
     Eigen::Ref<Eigen::ArrayXXd const> const points) {

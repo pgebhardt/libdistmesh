@@ -21,17 +21,16 @@
 #ifndef LIBDISTMESH_INCLUDE_DISTMESH_H
 #define LIBDISTMESH_INCLUDE_DISTMESH_H
 
+// std c++ lib for handling functors
+#include <functional>
+
 // Eigen lib for array handling
 #include <Eigen/Dense>
 
 // libdistmesh includes
-#include "settings.h"
 #include "functional.h"
 #include "distance_function.h"
-#include "triangulation.h"
-#include "utils.h"
 
-// namespace distmesh
 namespace distmesh {
     // easy creation of n-dimensional bounding_box
     Eigen::ArrayXXd boundingBox(unsigned const dimension);

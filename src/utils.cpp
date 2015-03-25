@@ -18,11 +18,14 @@
 // Contact: patrik.gebhardt@rub.de
 // --------------------------------------------------------------------
 
-#include "distmesh/distmesh.h"
 #include <random>
 #include <chrono>
 #include <set>
 #include <array>
+
+#include "distmesh/distmesh.h"
+#include "distmesh/settings.h"
+#include "distmesh/utils.h"
 
 // calculate factorial recursively
 unsigned distmesh::utils::factorial(unsigned const n) {

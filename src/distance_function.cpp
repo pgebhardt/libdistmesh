@@ -19,6 +19,7 @@
 // --------------------------------------------------------------------
 
 #include "distmesh/distmesh.h"
+#include "distmesh/utils.h"
 
 // creates distance function of rectangular domain
 distmesh::Functional distmesh::distanceFunction::rectangular(

@@ -21,7 +21,6 @@
 #ifndef LIBDISTMESH_INCLUDE_UTILS_H
 #define LIBDISTMESH_INCLUDE_UTILS_H
 
-// namespace distmesh::utils
 namespace distmesh {
 namespace utils {
     // select array elements based on mask
