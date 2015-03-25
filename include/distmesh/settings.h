@@ -27,8 +27,7 @@ namespace settings {
     static const double pointMovementTolerance = 1e-3;
     static const double generalPrecision = 1e-3;
     static const double deltaT = 1e-1;
-    static const unsigned maxSteps = 100000;
-    static const unsigned randomSeed = std::chrono::system_clock::now().time_since_epoch().count();
+    static const unsigned maxSteps = 10000;
 }
 }
 

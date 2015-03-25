@@ -21,7 +21,10 @@
 #ifndef LIBDISTMESH_INCLUDE_DISTMESH_H
 #define LIBDISTMESH_INCLUDE_DISTMESH_H
 
-#include "common.h"
+// Eigen lib for array handling
+#include <Eigen/Dense>
+
+// libdistmesh includes
 #include "settings.h"
 #include "functional.h"
 #include "distance_function.h"

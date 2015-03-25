@@ -37,7 +37,7 @@ std::tuple<Eigen::ArrayXXd, Eigen::ArrayXXi> distmesh::distmesh(
     Functional const& edgeLengthFunction, Eigen::Ref<Eigen::ArrayXXd const> const boundingBox,
     Eigen::Ref<Eigen::ArrayXXd const> const fixedPoints) {
     // create initial distribution in bounding box
-    Eigen::ArrayXXd points = utils::createPointList(distanceFunction,
+    Eigen::ArrayXXd points = utils::createInitialPoints(distanceFunction,
         baseEdgeLength, edgeLengthFunction, boundingBox, fixedPoints);
 
     // create initial triangulation
@@ -53,10 +53,9 @@ std::tuple<Eigen::ArrayXXd, Eigen::ArrayXXi> distmesh::distmesh(
     Eigen::ArrayXXi bar_indices;
     for (unsigned step = 0; step < settings::maxSteps; ++step) {
         // retriangulate if point movement is above tolerance
-        double retriangulation_criterion =
-            ((points - buffer_retriangulation_criterion).square().rowwise().sum().sqrt() /
-            baseEdgeLength).maxCoeff();
-        if (retriangulation_criterion > settings::retriangulationTolerance) {
+        double retriangulationCriterion = (points - buffer_retriangulation_criterion)
+            .square().rowwise().sum().sqrt().maxCoeff();
+        if (retriangulationCriterion > settings::retriangulationTolerance * baseEdgeLength) {
             // update triangulation
             triangulation = triangulation::delaunay(points);
 

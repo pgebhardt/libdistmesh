@@ -63,8 +63,8 @@ namespace utils {
     // calculate factorial recursively
     unsigned factorial(unsigned const n);
 
-    // create point list
-    Eigen::ArrayXXd createPointList(Functional const& distanceFunction,
+    // create initial points distribution
+    Eigen::ArrayXXd createInitialPoints(Functional const& distanceFunction,
         double const baseEdgeLength, Functional const& edgeLengthFunction,
         Eigen::Ref<Eigen::ArrayXXd const> const boundingBox,
         Eigen::Ref<Eigen::ArrayXXd const> const fixedPoints);

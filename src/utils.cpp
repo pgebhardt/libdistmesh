@@ -20,7 +20,7 @@
 
 #include "distmesh/distmesh.h"
 #include <random>
-#include <limits>
+#include <chrono>
 #include <set>
 #include <array>
 
@@ -34,25 +34,28 @@ unsigned distmesh::utils::factorial(unsigned const n) {
     }
 }
 
-// create point list
-Eigen::ArrayXXd distmesh::utils::createPointList(
+// create initial points distribution
+Eigen::ArrayXXd distmesh::utils::createInitialPoints(
     Functional const& distanceFunction, double const baseEdgeLength,
     Functional const& edgeLengthFunction, Eigen::Ref<Eigen::ArrayXXd const> const boundingBox,
     Eigen::Ref<Eigen::ArrayXXd const> const fixedPoints) {
+    // extract dimension of mesh
+    int const dimensions = boundingBox.rows();
+
     // calculate max number of points per dimension and
     // max total point coun and create initial array
-    Eigen::ArrayXi maxPointsPerDimension(boundingBox.rows());
+    Eigen::ArrayXi maxPointsPerDimension(dimensions);
     int maxPointCount = 1;
-    for (int dim = 0; dim < boundingBox.rows(); ++dim) {
+    for (int dim = 0; dim < dimensions; ++dim) {
         maxPointsPerDimension(dim) = ceil((boundingBox(dim, 1) - boundingBox(dim, 0)) /
             (baseEdgeLength * (dim == 0 ? 1.0 : sqrt(3.0) / 2.0)));
         maxPointCount *= maxPointsPerDimension(dim);
     }
-    Eigen::ArrayXXd points(maxPointCount, boundingBox.rows());
 
     // fill point list with evenly distributed points
+    Eigen::ArrayXXd points(maxPointCount, dimensions);
     int sameValueCount = 1;
-    for (int dim = 0; dim < boundingBox.rows(); ++dim) {
+    for (int dim = 0; dim < dimensions; ++dim) {
         for (int point = 0; point < maxPointCount; ++point) {
             points(point, dim) = boundingBox(dim, 0) +
                 baseEdgeLength * (dim == 0 ? 1.0 : sqrt(3.0) / 2.0) *
@@ -78,27 +81,27 @@ Eigen::ArrayXXd distmesh::utils::createPointList(
     points = selectMaskedArrayElements<double>(points, isDublicate);
 
     // add fixed points to final list first
-    Eigen::ArrayXXd finalPoints(points.rows() + fixedPoints.rows(), boundingBox.rows());
+    Eigen::ArrayXXd finalPoints(points.rows() + fixedPoints.rows(), dimensions);
     finalPoints.block(0, 0, fixedPoints.rows(), 2) = fixedPoints;
 
+    // calculate propability to keep points
+    Eigen::ArrayXd propability = 1.0 / edgeLengthFunction(points).pow(dimensions);
+    propability /= propability.maxCoeff();
+
     // initialize random number generator
-    std::default_random_engine randomGenerator(settings::randomSeed);
+    std::default_random_engine randomGenerator(
+        std::chrono::system_clock::now().time_since_epoch().count());
     std::uniform_real_distribution<double> randomDistribution(0.0, 1.0);
 
     // reject points with wrong propability
-    Eigen::ArrayXXd propability = edgeLengthFunction(points);
-    double propabilityNorm = propability.minCoeff();
     int finalPointCount = 0;
     for (int point = 0; point < propability.rows(); ++point) {
-        if (randomDistribution(randomGenerator) <
-            std::pow(propabilityNorm / propability(point, 0),
-                boundingBox.rows())) {
+        if (randomDistribution(randomGenerator) < propability(point)) {
             finalPoints.row(finalPointCount + fixedPoints.rows()) = points.row(point);
             finalPointCount++;
         }
     }
-    finalPoints.conservativeResize(finalPointCount + fixedPoints.rows(),
-        boundingBox.rows());
+    finalPoints.conservativeResize(finalPointCount + fixedPoints.rows(), dimensions);
 
     return finalPoints;
 }
