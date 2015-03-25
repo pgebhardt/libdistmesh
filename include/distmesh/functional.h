@@ -23,7 +23,7 @@
 
 // macro for easies creation of distmesh lambda functions
 #define DISTMESH_FUNCTIONAL(function_body) \
-    (distmesh::Functional([=](Eigen::Ref<Eigen::ArrayXXd const> const points) -> Eigen::ArrayXXd \
+    (distmesh::Functional([=](Eigen::Ref<Eigen::ArrayXXd const> const points) -> Eigen::ArrayXd \
         function_body))
 
 namespace distmesh {
@@ -31,13 +31,13 @@ namespace distmesh {
     class Functional {
     public:
         // function type of Functional callable
-        typedef std::function<Eigen::ArrayXXd(Eigen::Ref<Eigen::ArrayXXd const> const)> function_t;
+        typedef std::function<Eigen::ArrayXd(Eigen::Ref<Eigen::ArrayXXd const> const)> function_t;
 
         // create class from function type
         Functional(function_t const& func) : function_(func) {}
         Functional(double const constant) :
             Functional(DISTMESH_FUNCTIONAL({
-                return Eigen::ArrayXXd::Constant(points.rows(), 1, constant);
+                return Eigen::ArrayXd::Constant(points.rows(),constant);
             })) {}
 
         // copy constructor
@@ -49,7 +49,7 @@ namespace distmesh {
         Functional& operator=(Functional&& rhs);
 
         // evaluate function by call
-        Eigen::ArrayXXd operator() (Eigen::Ref<Eigen::ArrayXXd const> const points) const;
+        Eigen::ArrayXd operator() (Eigen::Ref<Eigen::ArrayXXd const> const points) const;
 
         // basic arithmetic operations
         Functional operator+() const { return *this; }

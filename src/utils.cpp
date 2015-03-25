@@ -195,7 +195,7 @@ void distmesh::utils::projectPointsToFunction(
 Eigen::ArrayXXd distmesh::utils::pointsInsidePoly(
     Eigen::Ref<Eigen::ArrayXXd const> const points,
     Eigen::Ref<Eigen::ArrayXXd const> const polygon) {
-    Eigen::ArrayXXd inside = Eigen::ArrayXXd::Zero(points.rows(), 1);
+    Eigen::ArrayXd inside = Eigen::ArrayXd::Zero(points.rows());
 
     for (int i = 0, j = polygon.rows() - 1; i < polygon.rows(); j = i++) {
         inside = (((points.col(1) < polygon(i, 1)) != (points.col(1) < polygon(j, 1))) &&

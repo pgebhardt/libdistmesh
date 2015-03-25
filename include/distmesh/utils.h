@@ -29,12 +29,12 @@ namespace utils {
     >
     Eigen::Array<type, Eigen::Dynamic, Eigen::Dynamic> selectMaskedArrayElements(
         Eigen::Ref<Eigen::Array<type, Eigen::Dynamic, Eigen::Dynamic> const> const array,
-        Eigen::Ref<Eigen::Array<bool, Eigen::Dynamic, Eigen::Dynamic> const> const mask) {
+        Eigen::Ref<Eigen::Array<bool, Eigen::Dynamic, 1> const> const mask) {
         Eigen::Array<type, Eigen::Dynamic, Eigen::Dynamic> result(mask.count(), array.cols());
 
         int resultCount = 0;
         for (int row = 0; row < array.rows(); ++row) {
-            if (mask(row, 0)) {
+            if (mask(row)) {
                 result.row(resultCount) = array.row(row);
                 resultCount++;
             }
@@ -49,11 +49,11 @@ namespace utils {
     >
     Eigen::Array<type, Eigen::Dynamic, Eigen::Dynamic> selectIndexedArrayElements(
         Eigen::Ref<Eigen::Array<type, Eigen::Dynamic, Eigen::Dynamic> const> const array,
-        Eigen::Ref<Eigen::ArrayXXi const> const indices) {
+        Eigen::Ref<Eigen::ArrayXi const> const indices) {
         Eigen::Array<type, Eigen::Dynamic, Eigen::Dynamic> result(indices.rows(), array.cols());
 
         for (int row = 0; row < indices.rows(); ++row) {
-            result.row(row) = array.row(indices(row, 0));
+            result.row(row) = array.row(indices(row));
         }
 
         return result;

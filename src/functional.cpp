@@ -32,7 +32,7 @@ distmesh::Functional& distmesh::Functional::operator=(
     return *this;
 }
 
-Eigen::ArrayXXd distmesh::Functional::operator()(
+Eigen::ArrayXd distmesh::Functional::operator()(
     Eigen::Ref<Eigen::ArrayXXd const> const points) const {
     return this->function()(points);
 }
