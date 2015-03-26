@@ -18,10 +18,9 @@
 // Contact: patrik.gebhardt@rub.de
 // --------------------------------------------------------------------
 
-#include <random>
-#include <chrono>
 #include <set>
 #include <array>
+#include <iostream>
 
 #include "distmesh/distmesh.h"
 #include "distmesh/settings.h"
@@ -83,28 +82,18 @@ Eigen::ArrayXXd distmesh::utils::createInitialPoints(
     }
     points = selectMaskedArrayElements<double>(points, isDublicate);
 
-    // add fixed points to final list first
-    Eigen::ArrayXXd finalPoints(points.rows() + fixedPoints.rows(), dimensions);
-    finalPoints.block(0, 0, fixedPoints.rows(), 2) = fixedPoints;
-
     // calculate propability to keep points
     Eigen::ArrayXd propability = 1.0 / edgeLengthFunction(points).pow(dimensions);
     propability /= propability.maxCoeff();
 
-    // initialize random number generator
-    std::default_random_engine randomGenerator(
-        std::chrono::system_clock::now().time_since_epoch().count());
-    std::uniform_real_distribution<double> randomDistribution(0.0, 1.0);
-
     // reject points with wrong propability
-    int finalPointCount = 0;
-    for (int point = 0; point < propability.rows(); ++point) {
-        if (randomDistribution(randomGenerator) < propability(point)) {
-            finalPoints.row(finalPointCount + fixedPoints.rows()) = points.row(point);
-            finalPointCount++;
-        }
-    }
-    finalPoints.conservativeResize(finalPointCount + fixedPoints.rows(), dimensions);
+    points = selectMaskedArrayElements<double>(points,
+        0.5 * (1.0 + Eigen::ArrayXd::Random(points.rows())) < propability);
+    std::cout << 0.5 * (1.0 + Eigen::ArrayXd::Random(points.rows())) << std::endl;
+
+    // combine fixed and variable points to one array
+    Eigen::ArrayXXd finalPoints(points.rows() + fixedPoints.rows(), dimensions);
+    finalPoints << fixedPoints, points;
 
     return finalPoints;
 }
