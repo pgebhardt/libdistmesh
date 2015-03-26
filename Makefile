@@ -70,7 +70,7 @@ INCLUDE_DIRS += ./include
 GIT_VERSION := $(shell git describe --tags --long)
 COMMON_FLAGS := $(addprefix -I, $(INCLUDE_DIRS)) -DGIT_VERSION=\"$(GIT_VERSION)\"
 CXXFLAGS := -std=c++11 -fPIC
-LINKFLAGS := -fPIC -static-libstdc++
+LINKFLAGS := -fPIC
 LDFLAGS := $(addprefix -l, $(LIBRARIES)) $(addprefix -L, $(LIBRARY_DIRS)) $(addprefix -Xlinker -rpath , $(LIBRARY_DIRS))
 
 # Set compiler flags for debug configuration
