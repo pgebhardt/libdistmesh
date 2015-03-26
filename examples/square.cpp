@@ -18,8 +18,8 @@
 // Contact: patrik.gebhardt@rub.de
 // --------------------------------------------------------------------
 
-#include <distmesh/distmesh.h>
 #include <fstream>
+#include <distmesh/distmesh.h>
 
 // save eigen array to text file
 template <typename type>
@@ -37,7 +37,7 @@ void savetxt(Eigen::Ref<Eigen::Array<type, Eigen::Dynamic, Eigen::Dynamic> const
 
 int main() {
     Eigen::ArrayXXd boundingBox(2, 2);
-    boundingBox << 0.0, 1.0, 0.0, 1.0;
+    boundingBox << 0.0, 0.0, 1.0, 1.0;
 
     // fixed points at corners of domain to guarantee convergence
     Eigen::ArrayXXd fixedPoints(4, 2);

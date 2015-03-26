@@ -18,8 +18,8 @@
 // Contact: patrik.gebhardt@rub.de
 // --------------------------------------------------------------------
 
-#include <distmesh/distmesh.h>
 #include <fstream>
+#include <distmesh/distmesh.h>
 
 // save eigen array to text file
 template <typename type>

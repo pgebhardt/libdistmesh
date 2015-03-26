@@ -18,8 +18,8 @@
 // Contact: patrik.gebhardt@rub.de
 // --------------------------------------------------------------------
 
-#include <distmesh/distmesh.h>
 #include <fstream>
+#include <distmesh/distmesh.h>
 
 // save eigen array to text file
 template <typename type>
@@ -37,15 +37,14 @@ void savetxt(Eigen::Ref<Eigen::Array<type, Eigen::Dynamic, Eigen::Dynamic> const
 
 int main() {
     Eigen::ArrayXXd boundingBox(2, 2);
-    boundingBox << -2.0, 2.0, -1.0, 1.0;
+    boundingBox << -2.0, -1.0, 2.0, 1.0;
 
     // radii of ellipse
     Eigen::ArrayXd radii(2);
     radii << 2.0, 1.0;
 
     // create mesh
-    auto mesh = distmesh::distmesh(
-        distmesh::distanceFunction::elliptical(radii),
+    auto mesh = distmesh::distmesh(distmesh::distanceFunction::elliptical(radii),
         0.2, 1.0, boundingBox);
 
     // save mesh to file
