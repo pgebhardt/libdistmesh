@@ -154,7 +154,8 @@ void distmesh::utils::projectPointsToFunction(
     Eigen::ArrayXd distance = distanceFunction(points);
 
     // check for points outside of boundary
-    if ((distance > 0.0).any()) {
+    Eigen::Array<bool, Eigen::Dynamic, 1> outside = distance > 0.0;
+    if (outside.any()) {
         // calculate gradient
         Eigen::ArrayXXd gradient(points.rows(), points.cols());
         Eigen::ArrayXXd deltaX = Eigen::ArrayXXd::Zero(points.rows(), points.cols());
@@ -168,7 +169,7 @@ void distmesh::utils::projectPointsToFunction(
 
         // project points back to boundary
         for (int dim = 0; dim < points.cols(); ++dim) {
-            points.col(dim) -= (distance > 0.0).select(
+            points.col(dim) -= outside.select(
                 gradient.col(dim) * distance / gradient.square().rowwise().sum(),
                 0.0);
         }
