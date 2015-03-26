@@ -22,11 +22,21 @@
 #define _57ca4052_ba33_4235_9a5f_84154336d924
 
 namespace distmesh {
-namespace settings {
+namespace constants {
+    // algorithm stops, when maximum relative points movement is below tolerance
+    static double const pointsMovementTolerance = 1e-3;
+
+    // triangulation is updated, when maximum relative points movement is above tolerance
     static double const retriangulationTolerance = 1e-1;
-    static double const pointMovementTolerance = 1e-3;
-    static double const generalPrecision = 1e-3;
+
+    // time step for updating points positions with Euler's method
     static double const deltaT = 1e-1;
+
+    // relative tolerance in the geometry evaluations
+    static double const geomertyEvaluationTolerance = 1e-3;
+
+    // algorithm will be terminated after the maximum number of iterations,
+    // when no convergence can be achieved
     static unsigned const maxSteps = 10000;
 }
 }

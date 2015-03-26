@@ -23,7 +23,7 @@
 #include <algorithm>
 
 #include "distmesh/distmesh.h"
-#include "distmesh/settings.h"
+#include "distmesh/constants.h"
 #include "distmesh/utils.h"
 #include "distmesh/triangulation.h"
 
@@ -59,11 +59,11 @@ std::tuple<Eigen::ArrayXXd, Eigen::ArrayXXi> distmesh::distmesh(
 
     // main distmesh loop
     Eigen::ArrayXXi barIndices;
-    for (unsigned step = 0; step < settings::maxSteps; ++step) {
+    for (unsigned step = 0; step < constants::maxSteps; ++step) {
         // retriangulate if point movement is above tolerance
         double const retriangulationCriterion = (points - retriangulationCriterionBuffer)
             .square().rowwise().sum().sqrt().maxCoeff();
-        if (retriangulationCriterion > settings::retriangulationTolerance * baseEdgeLength) {
+        if (retriangulationCriterion > constants::retriangulationTolerance * baseEdgeLength) {
             // update triangulation
             triangulation = triangulation::delaunay(points);
 
@@ -77,7 +77,7 @@ std::tuple<Eigen::ArrayXXd, Eigen::ArrayXXi> distmesh::distmesh(
 
             // reject triangles with circumcenter outside of the region
             triangulation = utils::selectMaskedArrayElements<int>(triangulation,
-                distanceFunction(circumcenter) < -settings::generalPrecision * baseEdgeLength);
+                distanceFunction(circumcenter) < -constants::geomertyEvaluationTolerance * baseEdgeLength);
 
             // find unique bar indices
             barIndices = utils::findUniqueBars(triangulation);
@@ -111,10 +111,10 @@ std::tuple<Eigen::ArrayXXd, Eigen::ArrayXXi> distmesh::distmesh(
         // move points
         for (int bar = 0; bar < barIndices.rows(); ++bar) {
             if (barIndices(bar, 0) >= fixedPoints.rows()) {
-                points.row(barIndices(bar, 0)) += settings::deltaT * forceVector.row(bar);
+                points.row(barIndices(bar, 0)) += constants::deltaT * forceVector.row(bar);
             }
             if (barIndices(bar, 1) >= fixedPoints.rows()) {
-                points.row(barIndices(bar, 1)) -= settings::deltaT * forceVector.row(bar);
+                points.row(barIndices(bar, 1)) -= constants::deltaT * forceVector.row(bar);
             }
         }
 
@@ -123,7 +123,7 @@ std::tuple<Eigen::ArrayXXd, Eigen::ArrayXXi> distmesh::distmesh(
 
         // stop criterion
         double const stopCriterion = (points - stopCriterionBuffer).square().rowwise().sum().sqrt().maxCoeff();
-        if (stopCriterion < settings::pointMovementTolerance * baseEdgeLength) {
+        if (stopCriterion < constants::pointsMovementTolerance * baseEdgeLength) {
             break;
         }
     }

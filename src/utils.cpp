@@ -22,7 +22,7 @@
 #include <array>
 
 #include "distmesh/distmesh.h"
-#include "distmesh/settings.h"
+#include "distmesh/constants.h"
 #include "distmesh/utils.h"
 
 // calculate factorial recursively
@@ -70,7 +70,7 @@ Eigen::ArrayXXd distmesh::utils::createInitialPoints(
 
     // reject points outside of region defined by distance function
     points = selectMaskedArrayElements<double>(points,
-        distanceFunction(points) < settings::generalPrecision * baseEdgeLength);
+        distanceFunction(points) < constants::geomertyEvaluationTolerance * baseEdgeLength);
 
     // clear dublicate points
     Eigen::Array<bool, Eigen::Dynamic, 1> isDublicate =
