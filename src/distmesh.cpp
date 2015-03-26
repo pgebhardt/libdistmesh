@@ -29,9 +29,9 @@
 
 // easy creation of n-dimensional bounding box
 Eigen::ArrayXXd distmesh::boundingBox(unsigned const dimension) {
-    Eigen::ArrayXXd box(dimension, 2);
-    box.col(0).fill(-1.0);
-    box.col(1).fill(1.0);
+    Eigen::ArrayXXd box(2, dimension);
+    box.row(0).fill(-1.0);
+    box.row(1).fill(1.0);
     return box;
 }
 

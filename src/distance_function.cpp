@@ -25,14 +25,15 @@
 distmesh::Functional distmesh::distanceFunction::rectangular(
     Eigen::Ref<Eigen::ArrayXXd const> const rectangle) {
     return DISTMESH_FUNCTIONAL({
-        Eigen::ArrayXXd result =
-            (points.col(0) - rectangle(0, 0))
-            .min(rectangle(0, 1) - points.col(0));
+        Eigen::ArrayXXd result = (points.col(0) - rectangle(0, 0))
+            .min(rectangle(1, 0) - points.col(0));
+
         for (int dim = 1; dim < points.cols(); ++dim) {
             result = result
-                .min((points.col(dim) - rectangle(dim, 0)))
-                .min(rectangle(dim, 1) - points.col(dim));
+                .min((points.col(dim) - rectangle(0, dim)))
+                .min(rectangle(1, dim) - points.col(dim));
         }
+
         return -result;
     });
 }
@@ -48,7 +49,8 @@ distmesh::Functional distmesh::distanceFunction::elliptical(
             if (radii.rows() == points.cols()) {
                 return ((points.rowwise() - midpoint.transpose()).rowwise() / radii.transpose())
                     .square().rowwise().sum().sqrt() - 1.0;
-            } else {
+            }
+            else {
                 return (points.rowwise() - midpoint.transpose())
                     .square().rowwise().sum().sqrt() - 1.0;
             }
@@ -57,7 +59,8 @@ distmesh::Functional distmesh::distanceFunction::elliptical(
             if (radii.rows() == points.cols()) {
                 return (points.rowwise() / radii.transpose())
                     .square().rowwise().sum().sqrt() - 1.0;
-            } else {
+            }
+            else {
                 return points.square().rowwise().sum().sqrt() - 1.0;
             }
         }
@@ -72,7 +75,8 @@ distmesh::Functional
         if (midpoint.rows() == points.cols()) {
             return (points.rowwise() - midpoint.transpose())
                 .square().rowwise().sum().sqrt() - radius;
-        } else {
+        }
+        else {
             return points.square().rowwise().sum().sqrt() - radius;
         }
     });
