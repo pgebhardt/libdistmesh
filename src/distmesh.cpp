@@ -27,9 +27,9 @@
 #include "distmesh/utils.h"
 #include "distmesh/triangulation.h"
 
-// easy creation of n-dimensional bounding_box
-Eigen::ArrayXXd distmesh::boundingBox(unsigned const dimensions) {
-    Eigen::ArrayXXd box(dimensions, 2);
+// easy creation of n-dimensional bounding box
+Eigen::ArrayXXd distmesh::boundingBox(unsigned const dimension) {
+    Eigen::ArrayXXd box(dimension, 2);
     box.col(0).fill(-1.0);
     box.col(1).fill(1.0);
     return box;
@@ -40,6 +40,9 @@ std::tuple<Eigen::ArrayXXd, Eigen::ArrayXXi> distmesh::distmesh(
     Functional const& distanceFunction, double const baseEdgeLength,
     Functional const& edgeLengthFunction, Eigen::Ref<Eigen::ArrayXXd const> const boundingBox,
     Eigen::Ref<Eigen::ArrayXXd const> const fixedPoints) {
+    // determine dimension of mesh
+    unsigned const dimension = boundingBox.rows();
+
     // create initial distribution in bounding box
     Eigen::ArrayXXd points = utils::createInitialPoints(distanceFunction,
         baseEdgeLength, edgeLengthFunction, boundingBox, fixedPoints);
@@ -58,7 +61,7 @@ std::tuple<Eigen::ArrayXXd, Eigen::ArrayXXi> distmesh::distmesh(
     Eigen::ArrayXXi barIndices;
     for (unsigned step = 0; step < settings::maxSteps; ++step) {
         // retriangulate if point movement is above tolerance
-        double retriangulationCriterion = (points - retriangulationCriterionBuffer)
+        double const retriangulationCriterion = (points - retriangulationCriterionBuffer)
             .square().rowwise().sum().sqrt().maxCoeff();
         if (retriangulationCriterion > settings::retriangulationTolerance * baseEdgeLength) {
             // update triangulation
@@ -66,7 +69,7 @@ std::tuple<Eigen::ArrayXXd, Eigen::ArrayXXi> distmesh::distmesh(
 
             // calculate circumcenter
             Eigen::ArrayXXd circumcenter = Eigen::ArrayXXd::Zero(
-                triangulation.rows(), points.cols());
+                triangulation.rows(), dimension);
             for (int point = 0; point < triangulation.cols(); ++point) {
                 circumcenter += utils::selectIndexedArrayElements<double>(
                     points, triangulation.col(point)) / triangulation.cols();
@@ -89,19 +92,18 @@ std::tuple<Eigen::ArrayXXd, Eigen::ArrayXXi> distmesh::distmesh(
         Eigen::ArrayXd barLength = barVector.square().rowwise().sum().sqrt();
 
         // evaluate edgeLengthFunction at midpoints of bars
-        Eigen::ArrayXXd hbars = edgeLengthFunction(0.5 *
+        Eigen::ArrayXd hbars = edgeLengthFunction(0.5 *
             (utils::selectIndexedArrayElements<double>(points, barIndices.col(0)) +
             utils::selectIndexedArrayElements<double>(points, barIndices.col(1))));
 
         // calculate desired bar length
-        Eigen::ArrayXd targetBarLength = hbars *
-            (1.0 + 0.4 / std::pow(2.0, points.cols() - 1)) *
-            std::pow((barLength.pow(points.cols()).sum() /
-            hbars.pow(points.cols()).sum()), 1.0 / points.cols());
+        Eigen::ArrayXd desiredBarLength = hbars * (1.0 + 0.4 / std::pow(2.0, dimension - 1)) *
+            std::pow((barLength.pow(dimension).sum() / hbars.pow(dimension).sum()),
+                1.0 / dimension);
 
         // calculate force vector for each bar
         Eigen::ArrayXXd forceVector = barVector.colwise() *
-            ((targetBarLength - barLength) / barLength).max(0.0);
+            ((desiredBarLength - barLength) / barLength).max(0.0);
 
         // store current points positions
         stopCriterionBuffer = points;
@@ -120,7 +122,7 @@ std::tuple<Eigen::ArrayXXd, Eigen::ArrayXXi> distmesh::distmesh(
         utils::projectPointsToFunction(distanceFunction, baseEdgeLength, points);
 
         // stop criterion
-        double stopCriterion = (points - stopCriterionBuffer).square().rowwise().sum().sqrt().maxCoeff();
+        double const stopCriterion = (points - stopCriterionBuffer).square().rowwise().sum().sqrt().maxCoeff();
         if (stopCriterion < settings::pointMovementTolerance * baseEdgeLength) {
             break;
         }
