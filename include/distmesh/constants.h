@@ -29,11 +29,14 @@ namespace constants {
     // triangulation is updated, when maximum relative points movement is above tolerance
     static double const retriangulationTolerance = 1e-1;
 
+    // relative tolerance in the geometry evaluations
+    static double const geomertyEvaluationTolerance = 1e-3;
+
     // time step for updating points positions with Euler's method
     static double const deltaT = 1e-1;
 
-    // relative tolerance in the geometry evaluations
-    static double const geomertyEvaluationTolerance = 1e-3;
+    // step size for numerical differentiation
+    static double const deltaX = std::sqrt(std::numeric_limits<double>::epsilon());
 
     // algorithm will be terminated after the maximum number of iterations,
     // when no convergence can be achieved

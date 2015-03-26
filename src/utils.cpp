@@ -38,7 +38,7 @@ unsigned distmesh::utils::factorial(unsigned const n) {
 // create initial points distribution
 Eigen::ArrayXXd distmesh::utils::createInitialPoints(
     Functional const& distanceFunction, double const baseEdgeLength,
-    Functional const& edgeLengthFunction, Eigen::Ref<Eigen::ArrayXXd const> const boundingBox,
+    Functional const& elementSizeFunction, Eigen::Ref<Eigen::ArrayXXd const> const boundingBox,
     Eigen::Ref<Eigen::ArrayXXd const> const fixedPoints) {
     // extract dimension of mesh
     unsigned const dimension = boundingBox.cols();
@@ -82,7 +82,7 @@ Eigen::ArrayXXd distmesh::utils::createInitialPoints(
     points = selectMaskedArrayElements<double>(points, isDublicate);
 
     // calculate propability to keep points
-    Eigen::ArrayXd propability = 1.0 / edgeLengthFunction(points).pow(dimension);
+    Eigen::ArrayXd propability = 1.0 / elementSizeFunction(points).pow(dimension);
     propability /= propability.maxCoeff();
 
     // reject points with wrong propability
@@ -151,27 +151,24 @@ Eigen::ArrayXXi distmesh::utils::findUniqueBars(Eigen::Ref<Eigen::ArrayXXi const
 void distmesh::utils::projectPointsToFunction(
     Functional const& distanceFunction, double const baseEdgeLength,
     Eigen::Ref<Eigen::ArrayXXd> points) {
-    // evaluate distance function at points
     Eigen::ArrayXd distance = distanceFunction(points);
 
     // check for points outside of boundary
-    Eigen::Array<bool, Eigen::Dynamic, 1> outside = distance > 0.0;
-    if (outside.any()) {
+    if ((distance > 0.0).any()) {
         // calculate gradient
         Eigen::ArrayXXd gradient(points.rows(), points.cols());
-        Eigen::ArrayXXd deltaX(points.rows(), points.cols());
-        Eigen::ArrayXXd h;
-        deltaX.fill(0.0);
+        Eigen::ArrayXXd deltaX = Eigen::ArrayXXd::Zero(points.rows(), points.cols());
+
         for (int dim = 0; dim < points.cols(); ++dim) {
-            deltaX.col(dim).fill(std::sqrt(std::numeric_limits<double>::epsilon()) * baseEdgeLength);
-            h = points + deltaX;
-            gradient.col(dim) = (distanceFunction(h) - distance) /
-                (std::sqrt(std::numeric_limits<double>::epsilon()) * baseEdgeLength);
+            deltaX.col(dim).fill(constants::deltaX * baseEdgeLength);
+            gradient.col(dim) = (distanceFunction(points + deltaX) - distance) /
+                (constants::deltaX * baseEdgeLength);
             deltaX.col(dim).fill(0.0);
         }
 
+        // project points back to boundary
         for (int dim = 0; dim < points.cols(); ++dim) {
-            points.col(dim) -= outside.select(
+            points.col(dim) -= (distance > 0.0).select(
                 gradient.col(dim) * distance / gradient.square().rowwise().sum(),
                 0.0);
         }

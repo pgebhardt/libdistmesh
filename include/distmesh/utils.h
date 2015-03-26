@@ -64,7 +64,7 @@ namespace utils {
 
     // create initial points distribution
     Eigen::ArrayXXd createInitialPoints(Functional const& distanceFunction,
-        double const baseEdgeLength, Functional const& edgeLengthFunction,
+        double const baseEdgeLength, Functional const& elementSizeFunction,
         Eigen::Ref<Eigen::ArrayXXd const> const boundingBox,
         Eigen::Ref<Eigen::ArrayXXd const> const fixedPoints);
 

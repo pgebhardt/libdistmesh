@@ -38,14 +38,14 @@ Eigen::ArrayXXd distmesh::boundingBox(unsigned const dimension) {
 // apply the distmesh algorithm
 std::tuple<Eigen::ArrayXXd, Eigen::ArrayXXi> distmesh::distmesh(
     Functional const& distanceFunction, double const baseEdgeLength,
-    Functional const& edgeLengthFunction, Eigen::Ref<Eigen::ArrayXXd const> const boundingBox,
+    Functional const& elementSizeFunction, Eigen::Ref<Eigen::ArrayXXd const> const boundingBox,
     Eigen::Ref<Eigen::ArrayXXd const> const fixedPoints) {
     // determine dimension of mesh
     unsigned const dimension = boundingBox.rows();
 
     // create initial distribution in bounding box
     Eigen::ArrayXXd points = utils::createInitialPoints(distanceFunction,
-        baseEdgeLength, edgeLengthFunction, boundingBox, fixedPoints);
+        baseEdgeLength, elementSizeFunction, boundingBox, fixedPoints);
 
     // create initial triangulation
     Eigen::ArrayXXi triangulation = triangulation::delaunay(points);
@@ -91,14 +91,14 @@ std::tuple<Eigen::ArrayXXd, Eigen::ArrayXXi> distmesh::distmesh(
             utils::selectIndexedArrayElements<double>(points, barIndices.col(1));
         Eigen::ArrayXd barLength = barVector.square().rowwise().sum().sqrt();
 
-        // evaluate edgeLengthFunction at midpoints of bars
-        Eigen::ArrayXd hbars = edgeLengthFunction(0.5 *
+        // evaluate elementSizeFunction at midpoints of bars
+        Eigen::ArrayXd desiredElementSize = elementSizeFunction(0.5 *
             (utils::selectIndexedArrayElements<double>(points, barIndices.col(0)) +
             utils::selectIndexedArrayElements<double>(points, barIndices.col(1))));
 
         // calculate desired bar length
-        Eigen::ArrayXd desiredBarLength = hbars * (1.0 + 0.4 / std::pow(2.0, dimension - 1)) *
-            std::pow((barLength.pow(dimension).sum() / hbars.pow(dimension).sum()),
+        Eigen::ArrayXd desiredBarLength = desiredElementSize * (1.0 + 0.4 / std::pow(2.0, dimension - 1)) *
+            std::pow((barLength.pow(dimension).sum() / desiredElementSize.pow(dimension).sum()),
                 1.0 / dimension);
 
         // calculate force vector for each bar
