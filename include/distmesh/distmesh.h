@@ -21,11 +21,12 @@
 #ifndef _c7492357_ec3f_4dbf_b941_9175e9f79ab0
 #define _c7492357_ec3f_4dbf_b941_9175e9f79ab0
 
-// std c++ lib for handling functors
+// standard c++ lib
 #include <functional>
+#include <tuple>
 
 // Eigen lib for array handling
-#include <Eigen/Dense>
+#include <Eigen/Core>
 
 // libdistmesh includes
 #include "functional.h"
