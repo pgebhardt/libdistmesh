@@ -30,7 +30,7 @@ namespace constants {
     static double const retriangulationTolerance = 1e-1;
 
     // relative tolerance in the geometry evaluations
-    static double const geomertyEvaluationTolerance = 1e-3;
+    static double const geometryEvaluationTolerance = 1e-3;
 
     // time step for updating points positions with Euler's method
     static double const deltaT = 1e-1;

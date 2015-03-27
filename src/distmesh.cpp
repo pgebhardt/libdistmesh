@@ -77,7 +77,7 @@ std::tuple<Eigen::ArrayXXd, Eigen::ArrayXXi> distmesh::distmesh(
 
             // reject triangles with circumcenter outside of the region
             triangulation = utils::selectMaskedArrayElements<int>(triangulation,
-                distanceFunction(circumcenter) < -constants::geomertyEvaluationTolerance * baseEdgeLength);
+                distanceFunction(circumcenter) < -constants::geometryEvaluationTolerance * baseEdgeLength);
 
             // find unique bar indices
             barIndices = utils::findUniqueBars(triangulation);
