@@ -61,9 +61,8 @@ std::tuple<Eigen::ArrayXXd, Eigen::ArrayXXi> distmesh::distmesh(
     Eigen::ArrayXXi barIndices;
     for (unsigned step = 0; step < constants::maxSteps; ++step) {
         // retriangulate if point movement is above tolerance
-        double const retriangulationCriterion = (points - retriangulationCriterionBuffer)
-            .square().rowwise().sum().sqrt().maxCoeff();
-        if (retriangulationCriterion > constants::retriangulationTolerance * initialPointDistance) {
+        if ((points - retriangulationCriterionBuffer).square().rowwise().sum().sqrt().maxCoeff() >
+            constants::retriangulationTolerance * initialPointDistance) {
             // update triangulation
             triangulation = triangulation::delaunay(points);
 
@@ -122,8 +121,8 @@ std::tuple<Eigen::ArrayXXd, Eigen::ArrayXXi> distmesh::distmesh(
         utils::projectPointsToFunction(distanceFunction, initialPointDistance, points);
 
         // stop criterion
-        double const stopCriterion = (points - stopCriterionBuffer).square().rowwise().sum().sqrt().maxCoeff();
-        if (stopCriterion < constants::pointsMovementTolerance * initialPointDistance) {
+        if ((points - stopCriterionBuffer).square().rowwise().sum().sqrt().maxCoeff() <
+            constants::pointsMovementTolerance * initialPointDistance) {
             break;
         }
     }
