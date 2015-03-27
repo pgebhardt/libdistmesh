@@ -38,7 +38,7 @@ namespace distmesh {
 
     // apply the distmesh algorithm
     std::tuple<Eigen::ArrayXXd, Eigen::ArrayXXi> distmesh(
-        Functional const& distanceFunction, double const baseEdgeLength,
+        Functional const& distanceFunction, double const initialPointsDistance,
         Functional const& elementSizeFunction=1.0,
         Eigen::Ref<Eigen::ArrayXXd const> const boundingBox=distmesh::boundingBox(2),
         Eigen::Ref<Eigen::ArrayXXd const> const fixedPoints=Eigen::ArrayXXd());

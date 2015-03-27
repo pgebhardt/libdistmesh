@@ -64,7 +64,7 @@ namespace utils {
 
     // create initial points distribution
     Eigen::ArrayXXd createInitialPoints(Functional const& distanceFunction,
-        double const baseEdgeLength, Functional const& elementSizeFunction,
+        double const initialPointsDistance, Functional const& elementSizeFunction,
         Eigen::Ref<Eigen::ArrayXXd const> const boundingBox,
         Eigen::Ref<Eigen::ArrayXXd const> const fixedPoints);
 
@@ -75,9 +75,8 @@ namespace utils {
     Eigen::ArrayXXi findUniqueBars(Eigen::Ref<Eigen::ArrayXXi const> const triangulation);
 
     // project points outside of boundary back to it
-    void projectPointsToFunction(
-        Functional const& distanceFunction, double const baseEdgeLength,
-        Eigen::Ref<Eigen::ArrayXXd> points);
+    void projectPointsToFunction(Functional const& distanceFunction,
+        double const initialPointsDistance, Eigen::Ref<Eigen::ArrayXXd> points);
 
     // check whether points lies inside or outside of polygon
     Eigen::ArrayXXd pointsInsidePoly(

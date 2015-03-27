@@ -37,55 +37,53 @@ unsigned distmesh::utils::factorial(unsigned const n) {
 
 // create initial points distribution
 Eigen::ArrayXXd distmesh::utils::createInitialPoints(
-    Functional const& distanceFunction, double const baseEdgeLength,
+    Functional const& distanceFunction, double const initialPointsDistance,
     Functional const& elementSizeFunction, Eigen::Ref<Eigen::ArrayXXd const> const boundingBox,
     Eigen::Ref<Eigen::ArrayXXd const> const fixedPoints) {
     // extract dimension of mesh
     unsigned const dimension = boundingBox.cols();
 
-    // calculate maximum number of points per dimension and
-    // max total point count and create initial array
-    Eigen::ArrayXi maxPointsPerDimension(dimension);
+    // initially distribute points evenly in complete bounding box
+    Eigen::ArrayXi pointsPerDimension(dimension);
     for (int dim = 0; dim < dimension; ++dim) {
-        maxPointsPerDimension(dim) = ceil((boundingBox(1, dim) - boundingBox(0, dim)) /
-            (baseEdgeLength * (dim == 0 ? 1.0 : sqrt(3.0) / 2.0)));
+        pointsPerDimension(dim) = ceil((boundingBox(1, dim) - boundingBox(0, dim)) /
+            (initialPointsDistance * (dim == 0 ? 1.0 : sqrt(3.0) / 2.0)));
     }
 
-    // fill point list with evenly distributed points
-    Eigen::ArrayXXd points(maxPointsPerDimension.prod(), dimension);
-    int sameValueCount = 1;
+    Eigen::ArrayXXd points(pointsPerDimension.prod(), dimension);
+    for (int point = 0; point < points.rows(); ++point)
     for (int dim = 0; dim < dimension; ++dim) {
-        for (int point = 0; point < points.rows(); ++point) {
-            points(point, dim) = boundingBox(0, dim) +
-                baseEdgeLength * (dim == 0 ? 1.0 : sqrt(3.0) / 2.0) *
-                ((point / sameValueCount) % maxPointsPerDimension(dim));
-            if (dim > 0) {
-                points(point, dim - 1) += point / sameValueCount % 2 != 0 ? baseEdgeLength / 2.0 : 0.0;
-            }
+        int const pointIndex = (point / std::max(pointsPerDimension.topRows(dim).prod(), 1)) %
+            pointsPerDimension(dim);
+
+        points(point, dim) = boundingBox(0, dim) + (double)pointIndex * initialPointsDistance *
+            (dim == 0 ? 1.0 : sqrt(3.0) / 2.0);
+
+        if (dim > 0) {
+            points(point, dim - 1) += pointIndex % 2 != 0 ? initialPointsDistance / 2.0 : 0.0;
         }
-        sameValueCount *= maxPointsPerDimension(dim);
     }
 
     // reject points outside of region defined by distance function
     points = selectMaskedArrayElements<double>(points,
-        distanceFunction(points) < constants::geometryEvaluationTolerance * baseEdgeLength);
+        distanceFunction(points) < constants::geometryEvaluationTolerance * initialPointsDistance);
 
-    // clear dublicate points
-    Eigen::Array<bool, Eigen::Dynamic, 1> isDublicate =
+    // clear duplicate points
+    Eigen::Array<bool, Eigen::Dynamic, 1> isUniquePoint =
         Eigen::Array<bool, Eigen::Dynamic, 1>::Constant(points.rows(), true);
     for (int i = 0; i < fixedPoints.rows(); ++i)
     for (int j = 0; j < points.rows(); ++j) {
-        isDublicate(j) &= !(fixedPoints.row(i) == points.row(j)).all();
+        isUniquePoint(j) &= !(fixedPoints.row(i) == points.row(j)).all();
     }
-    points = selectMaskedArrayElements<double>(points, isDublicate);
+    points = selectMaskedArrayElements<double>(points, isUniquePoint);
 
-    // calculate propability to keep points
-    Eigen::ArrayXd propability = 1.0 / elementSizeFunction(points).pow(dimension);
-    propability /= propability.maxCoeff();
+    // calculate probability to keep points
+    Eigen::ArrayXd probability = 1.0 / elementSizeFunction(points).pow(dimension);
+    probability /= probability.maxCoeff();
 
-    // reject points with wrong propability
+    // reject points with wrong probability
     points = selectMaskedArrayElements<double>(points,
-        0.5 * (1.0 + Eigen::ArrayXd::Random(points.rows())) < propability);
+        0.5 * (1.0 + Eigen::ArrayXd::Random(points.rows())) < probability);
 
     // combine fixed and variable points to one array
     Eigen::ArrayXXd finalPoints(points.rows() + fixedPoints.rows(), dimension);
@@ -147,7 +145,7 @@ Eigen::ArrayXXi distmesh::utils::findUniqueBars(Eigen::Ref<Eigen::ArrayXXi const
 
 // project points outside of boundary back to it
 void distmesh::utils::projectPointsToFunction(
-    Functional const& distanceFunction, double const baseEdgeLength,
+    Functional const& distanceFunction, double const initialPointsDistance,
     Eigen::Ref<Eigen::ArrayXXd> points) {
     Eigen::ArrayXd distance = distanceFunction(points);
 
@@ -159,9 +157,9 @@ void distmesh::utils::projectPointsToFunction(
         Eigen::ArrayXXd deltaX = Eigen::ArrayXXd::Zero(points.rows(), points.cols());
 
         for (int dim = 0; dim < points.cols(); ++dim) {
-            deltaX.col(dim).fill(constants::deltaX * baseEdgeLength);
+            deltaX.col(dim).fill(constants::deltaX * initialPointsDistance);
             gradient.col(dim) = (distanceFunction(points + deltaX) - distance) /
-                (constants::deltaX * baseEdgeLength);
+                (constants::deltaX * initialPointsDistance);
             deltaX.col(dim).fill(0.0);
         }
 
