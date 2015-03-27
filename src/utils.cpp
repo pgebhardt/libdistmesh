@@ -43,21 +43,19 @@ Eigen::ArrayXXd distmesh::utils::createInitialPoints(
     // extract dimension of mesh
     unsigned const dimension = boundingBox.cols();
 
-    // calculate max number of points per dimension and
-    // max total point coun and create initial array
+    // calculate maximum number of points per dimension and
+    // max total point count and create initial array
     Eigen::ArrayXi maxPointsPerDimension(dimension);
-    int maxPointCount = 1;
     for (int dim = 0; dim < dimension; ++dim) {
         maxPointsPerDimension(dim) = ceil((boundingBox(1, dim) - boundingBox(0, dim)) /
             (baseEdgeLength * (dim == 0 ? 1.0 : sqrt(3.0) / 2.0)));
-        maxPointCount *= maxPointsPerDimension(dim);
     }
 
     // fill point list with evenly distributed points
-    Eigen::ArrayXXd points(maxPointCount, dimension);
+    Eigen::ArrayXXd points(maxPointsPerDimension.prod(), dimension);
     int sameValueCount = 1;
     for (int dim = 0; dim < dimension; ++dim) {
-        for (int point = 0; point < maxPointCount; ++point) {
+        for (int point = 0; point < points.rows(); ++point) {
             points(point, dim) = boundingBox(0, dim) +
                 baseEdgeLength * (dim == 0 ? 1.0 : sqrt(3.0) / 2.0) *
                 ((point / sameValueCount) % maxPointsPerDimension(dim));
