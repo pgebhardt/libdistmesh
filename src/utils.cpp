@@ -37,7 +37,7 @@ unsigned distmesh::utils::factorial(unsigned const n) {
 
 // create initial points distribution
 Eigen::ArrayXXd distmesh::utils::createInitialPoints(
-    Functional const& distanceFunction, double const initialPointsDistance,
+    Functional const& distanceFunction, double const initialPointDistance,
     Functional const& elementSizeFunction, Eigen::Ref<Eigen::ArrayXXd const> const boundingBox,
     Eigen::Ref<Eigen::ArrayXXd const> const fixedPoints) {
     // extract dimension of mesh
@@ -47,7 +47,7 @@ Eigen::ArrayXXd distmesh::utils::createInitialPoints(
     Eigen::ArrayXi pointsPerDimension(dimension);
     for (int dim = 0; dim < dimension; ++dim) {
         pointsPerDimension(dim) = ceil((boundingBox(1, dim) - boundingBox(0, dim)) /
-            (initialPointsDistance * (dim == 0 ? 1.0 : sqrt(3.0) / 2.0)));
+            (initialPointDistance * (dim == 0 ? 1.0 : sqrt(3.0) / 2.0)));
     }
 
     Eigen::ArrayXXd points(pointsPerDimension.prod(), dimension);
@@ -56,17 +56,17 @@ Eigen::ArrayXXd distmesh::utils::createInitialPoints(
         int const pointIndex = (point / std::max(pointsPerDimension.topRows(dim).prod(), 1)) %
             pointsPerDimension(dim);
 
-        points(point, dim) = boundingBox(0, dim) + (double)pointIndex * initialPointsDistance *
+        points(point, dim) = boundingBox(0, dim) + (double)pointIndex * initialPointDistance *
             (dim == 0 ? 1.0 : sqrt(3.0) / 2.0);
 
         if (dim > 0) {
-            points(point, dim - 1) += pointIndex % 2 != 0 ? initialPointsDistance / 2.0 : 0.0;
+            points(point, dim - 1) += pointIndex % 2 != 0 ? initialPointDistance / 2.0 : 0.0;
         }
     }
 
     // reject points outside of region defined by distance function
     points = selectMaskedArrayElements<double>(points,
-        distanceFunction(points) < constants::geometryEvaluationTolerance * initialPointsDistance);
+        distanceFunction(points) < constants::geometryEvaluationTolerance * initialPointDistance);
 
     // clear duplicate points
     Eigen::Array<bool, Eigen::Dynamic, 1> isUniquePoint =
@@ -145,7 +145,7 @@ Eigen::ArrayXXi distmesh::utils::findUniqueBars(Eigen::Ref<Eigen::ArrayXXi const
 
 // project points outside of boundary back to it
 void distmesh::utils::projectPointsToFunction(
-    Functional const& distanceFunction, double const initialPointsDistance,
+    Functional const& distanceFunction, double const initialPointDistance,
     Eigen::Ref<Eigen::ArrayXXd> points) {
     Eigen::ArrayXd distance = distanceFunction(points);
 
@@ -157,18 +157,15 @@ void distmesh::utils::projectPointsToFunction(
         Eigen::ArrayXXd deltaX = Eigen::ArrayXXd::Zero(points.rows(), points.cols());
 
         for (int dim = 0; dim < points.cols(); ++dim) {
-            deltaX.col(dim).fill(constants::deltaX * initialPointsDistance);
+            deltaX.col(dim).fill(constants::deltaX * initialPointDistance);
             gradient.col(dim) = (distanceFunction(points + deltaX) - distance) /
-                (constants::deltaX * initialPointsDistance);
+                (constants::deltaX * initialPointDistance);
             deltaX.col(dim).fill(0.0);
         }
 
         // project points back to boundary
-        for (int dim = 0; dim < points.cols(); ++dim) {
-            points.col(dim) -= outside.select(
-                gradient.col(dim) * distance / gradient.square().rowwise().sum(),
-                0.0);
-        }
+        points -= outside.replicate(1, points.cols()).select(
+            gradient.colwise() * distance / gradient.square().rowwise().sum(), 0.0);
     }
 }
 

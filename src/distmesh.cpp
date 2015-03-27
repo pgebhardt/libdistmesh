@@ -37,7 +37,7 @@ Eigen::ArrayXXd distmesh::boundingBox(unsigned const dimension) {
 
 // apply the distmesh algorithm
 std::tuple<Eigen::ArrayXXd, Eigen::ArrayXXi> distmesh::distmesh(
-    Functional const& distanceFunction, double const baseEdgeLength,
+    Functional const& distanceFunction, double const initialPointDistance,
     Functional const& elementSizeFunction, Eigen::Ref<Eigen::ArrayXXd const> const boundingBox,
     Eigen::Ref<Eigen::ArrayXXd const> const fixedPoints) {
     // determine dimension of mesh
@@ -45,7 +45,7 @@ std::tuple<Eigen::ArrayXXd, Eigen::ArrayXXi> distmesh::distmesh(
 
     // create initial distribution in bounding box
     Eigen::ArrayXXd points = utils::createInitialPoints(distanceFunction,
-        baseEdgeLength, elementSizeFunction, boundingBox, fixedPoints);
+        initialPointDistance, elementSizeFunction, boundingBox, fixedPoints);
 
     // create initial triangulation
     Eigen::ArrayXXi triangulation = triangulation::delaunay(points);
@@ -63,7 +63,7 @@ std::tuple<Eigen::ArrayXXd, Eigen::ArrayXXi> distmesh::distmesh(
         // retriangulate if point movement is above tolerance
         double const retriangulationCriterion = (points - retriangulationCriterionBuffer)
             .square().rowwise().sum().sqrt().maxCoeff();
-        if (retriangulationCriterion > constants::retriangulationTolerance * baseEdgeLength) {
+        if (retriangulationCriterion > constants::retriangulationTolerance * initialPointDistance) {
             // update triangulation
             triangulation = triangulation::delaunay(points);
 
@@ -77,7 +77,7 @@ std::tuple<Eigen::ArrayXXd, Eigen::ArrayXXi> distmesh::distmesh(
 
             // reject triangles with circumcenter outside of the region
             triangulation = utils::selectMaskedArrayElements<int>(triangulation,
-                distanceFunction(circumcenter) < -constants::geometryEvaluationTolerance * baseEdgeLength);
+                distanceFunction(circumcenter) < -constants::geometryEvaluationTolerance * initialPointDistance);
 
             // find unique bar indices
             barIndices = utils::findUniqueBars(triangulation);
@@ -119,11 +119,11 @@ std::tuple<Eigen::ArrayXXd, Eigen::ArrayXXi> distmesh::distmesh(
         }
 
         // project points outside of domain to boundary
-        utils::projectPointsToFunction(distanceFunction, baseEdgeLength, points);
+        utils::projectPointsToFunction(distanceFunction, initialPointDistance, points);
 
         // stop criterion
         double const stopCriterion = (points - stopCriterionBuffer).square().rowwise().sum().sqrt().maxCoeff();
-        if (stopCriterion < constants::pointsMovementTolerance * baseEdgeLength) {
+        if (stopCriterion < constants::pointsMovementTolerance * initialPointDistance) {
             break;
         }
     }
