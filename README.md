@@ -9,8 +9,6 @@ Getting Started
 
 Simply clone the repository, make sure all dependencies are installed and build it.
 
-    git clone https://github.com/schansge/libdistmesh.git
-    cd libdistmesh
     cp Makefile.config.example Makefile.config
     make
     make install
@@ -58,7 +56,7 @@ libDistMesh uses some C++11 features and compiles properly with both clang
 and gcc. For linear algebra operations and the delaunay triangulation two
 libraries are needed for building and using libDistMesh:
 
-* [Eigen](http://eigen.tuxfamily.org/) >= 3.2.0
+* [Eigen](http://eigen.tuxfamily.org/) >= 3.2.4
 * [QHull](http://www.qhull.org/) >= 2012.1
 
 References
