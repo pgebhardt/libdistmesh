@@ -31,45 +31,45 @@ extern "C" {
 
 Eigen::ArrayXXi distmesh::triangulation::delaunay(
     Eigen::Ref<Eigen::ArrayXXd const> const points) {
+    // reset qhull
+    if (qh_qh) {
+        qh_save_qhull();
+    }
+
     // convert points array to row major format
     Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic,
         Eigen::RowMajor> pointsRowMajor = points;
 
-    // set flags for qhull
-    std::string flags = "qhull d Qt Qbb Qc Qz";
-
     // calculate delaunay triangulation
-    if (qh_qh) {
-        qh_save_qhull();
-    }
+    std::string flags = "qhull d Qt Qbb Qc Qz";
     qh_new_qhull(points.cols(), points.rows(), pointsRowMajor.data(), False,
         (char*)flags.c_str(), nullptr, stderr);
     qh_triangulate();
 
     // count all upper delaunay facets
-    unsigned facet_count = 0;
+    unsigned facetCount = 0;
     facetT* facet;
     FORALLfacets {
         if (!facet->upperdelaunay) {
-            facet_count++;
+            facetCount++;
         }
     }
 
     // extract point ids from delaunay triangulation
-    Eigen::ArrayXXi triangulation(facet_count, points.cols() + 1);
-    unsigned facet_id = 0;
-    unsigned vertex_id = 0;
+    Eigen::ArrayXXi triangulation(facetCount, points.cols() + 1);
+    unsigned facetId = 0;
+    unsigned vertexId = 0;
     vertexT* vertex, **vertexp;
 
     FORALLfacets {
-        vertex_id = 0;
+        vertexId = 0;
         if (!facet->upperdelaunay) {
             qh_setsize(facet->vertices);
             FOREACHvertex_(facet->vertices) {
-                triangulation(facet_id, vertex_id) = qh_pointid(vertex->point);
-                vertex_id++;
+                triangulation(facetId, vertexId) = qh_pointid(vertex->point);
+                vertexId++;
             }
-            facet_id++;
+            facetId++;
         }
     }
 
