@@ -37,7 +37,7 @@ void savetxt(Eigen::Ref<Eigen::Array<type, Eigen::Dynamic, Eigen::Dynamic> const
 
 int main() {
     // create mesh
-    auto mesh = distmesh::distmesh(distmesh::distanceFunction::circular(1.0), 0.2)
+    auto mesh = distmesh::distmesh(distmesh::distanceFunction::circular(1.0), 0.2);
 
     // save mesh to file
     savetxt<double>(std::get<0>(mesh), "points.txt");
