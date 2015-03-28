@@ -37,14 +37,12 @@ void savetxt(Eigen::Ref<Eigen::Array<type, Eigen::Dynamic, Eigen::Dynamic> const
 
 int main() {
     // create mesh
-    auto mesh = distmesh::distmesh(distmesh::distanceFunction::circular(1.0), 0.2);
+    auto mesh = distmesh::distmesh(distmesh::distanceFunction::circular(1.0), 0.2)
 
     // save mesh to file
     savetxt<double>(std::get<0>(mesh), "points.txt");
     savetxt<int>(std::get<1>(mesh), "triangulation.txt");
 
     // plot mesh using python
-    system("python plot_mesh.py");
-
-    return 0;
+    return system("python plot_mesh3d.py");
 }

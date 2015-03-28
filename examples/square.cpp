@@ -66,7 +66,5 @@ int main() {
     savetxt<int>(std::get<1>(mesh), "triangulation.txt");
 
     // plot mesh using python
-    system("python plot_mesh.py");
-
-    return 0;
+    return system("python plot_mesh.py");
 }
