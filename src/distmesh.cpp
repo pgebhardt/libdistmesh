@@ -41,7 +41,7 @@ std::tuple<Eigen::ArrayXXd, Eigen::ArrayXXi> distmesh::distmesh(
     Functional const& elementSizeFunction, Eigen::Ref<Eigen::ArrayXXd const> const boundingBox,
     Eigen::Ref<Eigen::ArrayXXd const> const fixedPoints) {
     // determine dimension of mesh
-    unsigned const dimension = boundingBox.rows();
+    unsigned const dimension = boundingBox.cols();
 
     // create initial distribution in bounding box
     Eigen::ArrayXXd points = utils::createInitialPoints(distanceFunction,
