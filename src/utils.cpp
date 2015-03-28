@@ -26,7 +26,7 @@
 #include "distmesh/utils.h"
 
 // calculate factorial recursively
-unsigned distmesh::utils::factorial(unsigned const n) {
+inline unsigned distmesh::utils::factorial(unsigned const n) {
     if (n <= 1) {
         return 1;
     }

@@ -60,7 +60,7 @@ namespace utils {
     }
 
     // calculate factorial recursively
-    unsigned factorial(unsigned const n);
+    inline unsigned factorial(unsigned const n);
 
     // create initial points distribution
     Eigen::ArrayXXd createInitialPoints(Functional const& distanceFunction,
