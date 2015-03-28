@@ -66,17 +66,14 @@ std::tuple<Eigen::ArrayXXd, Eigen::ArrayXXi> distmesh::distmesh(
             // update triangulation
             triangulation = triangulation::delaunay(points);
 
-            // calculate circumcenter
-            Eigen::ArrayXXd circumcenter = Eigen::ArrayXXd::Zero(
-                triangulation.rows(), dimension);
+            // reject triangles with midpoint outside of the region
+            Eigen::ArrayXXd midpoint = Eigen::ArrayXXd::Zero(triangulation.rows(), dimension);
             for (int point = 0; point < triangulation.cols(); ++point) {
-                circumcenter += utils::selectIndexedArrayElements<double>(
+                midpoint += utils::selectIndexedArrayElements<double>(
                     points, triangulation.col(point)) / triangulation.cols();
             }
-
-            // reject triangles with circumcenter outside of the region
             triangulation = utils::selectMaskedArrayElements<int>(triangulation,
-                distanceFunction(circumcenter) < -constants::geometryEvaluationTolerance * initialPointDistance);
+                distanceFunction(midpoint) < -constants::geometryEvaluationTolerance * initialPointDistance);
 
             // find unique bar indices
             barIndices = utils::findUniqueBars(triangulation);
