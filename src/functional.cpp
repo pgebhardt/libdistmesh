@@ -222,3 +222,23 @@ distmesh::Functional distmesh::Functional::abs() const {
         return res(points).abs();
     });
 }
+
+// geometric transform
+distmesh::Functional distmesh::Functional::shift(Eigen::Ref<Eigen::ArrayXd const> const offset) const {
+    Functional res(this->function());
+    return DISTMESH_FUNCTIONAL({
+        return res(points.rowwise() - offset.transpose());
+    });
+}
+
+distmesh::Functional distmesh::Functional::rotate2D(double const angle) const {
+    Functional res(this->function());
+    return DISTMESH_FUNCTIONAL({
+        Eigen::ArrayXXd transformedPoints(points.rows(), points.cols());
+        transformedPoints.col(0) = points.col(0) * std::cos(angle) + points.col(1) * std::sin(angle);
+        transformedPoints.col(1) = -points.col(0) * std::sin(angle) + points.col(1) * std::cos(angle);
+
+        return res(transformedPoints);
+    });
+}
+

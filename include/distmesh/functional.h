@@ -80,6 +80,10 @@ namespace distmesh {
         Functional max(Functional const& rhs) const;
         Functional abs() const;
 
+        // geometric transform
+        Functional shift(Eigen::Ref<Eigen::ArrayXd const> const offset) const;
+        Functional rotate2D(double const angle) const;
+
         // accessors
         function_t& function() { return this->function_; }
         function_t const& function() const { return this->function_; }
