@@ -18,38 +18,33 @@
 // Contact: patrik.gebhardt@rub.de
 // --------------------------------------------------------------------
 
-#include <fstream>
+#include <iostream>
 #include <distmesh/distmesh.h>
-
-// save eigen array to text file
-template <typename type>
-void savetxt(Eigen::Ref<Eigen::Array<type, Eigen::Dynamic, Eigen::Dynamic> const> const array,
-    std::string const& filename) {
-    // open file
-    std::ofstream file(filename);
-
-    // save array to file with high precision
-    Eigen::IOFormat const format(Eigen::FullPrecision, Eigen::DontAlignCols);
-    file << array.format(format);
-
-    file.close();
-}
+#include "helper.h"
 
 int main() {
-    Eigen::ArrayXXd boundingBox(2, 2);
-    boundingBox << -2.0, -1.0, 2.0, 1.0;
+    distmesh::helper::HighPrecisionTime time;
 
-    // radii of ellipse
-    Eigen::ArrayXd radii(2);
-    radii << 2.0, 1.0;
+    // corner points of polygon
+    Eigen::ArrayXXd polygon(10, 2);
+    polygon << -0.4, -0.5, 0.4, -0.2, 0.4, -0.7,
+        1.5, -0.4, 0.9, 0.1, 1.6, 0.8, 0.5, 0.5,
+        0.2, 1.0, 0.1, 0.4, -0.7, 0.7;
 
     // create mesh
-    auto mesh = distmesh::distmesh(distmesh::distanceFunction::elliptical(radii),
-        0.2, 1.0, boundingBox);
+    Eigen::ArrayXXd points;
+    Eigen::ArrayXXi elements;
+    std::tie(points, elements) = distmesh::distmesh(
+        distmesh::distanceFunction::polygon(polygon),
+        0.1, 1.0, distmesh::boundingBox(2), polygon);
+
+    // print mesh properties and elapsed time
+    std::cout << "Created mesh with " << points.rows() << " points and " << elements.rows() <<
+        " elements in " << time.elapsed() * 1e3 << " ms." << std::endl;
 
     // save mesh to file
-    savetxt<double>(std::get<0>(mesh), "points.txt");
-    savetxt<int>(std::get<1>(mesh), "triangulation.txt");
+    distmesh::helper::savetxt<double>(points, "points.txt");
+    distmesh::helper::savetxt<int>(elements, "triangulation.txt");
 
     // plot mesh using python
     return system("python plot_mesh.py");

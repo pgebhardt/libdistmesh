@@ -18,38 +18,25 @@
 // Contact: patrik.gebhardt@rub.de
 // --------------------------------------------------------------------
 
-#include <fstream>
+#include <iostream>
 #include <distmesh/distmesh.h>
-
-// save eigen array to text file
-template <typename type>
-void savetxt(Eigen::Ref<Eigen::Array<type, Eigen::Dynamic, Eigen::Dynamic> const> const array,
-    std::string const& filename) {
-    // open file
-    std::ofstream file(filename);
-
-    // save array to file with high precision
-    Eigen::IOFormat const format(Eigen::FullPrecision, Eigen::DontAlignCols);
-    file << array.format(format);
-
-    file.close();
-}
+#include "helper.h"
 
 int main() {
-    // fixed points at the corners of domain to guarantee convergence
-    Eigen::ArrayXXd fixedPoints(4, 2);
-    fixedPoints << -1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0;
+    distmesh::helper::HighPrecisionTime time;
 
     // create mesh
-    auto mesh = distmesh::distmesh(
-        distmesh::distanceFunction::rectangular(distmesh::boundingBox(2))
-            .max(-distmesh::distanceFunction::circular(0.5)),
-        0.05, 0.05 + 0.3 * distmesh::distanceFunction::circular(0.5),
-        distmesh::boundingBox(2), fixedPoints);
+    Eigen::ArrayXXd points;
+    Eigen::ArrayXXi elements;
+    std::tie(points, elements) = distmesh::distmesh(distmesh::distanceFunction::circular(1.0), 0.2);
+
+    // print mesh properties and elapsed time
+    std::cout << "Created mesh with " << points.rows() << " points and " << elements.rows() <<
+        " elements in " << time.elapsed() * 1e3 << " ms." << std::endl;
 
     // save mesh to file
-    savetxt<double>(std::get<0>(mesh), "points.txt");
-    savetxt<int>(std::get<1>(mesh), "triangulation.txt");
+    distmesh::helper::savetxt<double>(points, "points.txt");
+    distmesh::helper::savetxt<int>(elements, "triangulation.txt");
 
     // plot mesh using python
     return system("python plot_mesh.py");

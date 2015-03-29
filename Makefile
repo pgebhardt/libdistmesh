@@ -62,7 +62,7 @@ STATIC_NAME := $(BUILD_DIR)/lib/lib$(PROJECT)_static.a
 ##############################
 LIBRARIES := qhull
 LIBRARY_DIRS +=
-INCLUDE_DIRS += ./include
+INCLUDE_DIRS += ./include ./examples/include
 
 ##############################
 # Compiler Flags
@@ -84,13 +84,13 @@ endif
 # Source Files
 ##############################
 CXX_SRCS := $(shell find src -name "*.cpp")
-HXX_SRCS := $(shell find include -name "*.h")
-EXAMPLES_SRCS := $(shell find examples -name "*.cpp")
+HXX_SRCS := $(shell find include -name "*.h") $(shell find examples/include -name "*.h")
+EXAMPLES_SRCS := $(shell find examples/src -name "*.cpp")
 
 # Object files
 CXX_OBJS := $(addprefix $(BUILD_DIR)/objs/, $(CXX_SRCS:.cpp=.o))
 EXAMPLES_OBJS := $(addprefix $(BUILD_DIR)/objs/, $(EXAMPLES_SRCS:.cpp=.o))
-EXAMPLES_BINS := $(patsubst examples%.cpp, $(BUILD_DIR)/examples%, $(EXAMPLES_SRCS))
+EXAMPLES_BINS := $(patsubst examples/src/%.cpp, $(BUILD_DIR)/examples/%, $(EXAMPLES_SRCS))
 EXAMPLES_SCRIPTS := $(BUILD_DIR)/examples/plot_mesh.py
 
 ##############################
@@ -102,7 +102,7 @@ all: $(NAME) $(STATIC_NAME) examples
 
 examples: $(EXAMPLES_BINS) $(EXAMPLES_SCRIPTS)
 
-$(EXAMPLES_BINS): $(BUILD_DIR)/examples/% : $(BUILD_DIR)/objs/examples/%.o $(STATIC_NAME)
+$(EXAMPLES_BINS): $(BUILD_DIR)/examples/% : $(BUILD_DIR)/objs/examples/src/%.o $(STATIC_NAME)
 	@echo [ Linking ] $@
 	@mkdir -p $(BUILD_DIR)/examples
 	@$(CXX) -o $@ $< $(UTILS_OBJS) $(STATIC_NAME) $(COMMON_FLAGS) $(LDFLAGS) $(LINKFLAGS)
@@ -122,7 +122,7 @@ $(BUILD_DIR)/objs/%.o: %.cpp $(HXX_SRCS)
 	@$(foreach d, $(subst /, ,${@D}), mkdir -p $d && cd $d && ):
 	@$(CXX) $(CXXFLAGS) $(COMMON_FLAGS) -c -o $@ $<
 
-$(BUILD_DIR)/examples/%.py: examples/%.py
+$(BUILD_DIR)/examples/%.py: examples/scripts/%.py
 	@echo [ Copying ] $<
 	@mkdir -p $(BUILD_DIR)/examples
 	@cp $< $(BUILD_DIR)/examples
