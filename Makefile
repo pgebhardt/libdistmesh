@@ -86,17 +86,17 @@ endif
 CXX_SRCS := $(shell find src -name "*.cpp")
 HXX_SRCS := $(shell find include -name "*.h")
 EXAMPLES_SRCS := $(shell find examples -name "*.cpp")
-EXAMPLES_SCRIPTS := examples/plot_mesh.py
 
 # Object files
 CXX_OBJS := $(addprefix $(BUILD_DIR)/objs/, $(CXX_SRCS:.cpp=.o))
 EXAMPLES_OBJS := $(addprefix $(BUILD_DIR)/objs/, $(EXAMPLES_SRCS:.cpp=.o))
 EXAMPLES_BINS := $(patsubst examples%.cpp, $(BUILD_DIR)/examples%, $(EXAMPLES_SRCS))
+EXAMPLES_SCRIPTS := $(BUILD_DIR)/examples/plot_mesh.py
 
 ##############################
 # Build targets
 ##############################
-.PHONY: all install clean examples $(EXAMPLES_SCRIPTS)
+.PHONY: all install clean examples
 
 all: $(NAME) $(STATIC_NAME) examples
 
@@ -106,11 +106,6 @@ $(EXAMPLES_BINS): $(BUILD_DIR)/examples/% : $(BUILD_DIR)/objs/examples/%.o $(STA
 	@echo [ Linking ] $@
 	@mkdir -p $(BUILD_DIR)/examples
 	@$(CXX) -o $@ $< $(UTILS_OBJS) $(STATIC_NAME) $(COMMON_FLAGS) $(LDFLAGS) $(LINKFLAGS)
-
-$(EXAMPLES_SCRIPTS): ;
-	@echo [ Copying ] $@
-	@mkdir -p $(BUILD_DIR)/examples
-	@cp $@ $(BUILD_DIR)/examples
 
 $(NAME): $(CXX_OBJS)
 	@echo [ Linking ] $@
@@ -126,6 +121,11 @@ $(BUILD_DIR)/objs/%.o: %.cpp $(HXX_SRCS)
 	@echo [ CXX ] $<
 	@$(foreach d, $(subst /, ,${@D}), mkdir -p $d && cd $d && ):
 	@$(CXX) $(CXXFLAGS) $(COMMON_FLAGS) -c -o $@ $<
+
+$(BUILD_DIR)/examples/%.py: examples/%.py
+	@echo [ Copying ] $<
+	@mkdir -p $(BUILD_DIR)/examples
+	@cp $< $(BUILD_DIR)/examples
 
 install: $(NAME) $(STATIC_NAME) $(HXX_SRCS) $(EXAMPLES_BINS)
 	@install -m 0644 $(NAME) $(prefix)/lib
