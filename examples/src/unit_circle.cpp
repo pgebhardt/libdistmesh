@@ -28,7 +28,9 @@ int main() {
     // create mesh
     Eigen::ArrayXXd points;
     Eigen::ArrayXXi elements;
-    std::tie(points, elements) = distmesh::distmesh(distmesh::distanceFunction::circular(1.0), 0.2);
+
+    std::tie(points, elements) = distmesh::distmesh(
+        distmesh::distanceFunction::circular(1.0), 0.2);
 
     // print mesh properties and elapsed time
     std::cout << "Created mesh with " << points.rows() << " points and " << elements.rows() <<

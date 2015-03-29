@@ -25,18 +25,15 @@
 int main() {
     distmesh::helper::HighPrecisionTime time;
 
-    // fixed points at the corners of domain to guarantee convergence
-    Eigen::ArrayXXd fixedPoints(4, 2);
-    fixedPoints << -1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0;
-
     // create mesh
     Eigen::ArrayXXd points;
     Eigen::ArrayXXi elements;
+
     std::tie(points, elements) = distmesh::distmesh(
-        distmesh::distanceFunction::rectangular(distmesh::boundingBox(2))
+        distmesh::distanceFunction::rectangle(distmesh::boundingBox(2))
             .max(-distmesh::distanceFunction::circular(0.5)),
         0.05, 0.05 + 0.3 * distmesh::distanceFunction::circular(0.5),
-        distmesh::boundingBox(2), fixedPoints);
+        distmesh::boundingBox(2));
 
     // print mesh properties and elapsed time
     std::cout << "Created mesh with " << points.rows() << " points and " << elements.rows() <<

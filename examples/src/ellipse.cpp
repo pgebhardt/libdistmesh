@@ -35,7 +35,9 @@ int main() {
     // create mesh
     Eigen::ArrayXXd points;
     Eigen::ArrayXXi elements;
-    std::tie(points, elements) = distmesh::distmesh(distmesh::distanceFunction::elliptical(radii),
+
+    std::tie(points, elements) = distmesh::distmesh(
+        distmesh::distanceFunction::elliptical(radii),
         0.2, 1.0, boundingBox);
 
     // print mesh properties and elapsed time

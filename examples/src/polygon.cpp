@@ -34,6 +34,7 @@ int main() {
     // create mesh
     Eigen::ArrayXXd points;
     Eigen::ArrayXXi elements;
+
     std::tie(points, elements) = distmesh::distmesh(
         distmesh::distanceFunction::polygon(polygon),
         0.1, 1.0, distmesh::boundingBox(2), polygon);

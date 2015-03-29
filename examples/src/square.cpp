@@ -28,14 +28,6 @@ int main() {
     Eigen::ArrayXXd boundingBox(2, 2);
     boundingBox << 0.0, 0.0, 1.0, 1.0;
 
-    // fixed points at corners of domain to guarantee convergence
-    Eigen::ArrayXXd fixedPoints(4, 2);
-    fixedPoints << 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0;
-
-    // distance function for rectangular domain
-    auto distanceFunction =
-        distmesh::distanceFunction::rectangular(boundingBox);
-
     // corner points of polygon
     Eigen::ArrayXXd poly(2, 2);
     poly << 0.3, 0.7, 0.7, 0.5;
@@ -49,8 +41,10 @@ int main() {
     // create mesh
     Eigen::ArrayXXd points;
     Eigen::ArrayXXi elements;
-    std::tie(points, elements) = distmesh::distmesh(distanceFunction, 0.01,
-        sizeFunction, boundingBox, fixedPoints);
+
+    std::tie(points, elements) = distmesh::distmesh(
+        distmesh::distanceFunction::rectangle(boundingBox), 0.01,
+        sizeFunction, boundingBox);
 
     // print mesh properties and elapsed time
     std::cout << "Created mesh with " << points.rows() << " points and " << elements.rows() <<
