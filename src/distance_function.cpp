@@ -21,7 +21,7 @@
 #include "distmesh/distmesh.h"
 #include "distmesh/utils.h"
 
-// creates distance function of rectangular domain
+// creates distance function for a nd rectangular domain
 distmesh::Functional distmesh::distanceFunction::rectangular(
     Eigen::Ref<Eigen::ArrayXXd const> const rectangle) {
     return DISTMESH_FUNCTIONAL({
@@ -38,9 +38,36 @@ distmesh::Functional distmesh::distanceFunction::rectangular(
     });
 }
 
+// creates the true distance function for a 2d rectangular domain
+distmesh::Functional distmesh::distanceFunction::rectangle(
+    Eigen::Ref<Eigen::ArrayXXd const> const rectangle) {
+    return DISTMESH_FUNCTIONAL({
+        // distances to all 4 sides of rectangle
+        auto d1 = rectangle(0, 1) - points.col(1);
+        auto d2 = -rectangle(1, 1) + points.col(1);
+        auto d3 = rectangle(0, 0) - points.col(0);
+        auto d4 = -rectangle(1, 0) + points.col(0);
+
+        // distances to all 4 corners of rectangle
+        auto d5 = (d1.square() + d3.square()).sqrt();
+        auto d6 = (d1.square() + d4.square()).sqrt();
+        auto d7 = (d2.square() + d3.square()).sqrt();
+        auto d8 = (d2.square() + d4.square()).sqrt();
+
+        // distance to neares side of rectangle
+        Eigen::ArrayXd d = -(-d1).min(-d2).min(-d3).min(-d4);
+
+        // check if smallest distance is to one of the corners
+        d = (d1 > 0.0 && d3 > 0.0).select(d5, d);
+        d = (d1 > 0.0 && d4 > 0.0).select(d6, d);
+        d = (d2 > 0.0 && d3 > 0.0).select(d7, d);
+        d = (d2 > 0.0 && d4 > 0.0).select(d8, d);
+
+        return d;
+    });
+}
+
 // creates distance function for elliptical domains
-// Note: not a real distance function but a level function,
-// which is sufficient
 distmesh::Functional distmesh::distanceFunction::elliptical(
     Eigen::Ref<Eigen::ArrayXd const> const radii,
     Eigen::Ref<Eigen::ArrayXd const> const midpoint) {
@@ -67,7 +94,7 @@ distmesh::Functional distmesh::distanceFunction::elliptical(
     });
 }
 
-// creates distance function for circular domains
+// creates the true distance function for circular domains
 distmesh::Functional
     distmesh::distanceFunction::circular(double const radius,
     Eigen::Ref<Eigen::ArrayXd const> const midpoint) {
@@ -82,7 +109,7 @@ distmesh::Functional
     });
 }
 
-// creates distance function for domain described by polygon
+// creates distance function for a 2d domain described by polygon
 distmesh::Functional distmesh::distanceFunction::polygon(
     Eigen::Ref<Eigen::ArrayXXd const> const polygon) {
     return DISTMESH_FUNCTIONAL({
