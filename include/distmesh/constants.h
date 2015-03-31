@@ -23,14 +23,14 @@
 
 namespace distmesh {
 namespace constants {
-    // algorithm stops, when maximum relative points movement is below tolerance
-    static double const pointsMovementTolerance = 1e-3;
+    // algorithm stops, when maximum relative points movement is below threshold
+    static double const pointsMovementThreshold = 1e-3;
 
-    // triangulation is updated, when maximum relative points movement is above tolerance
-    static double const retriangulationTolerance = 1e-1;
+    // triangulation is updated, when maximum relative points movement is above threshold
+    static double const retriangulationThreshold = 1e-1;
 
-    // relative tolerance in the geometry evaluations
-    static double const geometryEvaluationTolerance = 1e-3;
+    // relative threshold in the geometry evaluations
+    static double const geometryEvaluationThreshold = 1e-3;
 
     // time step for updating points positions with Euler's method
     static double const deltaT = 1e-1;

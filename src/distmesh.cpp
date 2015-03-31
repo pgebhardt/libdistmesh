@@ -60,9 +60,9 @@ std::tuple<Eigen::ArrayXXd, Eigen::ArrayXXi> distmesh::distmesh(
     // main distmesh loop
     Eigen::ArrayXXi barIndices;
     for (unsigned step = 0; step < constants::maxSteps; ++step) {
-        // retriangulate if point movement is above tolerance
+        // retriangulate if point movement is above threshold
         if ((points - retriangulationCriterionBuffer).square().rowwise().sum().sqrt().maxCoeff() >
-            constants::retriangulationTolerance * initialPointDistance) {
+            constants::retriangulationThreshold * initialPointDistance) {
             // update triangulation
             triangulation = triangulation::delaunay(points);
 
@@ -73,7 +73,7 @@ std::tuple<Eigen::ArrayXXd, Eigen::ArrayXXi> distmesh::distmesh(
                     points, triangulation.col(point)) / triangulation.cols();
             }
             triangulation = utils::selectMaskedArrayElements<int>(triangulation,
-                distanceFunction(circumcenter) < -constants::geometryEvaluationTolerance * initialPointDistance);
+                distanceFunction(circumcenter) < -constants::geometryEvaluationThreshold * initialPointDistance);
 
             // find unique bar indices
             barIndices = utils::findUniqueBars(triangulation);
@@ -117,9 +117,9 @@ std::tuple<Eigen::ArrayXXd, Eigen::ArrayXXi> distmesh::distmesh(
         // project points outside of domain to boundary
         utils::projectPointsToFunction(distanceFunction, initialPointDistance, points);
 
-        // stop criterion
+        // stop, when maximum points movement is below threshold
         if ((points - stopCriterionBuffer).square().rowwise().sum().sqrt().maxCoeff() <
-            constants::pointsMovementTolerance * initialPointDistance) {
+            constants::pointsMovementThreshold * initialPointDistance) {
             break;
         }
     }

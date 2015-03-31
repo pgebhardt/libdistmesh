@@ -66,7 +66,7 @@ Eigen::ArrayXXd distmesh::utils::createInitialPoints(
 
     // reject points outside of region defined by distance function
     points = selectMaskedArrayElements<double>(points,
-        distanceFunction(points) < constants::geometryEvaluationTolerance * initialPointDistance);
+        distanceFunction(points) < constants::geometryEvaluationThreshold * initialPointDistance);
 
     // clear duplicate points
     Eigen::Array<bool, Eigen::Dynamic, 1> isUniquePoint =
