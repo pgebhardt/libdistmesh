@@ -74,8 +74,8 @@ namespace utils {
     // find unique bars
     Eigen::ArrayXXi findUniqueBars(Eigen::Ref<Eigen::ArrayXXi const> const triangulation);
 
-    // project points outside of boundary back to it
-    void projectPointsToFunction(Functional const& distanceFunction,
+    // project points outside of domain back to boundary
+    void projectPointsToBoundary(Functional const& distanceFunction,
         double const initialPointDistance, Eigen::Ref<Eigen::ArrayXXd> points);
 
     // check whether points lies inside or outside of polygon

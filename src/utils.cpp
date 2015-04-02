@@ -118,7 +118,7 @@ Eigen::ArrayXXi distmesh::utils::nOverK(unsigned const n, unsigned const k) {
 // find unique bars
 Eigen::ArrayXXi distmesh::utils::findUniqueBars(Eigen::Ref<Eigen::ArrayXXi const> const triangulation) {
     // find all unique combinations
-    auto combinations = nOverK(triangulation.cols(), 2);
+    auto const combinations = nOverK(triangulation.cols(), 2);
 
     // find unique bars for all combinations
     std::set<std::array<int, 2>> uniqueBars;
@@ -127,6 +127,8 @@ Eigen::ArrayXXi distmesh::utils::findUniqueBars(Eigen::Ref<Eigen::ArrayXXi const
     for (int triangle = 0; triangle < triangulation.rows(); ++triangle) {
         bar[0] = triangulation(triangle, combinations(combination, 0));
         bar[1] = triangulation(triangle, combinations(combination, 1));
+
+        bar = bar[1] < bar[0] ? std::array<int, 2>{bar[1], bar[0]} : bar;
 
         uniqueBars.insert(bar);
     }
@@ -143,8 +145,8 @@ Eigen::ArrayXXi distmesh::utils::findUniqueBars(Eigen::Ref<Eigen::ArrayXXi const
     return barIndices;
 }
 
-// project points outside of boundary back to it
-void distmesh::utils::projectPointsToFunction(
+// project points outside of domain back to boundary
+void distmesh::utils::projectPointsToBoundary(
     Functional const& distanceFunction, double const initialPointDistance,
     Eigen::Ref<Eigen::ArrayXXd> points) {
     Eigen::ArrayXd distance = distanceFunction(points);

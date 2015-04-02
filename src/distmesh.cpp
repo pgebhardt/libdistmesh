@@ -115,7 +115,7 @@ std::tuple<Eigen::ArrayXXd, Eigen::ArrayXXi> distmesh::distmesh(
         }
 
         // project points outside of domain to boundary
-        utils::projectPointsToFunction(distanceFunction, initialPointDistance, points);
+        utils::projectPointsToBoundary(distanceFunction, initialPointDistance, points);
 
         // stop, when maximum points movement is below threshold
         if ((points - stopCriterionBuffer).square().rowwise().sum().sqrt().maxCoeff() <
