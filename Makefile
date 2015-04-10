@@ -25,7 +25,7 @@ PROJECT := distmesh
 # Load build configuration
 ##############################
 CONFIG_FILE ?= Makefile.config
-include $(CONFIG_FILE)
+-include $(CONFIG_FILE)
 
 ##############################
 # Main output directories
