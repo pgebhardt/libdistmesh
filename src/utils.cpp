@@ -23,7 +23,6 @@
 
 #include "distmesh/distmesh.h"
 #include "distmesh/constants.h"
-#include "distmesh/utils.h"
 
 // calculate factorial recursively
 inline unsigned distmesh::utils::factorial(unsigned const n) {
@@ -172,7 +171,7 @@ void distmesh::utils::projectPointsToBoundary(
 }
 
 // check whether points lies inside or outside of polygon
-Eigen::ArrayXXd distmesh::utils::pointsInsidePoly(
+Eigen::ArrayXd distmesh::utils::pointsInsidePoly(
     Eigen::Ref<Eigen::ArrayXXd const> const points,
     Eigen::Ref<Eigen::ArrayXXd const> const polygon) {
     Eigen::ArrayXd inside = Eigen::ArrayXd::Zero(points.rows());

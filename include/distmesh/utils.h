@@ -79,7 +79,7 @@ namespace utils {
         double const initialPointDistance, Eigen::Ref<Eigen::ArrayXXd> points);
 
     // check whether points lies inside or outside of polygon
-    Eigen::ArrayXXd pointsInsidePoly(
+    Eigen::ArrayXd pointsInsidePoly(
         Eigen::Ref<Eigen::ArrayXXd const> const points,
         Eigen::Ref<Eigen::ArrayXXd const> const polygon);
 }
