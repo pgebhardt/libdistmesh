@@ -24,7 +24,6 @@
 
 #include "distmesh/distmesh.h"
 #include "distmesh/constants.h"
-#include "distmesh/utils.h"
 #include "distmesh/triangulation.h"
 
 // easy creation of n-dimensional bounding box

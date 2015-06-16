@@ -31,6 +31,7 @@
 // libdistmesh includes
 #include "functional.h"
 #include "distance_function.h"
+#include "utils.h"
 
 namespace distmesh {
     // easy creation of n-dimensional bounding box
