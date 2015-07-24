@@ -132,16 +132,47 @@ Eigen::ArrayXXi distmesh::utils::findUniqueBars(Eigen::Ref<Eigen::ArrayXXi const
         uniqueBars.insert(bar);
     }
 
-    // copy set to eigen array
+    // copy set to eigen array and guaratee direction of bars
+    // for node with lower index to node with higher index
     Eigen::ArrayXXi barIndices(uniqueBars.size(), 2);
     int index = 0;
     for (auto const& bar : uniqueBars) {
-        barIndices(index, 0) = bar[0];
-        barIndices(index, 1) = bar[1];
+        if (bar[1] > bar[0]) {
+            barIndices(index, 0) = bar[0];
+            barIndices(index, 1) = bar[1];
+        }
+        else {
+            barIndices(index, 0) = bar[1];
+            barIndices(index, 1) = bar[0];            
+        }
         index++;
     }
 
     return barIndices;
+}
+
+Eigen::ArrayXXi distmesh::utils::getTriangulationBarIndices(
+    Eigen::Ref<Eigen::ArrayXXi const> const triangulation,
+    Eigen::Ref<Eigen::ArrayXXi const> const bars) {
+    Eigen::ArrayXXi barIndices = Eigen::ArrayXXi::Ones(triangulation.rows(), triangulation.cols()) * -1;
+    
+    // find indices for each bar of triangulation in bar index array
+    for (int element = 0; element < triangulation.rows(); ++element)
+    for (int node = 0; node < triangulation.cols(); ++node) {
+        // create bar with direction from node with lower index
+        // to node with higher index
+        auto const bar = triangulation(element, (node + 1) % triangulation.cols()) > triangulation(element, node) ?
+            (Eigen::ArrayXi(2) << triangulation(element, node), triangulation(element, (node + 1) % triangulation.cols())).finished() :
+            (Eigen::ArrayXi(2) << triangulation(element, (node + 1) % triangulation.cols()), triangulation(element, node)).finished();
+
+        // check if bar is in bars list, and get index
+        int barIndex = 0;
+        if ((bars.rowwise() - bar.transpose()).square().rowwise().sum().minCoeff(&barIndex) == 0) {
+            barIndices(element, node) = barIndex;            
+        }
+    }
+    
+    return barIndices;    
 }
 
 // project points outside of domain back to boundary

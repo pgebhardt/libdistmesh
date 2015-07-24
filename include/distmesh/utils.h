@@ -74,6 +74,10 @@ namespace utils {
     // find unique bars
     Eigen::ArrayXXi findUniqueBars(Eigen::Ref<Eigen::ArrayXXi const> const triangulation);
 
+    // get indices of bars in triangulation
+    Eigen::ArrayXXi getTriangulationBarIndices(Eigen::Ref<Eigen::ArrayXXi const> const triangulation,
+        Eigen::Ref<Eigen::ArrayXXi const> const bars);
+
     // project points outside of domain back to boundary
     void projectPointsToBoundary(Functional const& distanceFunction,
         double const initialPointDistance, Eigen::Ref<Eigen::ArrayXXd> points);
