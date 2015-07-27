@@ -127,40 +127,43 @@ std::tuple<Eigen::ArrayXXd, Eigen::ArrayXXi> distmesh::distmesh(
 }
 
 // determine boundary edges of given triangulation
-Eigen::ArrayXXi distmesh::boundEdges(Eigen::Ref<Eigen::ArrayXXi const> const triangulation) {
-    std::set<std::vector<int>> uniqueEdges;
-    std::vector<std::vector<int>> boundaryEdges;
-    std::vector<int> edge(triangulation.cols() - 1);
-
-    // find all possible combinations of edges
-    Eigen::ArrayXXi combinations = utils::nOverK(triangulation.cols(), triangulation.cols() - 1);
+Eigen::ArrayXi distmesh::boundEdges(Eigen::Ref<Eigen::ArrayXXi const> const triangulation,
+    Eigen::Ref<Eigen::ArrayXXi const> const edges) {
+    // get edge indices for each triangle in triangulation
+    Eigen::ArrayXXi const edgeIndices = [](Eigen::Ref<Eigen::ArrayXXi const> const triangulation,
+        Eigen::Ref<Eigen::ArrayXXi const> const edges) {
+        if (edges.rows() == 0) {
+            return utils::getTriangulationEdgeIndices(triangulation, utils::findUniqueEdges(triangulation));
+        }
+        else {
+            return utils::getTriangulationEdgeIndices(triangulation, edges);            
+        }
+    }(triangulation, edges);
 
     // find edges, which only appear once in triangulation
-    for (int combination = 0; combination < combinations.rows(); ++combination)
-    for (int triangle = 0; triangle < triangulation.rows(); ++triangle) {
-        // get current edge
-        for (size_t point = 0; point < edge.size(); ++point) {
-            edge[point] = triangulation(triangle, combinations(combination, point));
-        }
+    std::set<int> uniqueEdges;
+    std::vector<int> boundaryEdges;
+    for (int triangle = 0; triangle < triangulation.rows(); ++triangle)
+    for (int edge = 0; edge < triangulation.cols(); ++edge) {
+        auto const edgeIndex = edgeIndices(triangle, edge);
 
         // insert edge in set to get info about multiple appearance
-        if (!std::get<1>(uniqueEdges.insert(edge))) {
+        if (!std::get<1>(uniqueEdges.insert(edgeIndex))) {
             // find edge in vector and delete it
-            auto it = std::find(boundaryEdges.begin(), boundaryEdges.end(), edge);
+            auto const it = std::find(boundaryEdges.begin(), boundaryEdges.end(), edgeIndex);
             if (it != boundaryEdges.end()) {
                 boundaryEdges.erase(it);
             }
         }
         else {
-            boundaryEdges.push_back(edge);
+            boundaryEdges.push_back(edgeIndex);
         }
     }
 
     // convert stl vector to eigen array
-    Eigen::ArrayXXi boundary(boundaryEdges.size(), edge.size());
-    for (int edge = 0; edge < boundary.rows(); ++edge)
-    for (int point = 0; point < boundary.cols(); ++point) {
-        boundary(edge, point) = boundaryEdges[edge][point];
+    Eigen::ArrayXi boundary(boundaryEdges.size());
+    for (int edge = 0; edge < boundary.rows(); ++edge) {
+        boundary(edge) = boundaryEdges[edge];
     }
 
     return boundary;
