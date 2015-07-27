@@ -57,7 +57,7 @@ std::tuple<Eigen::ArrayXXd, Eigen::ArrayXXi> distmesh::distmesh(
         points.rows(), points.cols());
 
     // main distmesh loop
-    Eigen::ArrayXXi barIndices;
+    Eigen::ArrayXXi edgeIndices;
     for (unsigned step = 0; step < constants::maxSteps; ++step) {
         // retriangulate if point movement is above threshold
         if ((points - retriangulationCriterionBuffer).square().rowwise().sum().sqrt().maxCoeff() >
@@ -74,42 +74,42 @@ std::tuple<Eigen::ArrayXXd, Eigen::ArrayXXi> distmesh::distmesh(
             triangulation = utils::selectMaskedArrayElements<int>(triangulation,
                 distanceFunction(circumcenter) < -constants::geometryEvaluationThreshold * initialPointDistance);
 
-            // find unique bar indices
-            barIndices = utils::findUniqueBars(triangulation);
+            // find unique edge indices
+            edgeIndices = utils::findUniqueEdges(triangulation);
 
             // store current points positions
             retriangulationCriterionBuffer = points;
         }
 
-        // calculate bar vectors and their length
-        Eigen::ArrayXXd barVector = utils::selectIndexedArrayElements<double>(points, barIndices.col(0)) -
-            utils::selectIndexedArrayElements<double>(points, barIndices.col(1));
-        Eigen::ArrayXd barLength = barVector.square().rowwise().sum().sqrt();
+        // calculate edge vectors and their length
+        auto const edgeVector = (utils::selectIndexedArrayElements<double>(points, edgeIndices.col(0)) -
+            utils::selectIndexedArrayElements<double>(points, edgeIndices.col(1))).eval();
+        auto const edgeLength = edgeVector.square().rowwise().sum().sqrt().eval();
 
-        // evaluate elementSizeFunction at midpoints of bars
-        Eigen::ArrayXd desiredElementSize = elementSizeFunction(0.5 *
-            (utils::selectIndexedArrayElements<double>(points, barIndices.col(0)) +
-            utils::selectIndexedArrayElements<double>(points, barIndices.col(1))));
+        // evaluate elementSizeFunction at midpoints of edges
+        auto const desiredElementSize = elementSizeFunction(0.5 *
+            (utils::selectIndexedArrayElements<double>(points, edgeIndices.col(0)) +
+            utils::selectIndexedArrayElements<double>(points, edgeIndices.col(1)))).eval();
 
-        // calculate desired bar length
-        Eigen::ArrayXd desiredBarLength = desiredElementSize * (1.0 + 0.4 / std::pow(2.0, dimension - 1)) *
-            std::pow((barLength.pow(dimension).sum() / desiredElementSize.pow(dimension).sum()),
-                1.0 / dimension);
+        // calculate desired edge length
+        auto const desiredEdgeLength = (desiredElementSize * (1.0 + 0.4 / std::pow(2.0, dimension - 1)) *
+            std::pow((edgeLength.pow(dimension).sum() / desiredElementSize.pow(dimension).sum()),
+                1.0 / dimension)).eval();
 
-        // calculate force vector for each bar
-        Eigen::ArrayXXd forceVector = barVector.colwise() *
-            ((desiredBarLength - barLength) / barLength).max(0.0);
+        // calculate force vector for each edge
+        auto const forceVector = (edgeVector.colwise() *
+            ((desiredEdgeLength - edgeLength) / edgeLength).max(0.0)).eval();
 
         // store current points positions
         stopCriterionBuffer = points;
 
         // move points
-        for (int bar = 0; bar < barIndices.rows(); ++bar) {
-            if (barIndices(bar, 0) >= fixedPoints.rows()) {
-                points.row(barIndices(bar, 0)) += constants::deltaT * forceVector.row(bar);
+        for (int edge = 0; edge < edgeIndices.rows(); ++edge) {
+            if (edgeIndices(edge, 0) >= fixedPoints.rows()) {
+                points.row(edgeIndices(edge, 0)) += constants::deltaT * forceVector.row(edge);
             }
-            if (barIndices(bar, 1) >= fixedPoints.rows()) {
-                points.row(barIndices(bar, 1)) -= constants::deltaT * forceVector.row(bar);
+            if (edgeIndices(edge, 1) >= fixedPoints.rows()) {
+                points.row(edgeIndices(edge, 1)) -= constants::deltaT * forceVector.row(edge);
             }
         }
 
@@ -139,14 +139,14 @@ Eigen::ArrayXi distmesh::boundEdges(Eigen::Ref<Eigen::ArrayXXi const> const tria
             return utils::getTriangulationEdgeIndices(triangulation, edges);            
         }
     }(triangulation, edges);
-
+    
     // find edges, which only appear once in triangulation
     std::set<int> uniqueEdges;
     std::vector<int> boundaryEdges;
     for (int triangle = 0; triangle < triangulation.rows(); ++triangle)
     for (int edge = 0; edge < triangulation.cols(); ++edge) {
         auto const edgeIndex = edgeIndices(triangle, edge);
-
+            
         // insert edge in set to get info about multiple appearance
         if (!std::get<1>(uniqueEdges.insert(edgeIndex))) {
             // find edge in vector and delete it
@@ -165,6 +165,6 @@ Eigen::ArrayXi distmesh::boundEdges(Eigen::Ref<Eigen::ArrayXXi const> const tria
     for (int edge = 0; edge < boundary.rows(); ++edge) {
         boundary(edge) = boundaryEdges[edge];
     }
-
+    
     return boundary;
 }

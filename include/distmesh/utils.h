@@ -71,12 +71,12 @@ namespace utils {
     // create array with all unique combinations n over k
     Eigen::ArrayXXi nOverK(unsigned const n, unsigned const k);
 
-    // find unique bars
-    Eigen::ArrayXXi findUniqueBars(Eigen::Ref<Eigen::ArrayXXi const> const triangulation);
+    // get a unique list of all edges in given triangulation
+    Eigen::ArrayXXi findUniqueEdges(Eigen::Ref<Eigen::ArrayXXi const> const triangulation);
 
     // get indices of bars in triangulation
-    Eigen::ArrayXXi getTriangulationBarIndices(Eigen::Ref<Eigen::ArrayXXi const> const triangulation,
-        Eigen::Ref<Eigen::ArrayXXi const> const bars);
+    Eigen::ArrayXXi getTriangulationEdgeIndices(Eigen::Ref<Eigen::ArrayXXi const> const triangulation,
+        Eigen::Ref<Eigen::ArrayXXi const> const edges);
 
     // project points outside of domain back to boundary
     void projectPointsToBoundary(Functional const& distanceFunction,

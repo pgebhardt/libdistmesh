@@ -114,65 +114,64 @@ Eigen::ArrayXXi distmesh::utils::nOverK(unsigned const n, unsigned const k) {
     return combinations;
 }
 
-// find unique bars
-Eigen::ArrayXXi distmesh::utils::findUniqueBars(Eigen::Ref<Eigen::ArrayXXi const> const triangulation) {
+Eigen::ArrayXXi distmesh::utils::findUniqueEdges(Eigen::Ref<Eigen::ArrayXXi const> const triangulation) {
     // find all unique combinations
     auto const combinations = nOverK(triangulation.cols(), 2);
 
-    // find unique bars for all combinations
-    std::set<std::array<int, 2>> uniqueBars;
-    std::array<int, 2> bar = {{0, 0}};
+    // find unique edges for all combinations
+    std::set<std::array<int, 2>> uniqueEdges;
+    std::array<int, 2> edge = {{0, 0}};
     for (int combination = 0; combination < combinations.rows(); ++combination)
     for (int triangle = 0; triangle < triangulation.rows(); ++triangle) {
-        bar[0] = triangulation(triangle, combinations(combination, 0));
-        bar[1] = triangulation(triangle, combinations(combination, 1));
+        edge[0] = triangulation(triangle, combinations(combination, 0));
+        edge[1] = triangulation(triangle, combinations(combination, 1));
 
-        bar = bar[1] < bar[0] ? std::array<int, 2>{bar[1], bar[0]} : bar;
+        edge = edge[1] < edge[0] ? std::array<int, 2>{edge[1], edge[0]} : edge;
 
-        uniqueBars.insert(bar);
+        uniqueEdges.insert(edge);
     }
 
-    // copy set to eigen array and guaratee direction of bars
+    // copy set to eigen array and guaratee direction of edges
     // for node with lower index to node with higher index
-    Eigen::ArrayXXi barIndices(uniqueBars.size(), 2);
+    Eigen::ArrayXXi edgeIndices(uniqueEdges.size(), 2);
     int index = 0;
-    for (auto const& bar : uniqueBars) {
-        if (bar[1] > bar[0]) {
-            barIndices(index, 0) = bar[0];
-            barIndices(index, 1) = bar[1];
+    for (auto const& edge : uniqueEdges) {
+        if (edge[1] > edge[0]) {
+            edgeIndices(index, 0) = edge[0];
+            edgeIndices(index, 1) = edge[1];
         }
         else {
-            barIndices(index, 0) = bar[1];
-            barIndices(index, 1) = bar[0];            
+            edgeIndices(index, 0) = edge[1];
+            edgeIndices(index, 1) = edge[0];            
         }
         index++;
     }
 
-    return barIndices;
+    return edgeIndices;
 }
 
-Eigen::ArrayXXi distmesh::utils::getTriangulationBarIndices(
+Eigen::ArrayXXi distmesh::utils::getTriangulationEdgeIndices(
     Eigen::Ref<Eigen::ArrayXXi const> const triangulation,
-    Eigen::Ref<Eigen::ArrayXXi const> const bars) {
-    Eigen::ArrayXXi barIndices = Eigen::ArrayXXi::Ones(triangulation.rows(), triangulation.cols()) * -1;
+    Eigen::Ref<Eigen::ArrayXXi const> const edges) {
+    Eigen::ArrayXXi edgeIndices = Eigen::ArrayXXi::Ones(triangulation.rows(), triangulation.cols()) * -1;
     
-    // find indices for each bar of triangulation in bar index array
+    // find indices for each edge of triangulation in edge index array
     for (int element = 0; element < triangulation.rows(); ++element)
     for (int node = 0; node < triangulation.cols(); ++node) {
-        // create bar with direction from node with lower index
+        // create edge with direction from node with lower index
         // to node with higher index
-        auto const bar = triangulation(element, (node + 1) % triangulation.cols()) > triangulation(element, node) ?
+        auto const edge = triangulation(element, (node + 1) % triangulation.cols()) > triangulation(element, node) ?
             (Eigen::ArrayXi(2) << triangulation(element, node), triangulation(element, (node + 1) % triangulation.cols())).finished() :
             (Eigen::ArrayXi(2) << triangulation(element, (node + 1) % triangulation.cols()), triangulation(element, node)).finished();
 
-        // check if bar is in bars list, and get index
-        int barIndex = 0;
-        if ((bars.rowwise() - bar.transpose()).square().rowwise().sum().minCoeff(&barIndex) == 0) {
-            barIndices(element, node) = barIndex;            
+        // check if edge is in edges list, and get index
+        int edgeIndex = 0;
+        if ((edges.rowwise() - edge.transpose()).square().rowwise().sum().minCoeff(&edgeIndex) == 0) {
+            edgeIndices(element, node) = edgeIndex;            
         }
     }
     
-    return barIndices;    
+    return edgeIndices;    
 }
 
 // project points outside of domain back to boundary
