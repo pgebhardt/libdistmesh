@@ -119,6 +119,7 @@ Eigen::ArrayXXi distmesh::utils::findUniqueEdges(Eigen::Ref<Eigen::ArrayXXi cons
     auto const combinations = nOverK(triangulation.cols(), 2);
 
     // find unique edges for all combinations
+    // guarantee direction of edges with lower node index to higher index
     std::set<std::array<int, 2>> uniqueEdges;
     std::array<int, 2> edge = {{0, 0}};
     for (int combination = 0; combination < combinations.rows(); ++combination)
@@ -131,19 +132,13 @@ Eigen::ArrayXXi distmesh::utils::findUniqueEdges(Eigen::Ref<Eigen::ArrayXXi cons
         uniqueEdges.insert(edge);
     }
 
-    // copy set to eigen array and guaratee direction of edges
-    // for node with lower index to node with higher index
+    // copy set to eigen array
     Eigen::ArrayXXi edgeIndices(uniqueEdges.size(), 2);
     int index = 0;
     for (auto const& edge : uniqueEdges) {
-        if (edge[1] > edge[0]) {
-            edgeIndices(index, 0) = edge[0];
-            edgeIndices(index, 1) = edge[1];
-        }
-        else {
-            edgeIndices(index, 0) = edge[1];
-            edgeIndices(index, 1) = edge[0];            
-        }
+        edgeIndices(index, 0) = edge[0];
+        edgeIndices(index, 1) = edge[1];
+
         index++;
     }
 
@@ -153,20 +148,18 @@ Eigen::ArrayXXi distmesh::utils::findUniqueEdges(Eigen::Ref<Eigen::ArrayXXi cons
 Eigen::ArrayXXi distmesh::utils::getTriangulationEdgeIndices(
     Eigen::Ref<Eigen::ArrayXXi const> const triangulation,
     Eigen::Ref<Eigen::ArrayXXi const> const edges) {
-    Eigen::ArrayXXi edgeIndices = Eigen::ArrayXXi::Ones(triangulation.rows(), triangulation.cols()) * -1;
-    
     // find indices for each edge of triangulation in edge index array
+    Eigen::ArrayXXi edgeIndices(triangulation.rows(), triangulation.cols());
     for (int element = 0; element < triangulation.rows(); ++element)
     for (int node = 0; node < triangulation.cols(); ++node) {
         // create edge with direction from node with lower index
         // to node with higher index
-        auto const edge = triangulation(element, (node + 1) % triangulation.cols()) > triangulation(element, node) ?
-            (Eigen::ArrayXi(2) << triangulation(element, node), triangulation(element, (node + 1) % triangulation.cols())).finished() :
-            (Eigen::ArrayXi(2) << triangulation(element, (node + 1) % triangulation.cols()), triangulation(element, node)).finished();
+        auto const edge = (Eigen::ArrayXi(2) << triangulation(element, node), triangulation(element, (node + 1) % triangulation.cols())).finished();
 
         // check if edge is in edges list, and get index
         int edgeIndex = 0;
-        if ((edges.rowwise() - edge.transpose()).square().rowwise().sum().minCoeff(&edgeIndex) == 0) {
+        if (((edges.rowwise() - edge.transpose()).square().rowwise().sum().minCoeff(&edgeIndex) == 0) ||
+            ((edges.rowwise() - edge.transpose().reverse()).square().rowwise().sum().minCoeff(&edgeIndex) == 0)) {
             edgeIndices(element, node) = edgeIndex;            
         }
     }
