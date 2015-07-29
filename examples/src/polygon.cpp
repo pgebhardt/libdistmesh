@@ -37,7 +37,7 @@ int main() {
 
     std::tie(points, elements) = distmesh::distmesh(
         distmesh::distanceFunction::polygon(polygon),
-        0.1, 1.0, distmesh::boundingBox(2), polygon);
+        0.1, 1.0, distmesh::utils::boundingBox(2), polygon);
 
     // print mesh properties and elapsed time
     std::cout << "Created mesh with " << points.rows() << " points and " << elements.rows() <<

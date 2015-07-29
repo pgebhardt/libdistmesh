@@ -60,7 +60,17 @@ namespace utils {
     }
 
     // calculate factorial recursively
-    inline unsigned factorial(unsigned const n);
+    inline unsigned factorial(unsigned const n)  {
+        if (n <= 1) {
+            return 1;
+        }
+        else {
+            return n * factorial(n - 1);
+        }
+    }
+
+    // easy creation of n-dimensional bounding box
+    Eigen::ArrayXXd boundingBox(unsigned const dimensions);
 
     // create initial points distribution
     Eigen::ArrayXXd createInitialPoints(Functional const& distanceFunction,
@@ -77,6 +87,11 @@ namespace utils {
     // get indices of bars in triangulation
     Eigen::ArrayXXi getTriangulationEdgeIndices(Eigen::Ref<Eigen::ArrayXXi const> const triangulation,
         Eigen::Ref<Eigen::ArrayXXi const> const edges);
+
+    // determine boundary edges of given triangulation
+    Eigen::ArrayXi boundEdges(Eigen::Ref<Eigen::ArrayXXd const> const nodes,
+        Eigen::Ref<Eigen::ArrayXXi const> const triangulation,
+        Eigen::Ref<Eigen::ArrayXXi const> const edges=Eigen::ArrayXXi());
 
     // project points outside of domain back to boundary
     void projectPointsToBoundary(Functional const& distanceFunction,

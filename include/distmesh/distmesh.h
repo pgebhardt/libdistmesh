@@ -34,20 +34,12 @@
 #include "utils.h"
 
 namespace distmesh {
-    // easy creation of n-dimensional bounding box
-    Eigen::ArrayXXd boundingBox(unsigned const dimensions);
-
     // apply the distmesh algorithm
     std::tuple<Eigen::ArrayXXd, Eigen::ArrayXXi> distmesh(
         Functional const& distanceFunction, double const initialPointDistance,
         Functional const& elementSizeFunction=1.0,
-        Eigen::Ref<Eigen::ArrayXXd const> const boundingBox=distmesh::boundingBox(2),
+        Eigen::Ref<Eigen::ArrayXXd const> const boundingBox=utils::boundingBox(2),
         Eigen::Ref<Eigen::ArrayXXd const> const fixedPoints=Eigen::ArrayXXd());
-
-    // determine boundary edges of given triangulation
-    Eigen::ArrayXi boundEdges(Eigen::Ref<Eigen::ArrayXXd const> const nodes,
-        Eigen::Ref<Eigen::ArrayXXi const> const triangulation,
-        Eigen::Ref<Eigen::ArrayXXi const> const edges=Eigen::ArrayXXi());
 }
 
 #endif

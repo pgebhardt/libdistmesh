@@ -30,10 +30,10 @@ int main() {
     Eigen::ArrayXXi elements;
 
     std::tie(points, elements) = distmesh::distmesh(
-        distmesh::distanceFunction::rectangle(distmesh::boundingBox(2))
+        distmesh::distanceFunction::rectangle(distmesh::utils::boundingBox(2))
             .max(-distmesh::distanceFunction::circular(0.5)),
         0.05, 0.05 + 0.3 * distmesh::distanceFunction::circular(0.5),
-        distmesh::boundingBox(2));
+        distmesh::utils::boundingBox(2));
 
     // print mesh properties and elapsed time
     std::cout << "Created mesh with " << points.rows() << " points and " << elements.rows() <<

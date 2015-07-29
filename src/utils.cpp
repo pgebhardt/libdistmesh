@@ -24,14 +24,12 @@
 #include "distmesh/distmesh.h"
 #include "distmesh/constants.h"
 
-// calculate factorial recursively
-inline unsigned distmesh::utils::factorial(unsigned const n) {
-    if (n <= 1) {
-        return 1;
-    }
-    else {
-        return n * factorial(n - 1);
-    }
+// easy creation of n-dimensional bounding box
+Eigen::ArrayXXd distmesh::utils::boundingBox(unsigned const dimension) {
+    Eigen::ArrayXXd box(2, dimension);
+    box.row(0).fill(-1.0);
+    box.row(1).fill(1.0);
+    return box;
 }
 
 // create initial points distribution
@@ -165,6 +163,78 @@ Eigen::ArrayXXi distmesh::utils::getTriangulationEdgeIndices(
     }
     
     return edgeIndices;    
+}
+
+
+// determine boundary edges of given triangulation
+Eigen::ArrayXi distmesh::utils::boundEdges(Eigen::Ref<Eigen::ArrayXXd const> const nodes,
+    Eigen::Ref<Eigen::ArrayXXi const> const triangulation,
+    Eigen::Ref<Eigen::ArrayXXi const> const externalEdges) {
+    // create a new edge list, if none was given
+    Eigen::ArrayXXi edges;
+    if (externalEdges.rows() == 0) {
+        edges = utils::findUniqueEdges(triangulation);
+    }
+    else {
+        edges = externalEdges;
+    }
+    
+    // get edge indices for each triangle in triangulation
+    auto const edgeIndices = utils::getTriangulationEdgeIndices(triangulation, edges);
+    
+    // find edges, which only appear once in triangulation
+    std::set<int> uniqueEdges;
+    std::vector<int> boundaryEdges;
+    for (int triangle = 0; triangle < triangulation.rows(); ++triangle)
+    for (int edge = 0; edge < triangulation.cols(); ++edge) {
+        auto const edgeIndex = edgeIndices(triangle, edge);
+            
+        // insert edge in set to get info about multiple appearance
+        if (!std::get<1>(uniqueEdges.insert(edgeIndex))) {
+            // find edge in vector and delete it
+            auto const it = std::find(boundaryEdges.begin(), boundaryEdges.end(), edgeIndex);
+            if (it != boundaryEdges.end()) {
+                boundaryEdges.erase(it);
+            }
+        }
+        else {
+            boundaryEdges.push_back(edgeIndex);
+        }
+    }
+
+    // convert stl vector to eigen array
+    Eigen::ArrayXi boundary(boundaryEdges.size());
+    for (int edge = 0; edge < boundary.rows(); ++edge) {
+        boundary(edge) = boundaryEdges[edge];
+    }
+    
+    // for the 2-D case fix orientation of boundary edges
+    if (nodes.cols() == 2) {
+        for (int edge = 0; edge < boundary.rows(); ++edge) {
+            // find get index of element containing boundary edge
+            int elementIndex = 0, edgeIndex = 0;
+            (edgeIndices - boundary(edge)).square().minCoeff(&elementIndex, &edgeIndex);
+            
+            // get index of node not used in edge, but in the triangle
+            int nodeIndex = 0;
+            for (int node = 0; node < triangulation.cols(); ++node) {
+                if ((triangulation(elementIndex, node) != edges(boundary(edge), 0)) &&
+                    (triangulation(elementIndex, node) != edges(boundary(edge), 1))) {
+                    nodeIndex = node;
+                    break;
+                }
+            }
+            
+            // boundary edges with wrong orientation are marked with a negative sign
+            auto const v1 = (nodes.row(edges(boundary(edge), 1)) - nodes.row(edges(boundary(edge), 0))).eval();
+            auto const v2 = (nodes.row(triangulation(elementIndex, nodeIndex)) - nodes.row(edges(boundary(edge), 1))).eval();
+            if (v1(0) * v2(1) - v1(1) * v2(0) < 0.0) {
+                boundary(edge) *= -1;
+            }
+        }
+    }
+    
+    return boundary;
 }
 
 // project points outside of domain back to boundary
