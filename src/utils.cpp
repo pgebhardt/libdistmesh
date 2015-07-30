@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with libDistMesh.  If not, see <http://www.gnu.org/licenses/>.
+// along with libDistMesh. If not, see <http://www.gnu.org/licenses/>.
 //
 // Copyright (C) 2015 Patrik Gebhardt
 // Contact: patrik.gebhardt@rub.de
@@ -20,6 +20,7 @@
 
 #include <set>
 #include <array>
+#include <vector>
 
 #include "distmesh/distmesh.h"
 #include "distmesh/constants.h"
@@ -158,11 +159,11 @@ Eigen::ArrayXXi distmesh::utils::getTriangulationEdgeIndices(
         int edgeIndex = 0;
         if (((edges.rowwise() - edge.transpose()).square().rowwise().sum().minCoeff(&edgeIndex) == 0) ||
             ((edges.rowwise() - edge.transpose().reverse()).square().rowwise().sum().minCoeff(&edgeIndex) == 0)) {
-            edgeIndices(element, node) = edgeIndex;            
+            edgeIndices(element, node) = edgeIndex;
         }
     }
-    
-    return edgeIndices;    
+
+    return edgeIndices;
 }
 
 
@@ -178,17 +179,17 @@ Eigen::ArrayXi distmesh::utils::boundEdges(
     else {
         edges = _edges;
     }
-    
+
     // get edge indices for each triangle in triangulation
     auto const edgeIndices = utils::getTriangulationEdgeIndices(triangulation, edges);
-    
+
     // find edges, which only appear once in triangulation
     std::set<int> uniqueEdges;
     std::vector<int> boundaryEdges;
     for (int triangle = 0; triangle < triangulation.rows(); ++triangle)
     for (int edge = 0; edge < triangulation.cols(); ++edge) {
         auto const edgeIndex = edgeIndices(triangle, edge);
-            
+
         // insert edge in set to get info about multiple appearance
         if (!std::get<1>(uniqueEdges.insert(edgeIndex))) {
             // find edge in vector and delete it
@@ -207,7 +208,7 @@ Eigen::ArrayXi distmesh::utils::boundEdges(
     for (int edge = 0; edge < boundary.rows(); ++edge) {
         boundary(edge) = boundaryEdges[edge];
     }
-    
+
     return boundary;
 }
 
@@ -227,7 +228,7 @@ Eigen::ArrayXXi distmesh::utils::fixBoundaryEdgeOrientation(
             // find get index of element containing boundary edge
             int elementIndex = 0, edgeIndex = 0;
             (edgeIndices - boundary(edge)).square().minCoeff(&elementIndex, &edgeIndex);
-            
+
             // get index of node not used in edge, but in the triangle
             int nodeIndex = 0;
             for (int node = 0; node < triangulation.cols(); ++node) {
@@ -237,7 +238,7 @@ Eigen::ArrayXXi distmesh::utils::fixBoundaryEdgeOrientation(
                     break;
                 }
             }
-            
+
             // boundary edges with wrong orientation are marked with a negative sign
             auto const v1 = (nodes.row(edges(boundary(edge), 1)) - nodes.row(edges(boundary(edge), 0))).eval();
             auto const v2 = (nodes.row(triangulation(elementIndex, nodeIndex)) - nodes.row(edges(boundary(edge), 1))).eval();
@@ -246,7 +247,7 @@ Eigen::ArrayXXi distmesh::utils::fixBoundaryEdgeOrientation(
             }
         }
     }
-    
+
     return edges;
 }
 

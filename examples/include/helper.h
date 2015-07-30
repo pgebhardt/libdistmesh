@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with libDistMesh.  If not, see <http://www.gnu.org/licenses/>.
+// along with libDistMesh. If not, see <http://www.gnu.org/licenses/>.
 //
 // Copyright (C) 2015 Patrik Gebhardt
 // Contact: patrik.gebhardt@rub.de
@@ -48,11 +48,11 @@ namespace helper {
         HighPrecisionTime() {
             this->restart();
         }
-        
+
         void restart() {
             this->time = std::chrono::high_resolution_clock::now();
         }
-        
+
         double elapsed() const {
             return std::chrono::duration_cast<std::chrono::duration<double>>(
                 std::chrono::high_resolution_clock::now() - this->time).count();

@@ -23,7 +23,7 @@ Example
 
 int main() {
     // create mesh
-    auto mesh = distmesh::distmesh(distmesh::distanceFunction::circular(1.0), 0.2);
+    auto const mesh = distmesh::distmesh(distmesh::distanceFunction::circular(1.0), 0.2);
 
     return 0;
 }
@@ -39,11 +39,11 @@ int main() {
     fixedPoints << -1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0;
 
     // create mesh
-    auto mesh = distmesh::distmesh(
+    auto const mesh = distmesh::distmesh(
         distmesh::distanceFunction::rectangular(rectangle)
             .max(-distmesh::distanceFunction::circular(0.5)),
         0.05, 0.05 + 0.3 * distmesh::distanceFunction::circular(0.5),
-        distmesh::boundingBox(2), fixedPoints);
+        distmesh::utils::boundingBox(2), fixedPoints);
 
     return 0;
 }
