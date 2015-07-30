@@ -32,9 +32,9 @@ extern "C" {
 Eigen::ArrayXXi distmesh::triangulation::delaunay(
     Eigen::Ref<Eigen::ArrayXXd const> const points) {
     // reset qhull
-/*    if (qh_qh) {
+    if (qh_qh) {
         qh_save_qhull();
-    }*/
+    }
 
     // convert points array to row major format
     Eigen::Array<double, Eigen::Dynamic, Eigen::Dynamic,
