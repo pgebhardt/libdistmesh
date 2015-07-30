@@ -167,16 +167,16 @@ Eigen::ArrayXXi distmesh::utils::getTriangulationEdgeIndices(
 
 
 // determine boundary edges of given triangulation
-Eigen::ArrayXi distmesh::utils::boundEdges(Eigen::Ref<Eigen::ArrayXXd const> const nodes,
+Eigen::ArrayXi distmesh::utils::boundEdges(
     Eigen::Ref<Eigen::ArrayXXi const> const triangulation,
-    Eigen::Ref<Eigen::ArrayXXi const> const externalEdges) {
+    Eigen::Ref<Eigen::ArrayXXi const> const _edges) {
     // create a new edge list, if none was given
     Eigen::ArrayXXi edges;
-    if (externalEdges.rows() == 0) {
+    if (_edges.rows() == 0) {
         edges = utils::findUniqueEdges(triangulation);
     }
     else {
-        edges = externalEdges;
+        edges = _edges;
     }
     
     // get edge indices for each triangle in triangulation
@@ -208,8 +208,21 @@ Eigen::ArrayXi distmesh::utils::boundEdges(Eigen::Ref<Eigen::ArrayXXd const> con
         boundary(edge) = boundaryEdges[edge];
     }
     
+    return boundary;
+}
+
+// fix orientation of edges located at the boundary
+Eigen::ArrayXXi distmesh::utils::fixBoundaryEdgeOrientation(
+    Eigen::Ref<Eigen::ArrayXXd const> const nodes,
+    Eigen::Ref<Eigen::ArrayXXi const> const triangulation,
+    Eigen::Ref<Eigen::ArrayXXi const> const _edges) {
+    Eigen::ArrayXXi edges = _edges;
+
     // for the 2-D case fix orientation of boundary edges
     if (nodes.cols() == 2) {
+        auto const edgeIndices = utils::getTriangulationEdgeIndices(triangulation, edges);
+        auto const boundary = utils::boundEdges(triangulation, edges);
+
         for (int edge = 0; edge < boundary.rows(); ++edge) {
             // find get index of element containing boundary edge
             int elementIndex = 0, edgeIndex = 0;
@@ -229,12 +242,12 @@ Eigen::ArrayXi distmesh::utils::boundEdges(Eigen::Ref<Eigen::ArrayXXd const> con
             auto const v1 = (nodes.row(edges(boundary(edge), 1)) - nodes.row(edges(boundary(edge), 0))).eval();
             auto const v2 = (nodes.row(triangulation(elementIndex, nodeIndex)) - nodes.row(edges(boundary(edge), 1))).eval();
             if (v1(0) * v2(1) - v1(1) * v2(0) < 0.0) {
-                boundary(edge) *= -1;
+                edges.row(boundary(edge)) = edges.row(boundary(edge)).reverse().eval();
             }
         }
     }
     
-    return boundary;
+    return edges;
 }
 
 // project points outside of domain back to boundary
