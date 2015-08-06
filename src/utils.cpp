@@ -170,7 +170,8 @@ Eigen::ArrayXXi distmesh::utils::getTriangulationEdgeIndices(
 // determine boundary edges of given triangulation
 Eigen::ArrayXi distmesh::utils::boundEdges(
     Eigen::Ref<Eigen::ArrayXXi const> const triangulation,
-    Eigen::Ref<Eigen::ArrayXXi const> const _edges) {
+    Eigen::Ref<Eigen::ArrayXXi const> const _edges,
+    Eigen::Ref<Eigen::ArrayXXi const> const _edgeIndices) {
     // create a new edge list, if none was given
     Eigen::ArrayXXi edges;
     if (_edges.rows() == 0) {
@@ -181,7 +182,13 @@ Eigen::ArrayXi distmesh::utils::boundEdges(
     }
 
     // get edge indices for each triangle in triangulation
-    auto const edgeIndices = utils::getTriangulationEdgeIndices(triangulation, edges);
+    Eigen::ArrayXXi edgeIndices;
+    if (_edges.rows() == 0) {
+        edgeIndices = utils::getTriangulationEdgeIndices(triangulation, edges);
+    }
+    else {
+        edgeIndices = _edgeIndices;
+    }
 
     // find edges, which only appear once in triangulation
     std::set<int> uniqueEdges;
@@ -208,7 +215,7 @@ Eigen::ArrayXi distmesh::utils::boundEdges(
     for (int edge = 0; edge < boundary.rows(); ++edge) {
         boundary(edge) = boundaryEdges[edge];
     }
-
+    
     return boundary;
 }
 
@@ -216,13 +223,13 @@ Eigen::ArrayXi distmesh::utils::boundEdges(
 Eigen::ArrayXXi distmesh::utils::fixBoundaryEdgeOrientation(
     Eigen::Ref<Eigen::ArrayXXd const> const nodes,
     Eigen::Ref<Eigen::ArrayXXi const> const triangulation,
-    Eigen::Ref<Eigen::ArrayXXi const> const _edges) {
+    Eigen::Ref<Eigen::ArrayXXi const> const _edges,
+    Eigen::Ref<Eigen::ArrayXXi const> const edgeIndices) {
     Eigen::ArrayXXi edges = _edges;
 
     // for the 2-D case fix orientation of boundary edges
     if (nodes.cols() == 2) {
-        auto const edgeIndices = utils::getTriangulationEdgeIndices(triangulation, edges);
-        auto const boundary = utils::boundEdges(triangulation, edges);
+        auto const boundary = utils::boundEdges(triangulation, edges, edgeIndices);
 
         for (int edge = 0; edge < boundary.rows(); ++edge) {
             // find get index of element containing boundary edge

@@ -90,12 +90,14 @@ namespace utils {
 
     // determine boundary edges of given triangulation
     Eigen::ArrayXi boundEdges(Eigen::Ref<Eigen::ArrayXXi const> const triangulation,
-        Eigen::Ref<Eigen::ArrayXXi const> const edges=Eigen::ArrayXXi());
+        Eigen::Ref<Eigen::ArrayXXi const> const edges=Eigen::ArrayXXi(),
+        Eigen::Ref<Eigen::ArrayXXi const> const edgeIndices=Eigen::ArrayXXi());
 
     // fix orientation of edges located at the boundary
     Eigen::ArrayXXi fixBoundaryEdgeOrientation(Eigen::Ref<Eigen::ArrayXXd const> const nodes,
         Eigen::Ref<Eigen::ArrayXXi const> const triangulation,
-        Eigen::Ref<Eigen::ArrayXXi const> const edges);
+        Eigen::Ref<Eigen::ArrayXXi const> const edges,
+        Eigen::Ref<Eigen::ArrayXXi const> const edgeIndices);
 
     // project points outside of domain back to boundary
     void projectPointsToBoundary(Functional const& distanceFunction,
