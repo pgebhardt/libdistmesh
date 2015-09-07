@@ -183,7 +183,7 @@ Eigen::ArrayXi distmesh::utils::boundEdges(
 
     // get edge indices for each triangle in triangulation
     Eigen::ArrayXXi edgeIndices;
-    if (_edgesIndices.rows() == 0) {
+    if (_edgeIndices.rows() == 0) {
         edgeIndices = utils::getTriangulationEdgeIndices(triangulation, edges);
     }
     else {
