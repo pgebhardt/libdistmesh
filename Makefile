@@ -98,7 +98,7 @@ EXAMPLES_SCRIPTS := $(BUILD_DIR)/examples/plot_mesh.py
 ##############################
 .PHONY: all install clean examples
 
-all: $(NAME) $(STATIC_NAME) examples
+all: $(NAME) $(STATIC_NAME)
 
 examples: $(EXAMPLES_BINS) $(EXAMPLES_SCRIPTS)
 
@@ -127,11 +127,10 @@ $(BUILD_DIR)/examples/%.py: examples/scripts/%.py
 	@mkdir -p $(BUILD_DIR)/examples
 	@cp $< $(BUILD_DIR)/examples
 
-install: $(NAME) $(STATIC_NAME) $(HXX_SRCS) $(EXAMPLES_BINS)
+install: $(NAME) $(STATIC_NAME) $(HXX_SRCS)
 	@install -m 0644 $(NAME) $(prefix)/lib
 	@install -m 0644 $(STATIC_NAME) $(prefix)/lib
 	@$(foreach f, $(HXX_SRCS), install -D -m 0644 $f $(prefix)/$f && ):
-	@$(foreach f, $(EXAMPLES_BINS), install -m 0755 $f $(prefix)/bin && ):
 
 clean:
 	@rm -rf $(ROOT_BUILD_DIR)
